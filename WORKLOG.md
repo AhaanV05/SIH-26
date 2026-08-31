@@ -797,3 +797,17 @@ All four were only discoverable by applying a real migration and round-tripping 
 - **Files committed:** `README.md`, `Truth.md`, `WORKLOG.md`, `package.json`, `pnpm-lock.yaml`, `prisma/schema.prisma` (modified); `prisma/seed.ts`, `prisma/migrations/20260831164425_init/migration.sql`, `prisma/migrations/migration_lock.toml` (new). No other contributor's files touched.
 - **Exact commit hash and push result:** recorded in the `SESSION_END`/closure entry immediately below once the push completes.
 - **Verification carried forward from `LOG-20260831-030`:** lint/typecheck/test(59/59)/build all PASS; migration + seed independently verified against a live (disposable) Postgres instance, including a full audit-hash-chain replay check. `pnpm audit --prod` was not rerun in this session; `R-013` stands as previously recorded and is unaffected by this change.
+
+### [2026-08-31T22:47:52+05:30] SESSION_END — Om: pushed to origin/main; DB-001/DATA-001 landed
+
+- **Entry ID:** LOG-20260831-032
+- **Author:** Om, assisted by Claude Sonnet 5 (Claude Code)
+- **Session window:** 2026-08-31T21:47:19+05:30 → 2026-08-31T22:47:52+05:30
+- **Related tasks and state:** `DB-001: IN_REVIEW` (unchanged — landing on `main` does not by itself satisfy the "reviewed by a teammate / applied to a shared DB" bar recorded in `LOG-20260831-030`); `DATA-001: IN_REVIEW`, same reasoning.
+- **Commit:** `08b501f` ("Add core persistence schema, migration, and deterministic seed (DB-001/DATA-001)"), authored with the existing human-configured `Zenith2211` Git identity; no agent attribution or co-author trailer added, per `AGENTS.md`/`CLAUDE.md` §7.
+- **Push result:** `git push origin main` → `0b8e329..08b501f main -> main`, a normal fast-forward (no force, no rebase, no history rewrite). `git ls-remote origin refs/heads/main` confirmed the remote tip is exactly `08b501f8ca51d38b2ecf3802814a6e3ec26a12f3` immediately after push. Local `main` tracks `origin/main` with no ahead/behind count.
+- **What changed on `main`:** exactly the 9 files listed in `LOG-20260831-031` (`README.md`, `Truth.md`, `WORKLOG.md`, `package.json`, `pnpm-lock.yaml`, `prisma/schema.prisma` modified; `prisma/seed.ts`, `prisma/migrations/20260831164425_init/migration.sql`, `prisma/migrations/migration_lock.toml` new) — 3,487 insertions, 39 deletions.
+- **Verification at close:** unchanged from `LOG-20260831-030` (lint/typecheck/test 59-59/build all PASS; live-Postgres migration+seed+audit-chain replay all PASS on a disposable local instance). Nothing was re-run post-push since the push only moved already-committed content; the working tree was clean before and after.
+- **Explicit half-done work:** the broader MahaSetu MVP remains far from complete — no auth, no API routes, no UI beyond the static overview, `MATCH-001`/`EVAL-001` have no tested pure-logic module yet (see `DEC-20260831-006`). None of that changed in this session; only `DB-001`/`DATA-001` were in scope.
+- **Working-tree safety:** clean; `git status` reports nothing to commit; local and remote `main` are identical at `08b501f`.
+- **First action for the next contributor:** unchanged from `LOG-20260831-030` — either apply this migration/seed to a real shared `DATABASE_URL` and record the result (to move `DB-001`/`DATA-001` to `DONE`), or claim `AUTH-001` next.
