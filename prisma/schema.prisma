@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
 enum OrganizationType {
   GOVERNMENT
   STARTUP
@@ -70,16 +74,27 @@ enum OutboxStatus {
 }
 
 model User {
-  id              String       @id @default(cuid())
+  id              String                 @id @default(cuid())
   name            String
-  email           String       @unique
-  locale          String       @default("en-IN")
-  status          UserStatus   @default(ACTIVE)
+  email           String                 @unique
+  locale          String                 @default("en-IN")
+  status          UserStatus             @default(ACTIVE)
   memberships     Membership[]
-  ownedChallenges Challenge[]  @relation("ChallengeOwner")
+  ownedChallenges Challenge[]            @relation("ChallengeOwner")
   createdSpecs    ChallengeSpecVersion[] @relation("SpecCreator")
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+
+  evaluatorAssignments  EvaluatorAssignment[]
+  moderationDecisions   ModerationDecision[]
+  milestoneReviews      MilestoneReview[]
+  riskItemsOwned        RiskItem[]
+  changeRequestsMade    ChangeRequest[]
+  pilotsOwned           Pilot[]               @relation("PilotOwner")
+  pilotsLed             Pilot[]               @relation("PilotStartupLead")
+  solutionCardsAttested SolutionCard[]
+  adoptionRequestsMade  AdoptionRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Organization {
@@ -98,17 +113,22 @@ model Organization {
 }
 
 model Department {
-  id             String        @id @default(cuid())
+  id             String       @id @default(cuid())
   organizationId String
   parentId       String?
   name           String
   jurisdiction   String
-  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  parent         Department?   @relation("DepartmentTree", fields: [parentId], references: [id], onDelete: Restrict)
-  children       Department[]  @relation("DepartmentTree")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  parent         Department?  @relation("DepartmentTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Department[] @relation("DepartmentTree")
   challenges     Challenge[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+
+  transferabilityAssessments TransferabilityAssessment[]
+  adoptionRequests           AdoptionRequest[]
+  pilotAttestationsIssued    PilotAttestation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([organizationId])
   @@index([parentId])
@@ -128,6 +148,39 @@ model Membership {
   @@index([organizationId, role])
 }
 
+// ---------------------------------------------------------------------------
+// Startup Passport (capability genome + evidence wallet)
+// ---------------------------------------------------------------------------
+
+enum EvidenceSourceType {
+  CONTROLLED_RUN
+  HUMAN_UPLOAD
+  SYSTEM_EXPORT
+}
+
+/// Mirrors src/modules/challenges/challenge-spec.ts `evidenceAssuranceLevels`
+/// and src/modules/evidence/types.ts `EvidenceAssuranceLevel` exactly so
+/// persisted rows never need translation from the tested pure-logic modules.
+enum EvidenceAssuranceLevel {
+  AUTHORITY_ASSERTED
+  OFFICER_VERIFIED
+  SYSTEM_OBSERVED
+  THIRD_PARTY_ATTESTED
+  SELF_DECLARED
+  SIMULATED_FOR_DEMO
+}
+
+model Capability {
+  id           String              @id @default(cuid())
+  code         String              @unique
+  name         String
+  taxonomyPath String
+  startups     StartupCapability[]
+  createdAt    DateTime            @default(now())
+
+  @@index([taxonomyPath])
+}
+
 model StartupProfile {
   id                 String       @id @default(cuid())
   organizationId     String       @unique
@@ -140,30 +193,105 @@ model StartupProfile {
   supportedLanguages Json
   capabilityCodes    Json
   organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+
+  capabilities       StartupCapability[]
+  credentialEvidence CredentialEvidence[]
+  proposals          Proposal[]
+  matches            Match[]
+  pilotAttestations  PilotAttestation[]
+  solutionCards      SolutionCard[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+model StartupCapability {
+  id              String         @id @default(cuid())
+  startupId       String
+  capabilityId    String
+  proficiency     Int
+  evidenceSummary String?
+  startup         StartupProfile @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  capability      Capability     @relation(fields: [capabilityId], references: [id], onDelete: Restrict)
+  createdAt       DateTime       @default(now())
+
+  @@unique([startupId, capabilityId])
+  @@index([capabilityId])
+}
+
+/// Startup Passport+ reusable evidence record. `assuranceLevel` never
+/// collapses to a single checkmark in the UI per Truth.md section 6.2/B.3.
+model CredentialEvidence {
+  id               String                 @id @default(cuid())
+  startupId        String
+  type             String
+  identifierMasked String?
+  issuer           String
+  sourceType       EvidenceSourceType
+  assuranceLevel   EvidenceAssuranceLevel
+  status           String
+  issuedAt         DateTime?
+  expiresAt        DateTime?
+  verifiedAt       DateTime?
+  verificationRef  String?
+  fileRef          String?
+  synthetic        Boolean                @default(true)
+  startup          StartupProfile         @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  @@index([startupId, type])
+}
+
+/// A completed pilot's reusable, portable evidence, attributed back to the
+/// issuing department. Referenced from Passport+ (section 6.2) as the
+/// mechanism that lets trust compound through delivery, not only documents.
+model PilotAttestation {
+  id                 String         @id @default(cuid())
+  startupId          String
+  pilotId            String
+  issuerDepartmentId String
+  outcomeHash        String
+  issuedAt           DateTime       @default(now())
+  status             String
+  startup            StartupProfile @relation(fields: [startupId], references: [id], onDelete: Restrict)
+  pilot              Pilot          @relation(fields: [pilotId], references: [id], onDelete: Restrict)
+  issuerDepartment   Department     @relation(fields: [issuerDepartmentId], references: [id], onDelete: Restrict)
+
+  @@index([startupId])
+  @@index([pilotId])
+}
+
+// ---------------------------------------------------------------------------
+// Challenges (Forge — executable procurement compiler)
+// ---------------------------------------------------------------------------
+
 model Challenge {
-  id             String          @id @default(cuid())
-  processId      String          @unique
-  departmentId   String
-  ownerId        String
-  title          String
-  problem        String
-  status         ChallengeStatus @default(DRAFT)
-  version        Int             @default(1)
-  publishedAt    DateTime?
-  department     Department      @relation(fields: [departmentId], references: [id], onDelete: Restrict)
-  owner          User            @relation("ChallengeOwner", fields: [ownerId], references: [id], onDelete: Restrict)
-  specVersions   ChallengeSpecVersion[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id           String                 @id @default(cuid())
+  processId    String                 @unique
+  departmentId String
+  ownerId      String
+  title        String
+  problem      String
+  status       ChallengeStatus        @default(DRAFT)
+  version      Int                    @default(1)
+  publishedAt  DateTime?
+  department   Department             @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  owner        User                   @relation("ChallengeOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  specVersions ChallengeSpecVersion[]
+  proposals    Proposal[]
+  matches      Match[]
+  pilots       Pilot[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
 
   @@index([departmentId, status])
   @@index([ownerId])
 }
 
+/// `document` stores the full Zod-validated ChallengeSpec JSON produced by
+/// src/modules/challenges/challenge-spec.ts; `contentHash` is its SHA-256
+/// per src/modules/challenges/challenge-spec-integrity.ts.
 model ChallengeSpecVersion {
   id            String            @id @default(cuid())
   challengeId   String
@@ -182,8 +310,653 @@ model ChallengeSpecVersion {
   @@index([contentHash])
 }
 
+// ---------------------------------------------------------------------------
+// Matching (explainable discovery, never an award decision)
+// ---------------------------------------------------------------------------
+
+model Match {
+  id              String         @id @default(cuid())
+  challengeId     String
+  startupId       String
+  eligibilityPass Boolean
+  semanticScore   Float
+  evidenceScore   Float
+  overallScore    Float
+  confidence      Float
+  explanation     Json
+  modelVersion    String
+  generatedAt     DateTime       @default(now())
+  challenge       Challenge      @relation(fields: [challengeId], references: [id], onDelete: Restrict)
+  startup         StartupProfile @relation(fields: [startupId], references: [id], onDelete: Restrict)
+
+  @@unique([challengeId, startupId])
+  @@index([startupId])
+}
+
+// ---------------------------------------------------------------------------
+// Applications and evaluation
+// ---------------------------------------------------------------------------
+
+enum ProposalStatus {
+  DRAFT
+  SUBMITTED
+  ELIGIBILITY_REVIEW
+  ELIGIBLE
+  INELIGIBLE
+  EVALUATION
+  SHORTLISTED
+  SELECTED
+  NOT_SELECTED
+  WITHDRAWN
+}
+
+enum ProposalAttachmentVisibility {
+  GOVERNMENT_ONLY
+  EVALUATOR_ONLY
+  PUBLIC_AFTER_DECISION
+}
+
+model Proposal {
+  id               String         @id @default(cuid())
+  challengeId      String
+  startupId        String
+  approach         String
+  outcomes         String
+  timeline         Json
+  pilotCostInPaise BigInt
+  risks            String?
+  status           ProposalStatus @default(DRAFT)
+  submittedAt      DateTime?
+  challenge        Challenge      @relation(fields: [challengeId], references: [id], onDelete: Restrict)
+  startup          StartupProfile @relation(fields: [startupId], references: [id], onDelete: Restrict)
+
+  attachments          ProposalAttachment[]
+  evaluatorAssignments EvaluatorAssignment[]
+  moderationDecisions  ModerationDecision[]
+  pilot                Pilot?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([challengeId, startupId])
+  @@index([status])
+}
+
+model ProposalAttachment {
+  id         String                       @id @default(cuid())
+  proposalId String
+  type       String
+  fileRef    String
+  hash       String
+  visibility ProposalAttachmentVisibility @default(GOVERNMENT_ONLY)
+  proposal   Proposal                     @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  createdAt  DateTime                     @default(now())
+}
+
+enum EvaluatorAssignmentStatus {
+  ASSIGNED
+  CONFLICT_DECLARED
+  SCORING
+  SCORED
+  MODERATED
+}
+
+model EvaluatorAssignment {
+  id          String                    @id @default(cuid())
+  proposalId  String
+  evaluatorId String
+  status      EvaluatorAssignmentStatus @default(ASSIGNED)
+  proposal    Proposal                  @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  evaluator   User                      @relation(fields: [evaluatorId], references: [id], onDelete: Restrict)
+
+  conflictDeclaration ConflictDeclaration?
+  scores              Score[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([proposalId, evaluatorId])
+}
+
+model ConflictDeclaration {
+  id           String              @id @default(cuid())
+  assignmentId String              @unique
+  hasConflict  Boolean
+  details      String?
+  declaredAt   DateTime            @default(now())
+  assignment   EvaluatorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+}
+
+/// `rubricCriterionId` references an id inside the frozen ChallengeSpecVersion
+/// rubric array (see challenge-spec.ts `rubricCriterionSchema`) rather than a
+/// foreign key, because the rubric is frozen JSON, not a separate table.
+model Score {
+  id                String              @id @default(cuid())
+  assignmentId      String
+  rubricCriterionId String
+  value             Float
+  rationale         String
+  submittedAt       DateTime            @default(now())
+  assignment        EvaluatorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, rubricCriterionId])
+}
+
+enum ModerationDecisionType {
+  SELECTED
+  NOT_SELECTED
+}
+
+model ModerationDecision {
+  id         String                 @id @default(cuid())
+  proposalId String
+  finalScore Float
+  decision   ModerationDecisionType
+  rationale  String
+  decidedBy  String
+  decidedAt  DateTime               @default(now())
+  proposal   Proposal               @relation(fields: [proposalId], references: [id], onDelete: Restrict)
+  decider    User                   @relation(fields: [decidedBy], references: [id], onDelete: Restrict)
+}
+
+// ---------------------------------------------------------------------------
+// Pilot Mission Control
+// ---------------------------------------------------------------------------
+
+enum PilotStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  TERMINATED
+}
+
+enum PilotFinalDecision {
+  GO
+  NO_GO
+  ITERATE
+}
+
+model Pilot {
+  id            String              @id @default(cuid())
+  challengeId   String
+  proposalId    String              @unique
+  ownerId       String
+  startupLeadId String
+  status        PilotStatus         @default(PLANNED)
+  startAt       DateTime?
+  endAt         DateTime?
+  budgetInPaise BigInt
+  finalDecision PilotFinalDecision?
+  challenge     Challenge           @relation(fields: [challengeId], references: [id], onDelete: Restrict)
+  proposal      Proposal            @relation(fields: [proposalId], references: [id], onDelete: Restrict)
+  owner         User                @relation("PilotOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  startupLead   User                @relation("PilotStartupLead", fields: [startupLeadId], references: [id], onDelete: Restrict)
+
+  metrics            PilotMetric[]
+  milestones         Milestone[]
+  sandboxRuns        SandboxRun[]
+  evidenceObjects    EvidenceObject[]
+  metricObservations MetricObservation[]
+  riskItems          RiskItem[]
+  changeRequests     ChangeRequest[]
+  attestations       PilotAttestation[]
+  solutionCard       SolutionCard?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([challengeId, status])
+}
+
+/// A pilot-local capture of a challenge metric's baseline/target, matching
+/// Truth.md section 7.5 `Metric(id, pilotId, name, baseline, target, unit,
+/// source, frequency)`. `metricDefinitionId` references the frozen
+/// ChallengeSpec `metrics[].id`, not a foreign key.
+model PilotMetric {
+  id                 String @id @default(cuid())
+  pilotId            String
+  metricDefinitionId String
+  name               String
+  baseline           Float
+  target             Float
+  unit               String
+  source             String
+  frequency          String
+  pilot              Pilot  @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+
+  @@unique([pilotId, metricDefinitionId])
+}
+
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  EVIDENCE_SUBMITTED
+  ACCEPTED
+  RETURNED
+  REJECTED
+}
+
+/// `requiredEvidenceKinds` mirrors `EvidenceObjectKind` in
+/// src/modules/evidence/types.ts so milestone requirements and submitted
+/// evidence objects use one shared vocabulary.
+enum EvidenceObjectKind {
+  DATASET
+  TEST_RUN
+  LIMITATIONS_NOTE
+  TELEMETRY
+  OFFICER_OBSERVATION
+  ACCESSIBILITY_REPORT
+  SECURITY_REPORT
+}
+
+model Milestone {
+  id                    String               @id @default(cuid())
+  pilotId               String
+  sequence              Int
+  name                  String
+  dueAt                 DateTime?
+  paymentPercent        Float
+  status                MilestoneStatus      @default(PLANNED)
+  requiredMetricIds     String[]
+  requiredEvidenceKinds EvidenceObjectKind[]
+  acceptanceStatement   String?
+  pilot                 Pilot                @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+
+  evidenceObjects       EvidenceObject[]
+  acceptanceEvaluations MilestoneAcceptanceEvaluation[]
+  reviews               MilestoneReview[]
+  paymentRequest        PaymentRequest?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pilotId, sequence])
+  @@index([pilotId, status])
+}
+
+enum SandboxRunStatus {
+  COMPLETED
+  FAILED
+}
+
+/// Mirrors src/modules/evidence/types.ts `SandboxRunRecord`.
+model SandboxRun {
+  id                      String           @id @default(cuid())
+  pilotId                 String
+  manifestVersion         String
+  datasetVersion          String
+  calculatorVersion       String
+  status                  SandboxRunStatus
+  sourceEvidenceObjectIds String[]
+  synthetic               Boolean          @default(true)
+  pilot                   Pilot            @relation(fields: [pilotId], references: [id], onDelete: Restrict)
+
+  metricObservations MetricObservation[]
+
+  createdAt DateTime @default(now())
+}
+
+/// Mirrors src/modules/evidence/types.ts `EvidenceObject`. `classification`
+/// reuses the shared `DataClassification` enum.
+model EvidenceObject {
+  id              String                 @id @default(cuid())
+  pilotId         String
+  milestoneId     String?
+  kind            EvidenceObjectKind
+  displayName     String
+  mediaType       String
+  sizeBytes       Int
+  sha256          String
+  classification  DataClassification
+  assuranceLevel  EvidenceAssuranceLevel
+  sourceType      EvidenceSourceType
+  sourceReference String
+  synthetic       Boolean                @default(true)
+  pilot           Pilot                  @relation(fields: [pilotId], references: [id], onDelete: Restrict)
+  milestone       Milestone?             @relation(fields: [milestoneId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@index([pilotId, kind])
+  @@index([milestoneId])
+}
+
+enum MetricQualityStatus {
+  PASS
+  FAIL
+}
+
+/// Mirrors src/modules/evidence/types.ts `MetricObservation`.
+model MetricObservation {
+  id                      String              @id @default(cuid())
+  pilotId                 String
+  metricDefinitionId      String
+  metricDefinitionVersion String
+  name                    String
+  value                   Float
+  unit                    String
+  sampleSize              Int
+  datasetVersion          String
+  calculatorVersion       String
+  runId                   String
+  sourceEvidenceObjectIds String[]
+  qualityStatus           MetricQualityStatus
+  qualityIssues           String[]
+  synthetic               Boolean             @default(true)
+  pilot                   Pilot               @relation(fields: [pilotId], references: [id], onDelete: Restrict)
+  run                     SandboxRun          @relation(fields: [runId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@index([pilotId, metricDefinitionId])
+}
+
+enum EvidenceClaimSubjectType {
+  PILOT
+  MILESTONE
+  SOLUTION
+  STARTUP
+}
+
+enum EvidenceVerificationMethod {
+  AUTOMATIC
+  MANUAL
+  HYBRID
+}
+
+/// Mirrors src/modules/evidence/types.ts `EvidenceClaim`. `subjectId` is
+/// polymorphic across Pilot/Milestone/Solution/Startup, so it is a plain
+/// indexed string rather than a foreign key.
+model EvidenceClaim {
+  id                             String                     @id @default(cuid())
+  subjectType                    EvidenceClaimSubjectType
+  subjectId                      String
+  predicate                      String
+  value                          Json
+  assuranceLevel                 EvidenceAssuranceLevel
+  verificationMethod             EvidenceVerificationMethod
+  supportingEvidenceObjectIds    String[]
+  supportingMetricObservationIds String[]
+  contradictingEvidenceObjectIds String[]
+  issuerId                       String
+  synthetic                      Boolean                    @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@index([subjectType, subjectId])
+}
+
+enum MilestoneAcceptanceStatus {
+  READY_FOR_HUMAN_ACCEPTANCE
+  NOT_READY
+}
+
+/// Persists the deterministic output of
+/// src/modules/evidence/milestone-acceptance.ts `evaluateMilestoneAcceptance`.
+/// `metricEvaluations`/`evidenceEvaluations` keep their full nested shape as
+/// JSON; the row never performs acceptance itself
+/// (`humanAuthorizationRequired` is always true in the source module).
+model MilestoneAcceptanceEvaluation {
+  id                  String                    @id @default(cuid())
+  milestoneId         String
+  status              MilestoneAcceptanceStatus
+  rulesSatisfied      Boolean
+  blockerCodes        String[]
+  summary             String
+  metricEvaluations   Json
+  evidenceEvaluations Json
+  milestone           Milestone                 @relation(fields: [milestoneId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@index([milestoneId])
+}
+
+enum MilestoneReviewDecision {
+  ACCEPTED
+  RETURNED
+  REJECTED
+}
+
+model MilestoneReview {
+  id          String                  @id @default(cuid())
+  milestoneId String
+  reviewerId  String
+  decision    MilestoneReviewDecision
+  reason      String?
+  reviewedAt  DateTime                @default(now())
+  milestone   Milestone               @relation(fields: [milestoneId], references: [id], onDelete: Restrict)
+  reviewer    User                    @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATED
+  CLOSED
+  ACCEPTED
+}
+
+model RiskItem {
+  id          String     @id @default(cuid())
+  pilotId     String
+  title       String
+  probability String
+  impact      String
+  mitigation  String?
+  ownerId     String
+  status      RiskStatus @default(OPEN)
+  pilot       Pilot      @relation(fields: [pilotId], references: [id], onDelete: Restrict)
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ChangeRequestDecision {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ChangeRequest {
+  id          String                @id @default(cuid())
+  pilotId     String
+  requestedBy String
+  change      String
+  impact      String?
+  decision    ChangeRequestDecision @default(PENDING)
+  reason      String?
+  pilot       Pilot                 @relation(fields: [pilotId], references: [id], onDelete: Restrict)
+  requester   User                  @relation(fields: [requestedBy], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Payments (PayFlow — simulated milestone payment tracking)
+// ---------------------------------------------------------------------------
+
+/// Mirrors src/modules/payments/payment-readiness.ts `PaymentRequestState`.
+enum PaymentRequestState {
+  NOT_READY
+  DRAFT
+  FINANCE_REVIEW
+  APPROVED
+  ADAPTER_SUBMITTED
+  PROCESSING
+  PAID
+  RETURNED
+  REJECTED
+  FAILED
+}
+
+/// Mirrors src/modules/payments/payment-readiness.ts `IntegrationMode`.
+enum IntegrationMode {
+  LIVE
+  SANDBOX
+  SIMULATED
+  OFFLINE_FIXTURE
+}
+
+/// Mirrors src/modules/payments/payment-readiness.ts `PaymentActorRole`.
+enum PaymentActorRole {
+  PILOT_REVIEWER
+  FINANCE_OFFICER
+  PAYMENT_ADAPTER
+}
+
+/// One mutable row per milestone (state evolves through
+/// `transitionPaymentRequest`); every transition is separately logged to
+/// `PaymentEvent` so the state machine stays auditable. `integrationMode` is
+/// immutable after creation per the hardening recorded in LOG-20260831-025.
+model PaymentRequest {
+  id                    String              @id @default(cuid())
+  milestoneId           String              @unique
+  state                 PaymentRequestState @default(NOT_READY)
+  integrationMode       IntegrationMode
+  amountInPaise         BigInt?
+  invoiceReference      String?
+  budgetReference       String?
+  beneficiaryReference  String?
+  adapterIdempotencyKey String?
+  milestone             Milestone           @relation(fields: [milestoneId], references: [id], onDelete: Restrict)
+
+  events PaymentEvent[]
+
+  requestedAt DateTime  @default(now())
+  paidAt      DateTime?
+  updatedAt   DateTime  @updatedAt
+}
+
+/// `actorId` is a plain string (not a User foreign key), matching
+/// `AuditEvent.actorId`, because `PAYMENT_ADAPTER` transitions are made by a
+/// system actor rather than a platform user.
+model PaymentEvent {
+  id               String              @id @default(cuid())
+  paymentRequestId String
+  fromState        PaymentRequestState
+  toState          PaymentRequestState
+  actorId          String
+  actorRole        PaymentActorRole
+  reason           String?
+  adapterReplayKey String?
+  paymentRequest   PaymentRequest      @relation(fields: [paymentRequestId], references: [id], onDelete: Restrict)
+
+  occurredAt DateTime @default(now())
+
+  @@index([paymentRequestId])
+}
+
+// ---------------------------------------------------------------------------
+// Proven Solutions Exchange (ScaleGraph)
+// ---------------------------------------------------------------------------
+
+enum SolutionCardStatus {
+  DRAFT
+  PUBLISHED
+  WITHDRAWN
+}
+
+model SolutionCard {
+  id               String             @id @default(cuid())
+  pilotId          String             @unique
+  startupId        String
+  title            String
+  summary          String
+  outcomes         Json
+  limitations      String?
+  evidenceStrength String
+  status           SolutionCardStatus @default(DRAFT)
+  attestedById     String?
+  publishedAt      DateTime?
+  pilot            Pilot              @relation(fields: [pilotId], references: [id], onDelete: Restrict)
+  startup          StartupProfile     @relation(fields: [startupId], references: [id], onDelete: Restrict)
+  attestedBy       User?              @relation(fields: [attestedById], references: [id], onDelete: Restrict)
+
+  transferabilityAssessments TransferabilityAssessment[]
+  adoptionRequests           AdoptionRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Mirrors src/modules/solutions/transferability.ts `TransferabilityAssessment`.
+/// `factors` stores the eight weighted `TransferabilityFactorResult` entries;
+/// the row is always advisory (`advisoryOnly`/`humanAuthorizationRequired`
+/// are fixed `true` in the source module and are not duplicated as columns).
+enum TransferabilityRecommendation {
+  REUSE_EVIDENCE_AND_ROUTE_TO_AUTHORIZED_PROCUREMENT
+  RUN_LOCALIZED_MICRO_PILOT
+  REQUIRE_FRESH_COMPETITIVE_DISCOVERY
+  NOT_CURRENTLY_TRANSFERABLE
+}
+
+model TransferabilityAssessment {
+  id                 String                        @id @default(cuid())
+  solutionCardId     String
+  sourceContextId    String
+  targetDepartmentId String
+  score              Float
+  recommendation     TransferabilityRecommendation
+  factors            Json
+  bindingConstraints String[]
+  reasons            String[]
+  gaps               String[]
+  synthetic          Boolean                       @default(true)
+  solutionCard       SolutionCard                  @relation(fields: [solutionCardId], references: [id], onDelete: Restrict)
+  targetDepartment   Department                    @relation(fields: [targetDepartmentId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@index([solutionCardId])
+  @@index([targetDepartmentId])
+}
+
+enum AdoptionPathway {
+  REUSE_EVIDENCE
+  LOCALIZED_MICRO_PILOT
+  FRAMEWORK_ROUTE
+  FRESH_EVALUATION
+}
+
+enum AdoptionRequestStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  DECLINED
+}
+
+model AdoptionRequest {
+  id                 String                @id @default(cuid())
+  solutionCardId     String
+  targetDepartmentId String
+  requesterId        String
+  pathway            AdoptionPathway
+  status             AdoptionRequestStatus @default(REQUESTED)
+  solutionCard       SolutionCard          @relation(fields: [solutionCardId], references: [id], onDelete: Restrict)
+  targetDepartment   Department            @relation(fields: [targetDepartmentId], references: [id], onDelete: Restrict)
+  requester          User                  @relation(fields: [requesterId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Audit and outbox
+// ---------------------------------------------------------------------------
+
+/// `sequence`/`schemaVersion`/`previousHash`/`eventHash` mirror
+/// src/modules/audit/audit-chain.ts `AuditEvent` exactly, so rows read back
+/// from this table can be passed straight into `verifyAuditChain` with no
+/// translation. `metadata` is nullable (not defaulted to `{}`) because the
+/// hash is computed over the exact original object shape — an event created
+/// without a `metadata` key hashes differently than one with an empty object,
+/// so the persisted value must distinguish "absent" from "empty" or replay
+/// verification breaks after a DB round-trip.
 model AuditEvent {
   id             String             @id @default(cuid())
+  sequence       Int                @unique
+  schemaVersion  Int                @default(1)
   occurredAt     DateTime           @default(now())
   actorType      String
   actorId        String?
@@ -195,7 +968,7 @@ model AuditEvent {
   causationId    String?
   reason         String?
   classification DataClassification @default(INTERNAL)
-  metadata       Json
+  metadata       Json?
   previousHash   String?
   eventHash      String             @unique
 

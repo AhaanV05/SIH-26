@@ -20,8 +20,13 @@ On Windows PowerShell, use `pnpm.cmd` if execution policy blocks the `pnpm.ps1` 
 Copy-Item .env.example .env
 pnpm.cmd install
 pnpm.cmd db:generate
+$env:DATABASE_URL='postgresql://postgres:postgres@localhost:5432/mahasetu?schema=public'
+pnpm.cmd db:deploy
+pnpm.cmd db:seed
 pnpm.cmd dev
 ```
+
+`db:deploy` applies the committed migration in `prisma/migrations/` (requires a reachable PostgreSQL server; it does not create or drop the database itself). `db:seed` truncates every application table and reloads the deterministic golden-path demo dataset described in `Truth.md` section 5.1 — safe to rerun any number of times for repeatable judging. Use `pnpm.cmd db:reset` during development to apply migrations from scratch and reseed in one step (destructive: drops and recreates the database).
 
 Open [http://localhost:3000](http://localhost:3000). The initial overview shell runs without contacting external government or AI services.
 
@@ -36,7 +41,7 @@ pnpm.cmd db:validate
 pnpm.cmd build
 ```
 
-`db:validate` parses the schema and connection URL; it does not require the database server to be running. Database migrations and deterministic seed data are not yet included.
+`db:validate` parses the schema and connection URL; it does not require the database server to be running. `db:deploy`/`db:seed`/`db:reset` do require a reachable PostgreSQL server.
 
 `pnpm audit --prod` currently reports the transitive Prisma configuration-tooling advisory tracked as `R-013` in `Truth.md`. Do not silence it with an unverified major override; rerun the audit before submission and adopt a compatible upstream fix when available.
 

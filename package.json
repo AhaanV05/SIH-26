@@ -18,7 +18,11 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "db:generate": "prisma generate",
     "db:format": "prisma format",
-    "db:validate": "prisma validate"
+    "db:validate": "prisma validate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
@@ -37,7 +41,20 @@
     "postcss": "^8.5.26",
     "prisma": "6.19.3",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
     "typescript": "6.0.3",
     "vitest": "4.1.11"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma",
+      "unrs-resolver"
+    ]
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
