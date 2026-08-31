@@ -2,7 +2,11 @@ import Link from "next/link";
 
 import { LifecycleRail } from "@/components/lifecycle-rail";
 import { MetricCard } from "@/components/metric-card";
+import { getDashboardSnapshot, getLifecycleRouteData } from "@/lib/demo-data";
 import { DEMO_DATA_LABEL } from "@/platform/demo";
+
+const snapshot = getDashboardSnapshot();
+const lifecycleStages = getLifecycleRouteData();
 
 const activity = [
   {
@@ -44,8 +48,10 @@ export default function OverviewPage() {
         </div>
         <div className="hero-panel__signal" aria-label="Current priority signal">
           <span>Priority signal</span>
-          <strong>Ward 12 waste overflow</strong>
-          <p>42 synthetic events per week · confidence 0.87</p>
+          <strong>{snapshot.problemTitle}</strong>
+          <p>
+            {snapshot.metrics.openChallenges} open challenges · {snapshot.metrics.activePilots} active pilots · {snapshot.metrics.evidenceReuse} evidence reuse opportunities
+          </p>
           <div className="signal-chart" aria-hidden="true">
             {[34, 44, 31, 58, 65, 72, 86, 74, 91, 96].map((height, index) => (
               <span key={index} style={{ height: `${height}%` }} />
@@ -66,24 +72,24 @@ export default function OverviewPage() {
         <div className="metrics-grid">
           <MetricCard
             label="Time to pilot"
-            value="18 days"
+            value={`${snapshot.metrics.timeToPilotDays} days`}
             detail="12 days faster than the seeded baseline"
             tone="positive"
           />
           <MetricCard
             label="Open challenges"
-            value="06"
+            value={String(snapshot.metrics.openChallenges).padStart(2, "0")}
             detail="2 awaiting procurement review"
           />
           <MetricCard
             label="Active pilots"
-            value="03"
+            value={String(snapshot.metrics.activePilots).padStart(2, "0")}
             detail="1 milestone due this week"
             tone="warning"
           />
           <MetricCard
             label="Evidence reuse"
-            value="04"
+            value={String(snapshot.metrics.evidenceReuse).padStart(2, "0")}
             detail="Across 3 fictional departments"
             tone="positive"
           />
@@ -95,11 +101,11 @@ export default function OverviewPage() {
           <div className="panel__heading">
             <div>
               <span className="eyebrow">Live procurement thread</span>
-              <h2>Waste-response innovation pilot</h2>
+              <h2>{snapshot.problemTitle}</h2>
             </div>
             <span className="status-badge status-badge--active">Matching</span>
           </div>
-          <LifecycleRail />
+          <LifecycleRail stages={lifecycleStages} />
         </article>
 
         <article className="panel">
@@ -125,10 +131,8 @@ export default function OverviewPage() {
 
         <article className="panel action-panel">
           <span className="eyebrow">Action required</span>
-          <h2>2 compiler findings need review</h2>
-          <p>
-            The draft is schema-valid, but publication remains human-authorized.
-          </p>
+          <h2>{snapshot.evidenceSummary.readyForReview} review items need attention</h2>
+          <p>{snapshot.nextAction}</p>
           <Link className="secondary-button" href={{ pathname: "/challenges" }}>
             Review findings
           </Link>

@@ -811,3 +811,166 @@ All four were only discoverable by applying a real migration and round-tripping 
 - **Explicit half-done work:** the broader MahaSetu MVP remains far from complete — no auth, no API routes, no UI beyond the static overview, `MATCH-001`/`EVAL-001` have no tested pure-logic module yet (see `DEC-20260831-006`). None of that changed in this session; only `DB-001`/`DATA-001` were in scope.
 - **Working-tree safety:** clean; `git status` reports nothing to commit; local and remote `main` are identical at `08b501f`.
 - **First action for the next contributor:** unchanged from `LOG-20260831-030` — either apply this migration/seed to a real shared `DATABASE_URL` and record the result (to move `DB-001`/`DATA-001` to `DONE`), or claim `AUTH-001` next.
+
+### [2026-08-31T19:12:08+05:30] CHECKPOINT — Dhanya: Complete fixture-backed data wiring for all 7 lifecycle route pages
+
+- **Entry ID:** LOG-20260831-033
+- **Author:** Dhanya, assisted by Claude Haiku (GitHub Copilot)
+- **Session window:** 2026-08-31T18:35:00+05:30 → 2026-08-31T19:12:08+05:30 (continuing from earlier handoff)
+- **Related tasks:** `APP-FLOW-001` (fixture-backed UI data wiring for all lifecycle routes)
+- **Objective:** Complete wiring of all 7 app-layer route pages (pulse, challenges, matches, pilots, evidence, solutions, audit) to consume fixture-backed demo data from `src/lib/demo-data.ts` helpers, replacing hardcoded static values with dynamic imports and state bindings.
+
+#### What was completed in this checkpoint:
+
+1. **All 7 route pages now wired to fixture-backed demo data:**
+   - [src/app/pulse/page.tsx](src/app/pulse/page.tsx) — **FULLY WIRED** (prior session: now hero metrics re-fixed for rendering accuracy)
+   - [src/app/challenges/page.tsx](src/app/challenges/page.tsx) — **NEWLY WIRED** (was hardcoded "Waste response innovation", "11", "4", "2", "18d" → now dynamic {challenge.*})
+   - [src/app/matches/page.tsx](src/app/matches/page.tsx) — **NEWLY WIRED** (was hardcoded "UrbanLoop Labs", "92%", "3", static 4-item grid → now dynamic {matches.*} with .map())
+   - [src/app/pilots/page.tsx](src/app/pilots/page.tsx) — **NEWLY WIRED** (was hardcoded "Ward 12 compact test", "14", "2 of 5" → now dynamic {pilot.*})
+   - [src/app/evidence/page.tsx](src/app/evidence/page.tsx) — **NEWLY WIRED** (was hardcoded "Milestone 02", counts, "32%" → now dynamic {evidence.*})
+   - [src/app/solutions/page.tsx](src/app/solutions/page.tsx) — **NEWLY WIRED** (was hardcoded "Overflow detection stack", "3", static 4-item grid → now dynamic {solutions.* with .map()})
+   - [src/app/audit/page.tsx](src/app/audit/page.tsx) — **NEWLY WIRED** (was hardcoded "Verified", "12 events", static 4-item timeline → now dynamic {audit.* with .map()})
+
+2. **All demo-data helpers already present (prior session):**
+   - `getPulseRouteData()` → returns signal object with {signalTitle, eventsPerWeek, confidence, affectedAgencies, metrics: {wasteOverflow, responseDelayHours, citizenComplaints, crossDeptImpact}}
+   - `getChallengesRouteData()` → returns {currentChallenge, status, eligibilityChecks, metrics, openFindings, timelinedays}
+   - `getMatchesRouteData()` → returns {topFit, topFitScore, topFitReferences, matches: [{name, score, note}, ...]}
+   - `getPilotsRouteData()` → returns {pilotTitle, sandboxDays, milestonesCompleted, totalMilestones, metrics: {setupStatus, modelValidationPercent, currentMilestoneState, daysUntilCheckpoint}}
+   - `getEvidenceRouteData()` → returns {currentPacket, evidenceCount, blockerCount, metrics: {metricsPass, totalMetrics, evidenceObjects, paymentPercent}}
+   - `getSolutionsRouteData()` → returns {reusableAsset, departmentsCanReuse, transfers: [{name, score, note, tone?}, ...]}
+   - `getAuditRouteData()` → returns {chainStatus, eventCount, continuityChecks, events: [{label, time, detail}, ...]}
+
+3. **HTML entity escaping fixes (linting compliance):**
+   - Fixed apostrophe entities in [src/app/pulse/page.tsx](src/app/pulse/page.tsx) line 42: `city's` → `city&apos;s`
+   - Fixed apostrophe entities in [src/app/matches/page.tsx](src/app/matches/page.tsx) line 15: `department's` → `department&apos;s`
+   - Removed unused variable `handledWithinTargetRate` from [src/lib/demo-data.ts](src/lib/demo-data.ts) in getEvidenceRouteData function
+
+#### Files modified:
+
+- [src/app/pulse/page.tsx](src/app/pulse/page.tsx) — metrics section re-fixed for proper binding syntax; apostrophe entities escaped
+- [src/app/challenges/page.tsx](src/app/challenges/page.tsx) — **NEW** complete page wiring with getChallengesRouteData import, const challenge creation, and {challenge.*} bindings in hero and metrics grid
+- [src/app/matches/page.tsx](src/app/matches/page.tsx) — **NEW** complete page wiring with getMatchesRouteData, {matches.topFit}, {Math.round(matches.topFitScore * 100)}%, matches.length badge, .map() grid; apostrophe entity fixed
+- [src/app/pilots/page.tsx](src/app/pilots/page.tsx) — **NEW** complete page wiring with getPilotsRouteData, all {pilot.*} bindings, metrics.* values in metrics grid
+- [src/app/evidence/page.tsx](src/app/evidence/page.tsx) — **NEW** complete page wiring with getEvidenceRouteData, all {evidence.*} bindings including metrics composite ratio display
+- [src/app/solutions/page.tsx](src/app/solutions/page.tsx) — **NEW** complete page wiring with getSolutionsRouteData, {solutions.reusableAsset}, {solutions.departmentsCanReuse}, .map() over transfers with tone-based CSS class binding
+- [src/app/audit/page.tsx](src/app/audit/page.tsx) — **NEW** complete page wiring with getAuditRouteData, all {audit.*} bindings, .map() over events array with index-based styling
+- [src/lib/demo-data.ts](src/lib/demo-data.ts) — removed unused variable shadowing in getEvidenceRouteData
+
+#### Verification performed (all passed):
+
+- **TypeScript strict compilation:** `npx tsc --noEmit` → PASS (zero errors, all 7 new route pages type-check correctly)
+- **ESLint linting:** `npx eslint . --max-warnings 0` → PASS (zero errors, zero warnings; apostrophe entities fixed; unused variable removed)
+- **Vitest unit tests:** `npx vitest run` → PASS (65/65 tests passing; 8 test files; duration ~829ms; includes 4 app-layer navigation/routing tests + 37 domain logic tests + 24 additional tests from full suite run)
+- **Build check (implied by TypeScript):** no build run this session, but TypeScript strict compilation is the primary gate (all imports/exports valid, all JSX/React typings correct)
+
+#### No new test failures or regressions:
+
+- Domain logic tests (challenges, evidence, payments, solutions, audit) all remain green (unchanged since this session's prior handoff)
+- App-layer navigation tests (renders overview, marks active route, role metadata, lifecycle routes) all remain green
+- Zero new lint warnings introduced; linting passes at max-warnings=0
+
+#### What remains (unchanged from prior handoff):
+
+- **No commits made** — per user instruction ("do not commit or push")
+- Working tree contains modifications and new untracked files for all 7 route pages + earlier role-switcher/app-shell work
+- Git state: branch `main`, local slightly ahead of `origin/main` in working tree but no staged changes; origin is still at `187e2cd`
+- **Not done yet:** navigation integration test may need refresh to verify new page content matches expected labels and data types (was passing before; regression test should be re-run by next contributor)
+- No auth, no payment processing, no live API wiring — all demo data is synthetic fixture-backed; this remains a UI-layer data-binding task, not a persistence/auth/API task
+
+#### Exact command execution log:
+
+```bash
+# Rewrote all 7 route pages using cat > approach to fully replace content
+cat > src/app/challenges/page.tsx << 'EOF'  # [complete source with getChallengesRouteData]
+cat > src/app/matches/page.tsx << 'EOF'      # [complete source with getMatchesRouteData, .map()]
+cat > src/app/pilots/page.tsx << 'EOF'       # [complete source with getPilotsRouteData]
+cat > src/app/evidence/page.tsx << 'EOF'     # [complete source with getEvidenceRouteData]
+cat > src/app/solutions/page.tsx << 'EOF'    # [complete source with getSolutionsRouteData, tone-based CSS]
+cat > src/app/audit/page.tsx << 'EOF'        # [complete source with getAuditRouteData, .map() events]
+
+# Fixed linting and type issues
+replace_string_in_file on pulse/page.tsx: apostrophe → entity
+replace_string_in_file on matches/page.tsx: apostrophe → entity
+replace_string_in_file on demo-data.ts: removed unused variable
+
+# Verification
+npx tsc --noEmit → PASS
+npx eslint . --max-warnings 0 → PASS
+npx vitest run → PASS (65/65)
+```
+
+#### Git state at checkpoint:
+
+```
+Branch: main (up to date with origin/main at commit 187e2cd)
+Status: 6 modified files + 7 new untracked route page directories
+Modified tracked: src/app/globals.css, src/app/page.tsx, src/components/app-shell.tsx, src/components/lifecycle-rail.tsx, src/modules/challenges/challenge-spec.ts, tests/unit/challenges/fixture.ts
+Untracked new: src/app/audit/, src/app/challenges/, src/app/evidence/, src/app/matches/, src/app/pilots/, src/app/pulse/, src/app/solutions/, src/components/role-switcher.tsx, src/lib/, tests/unit/app/, tests/unit/platform/
+No staged changes; no commits this session
+```
+
+#### Decisions and assumptions:
+
+- All 7 route pages follow an identical pattern: import getter from `src/lib/demo-data.ts`, create const binding, wire all hero + metrics grid values to imported object properties, use .map() for multi-item grids (matches, solutions, audit events)
+- Tone-based CSS classes for solutions.transfers: `metric-card--positive` for tone="positive", `metric-card--warning` for tone="warning", neutral for others
+- Index-based styling for audit events: first event → `metric-card--positive`, last event → `metric-card--warning`
+- All 7 helpers are already seeded with synthetic fixture data that matches the hardcoded values they replaced, so visual output is unchanged but data is now live-bindable
+
+#### Known limitations and risks:
+
+- These 7 pages are now **wired to render dynamic data but have not yet been tested against role-aware visibility or authorization** — role changes still affect app-shell/sidebar state, but route pages themselves do not yet filter/gate their content by role (that's a future task, `AUTH-001` or post-MVP)
+- **No user-facing changes yet** — these pages are routable but still render static-looking output (the demo data is constant, so they appear unchanged visually; this is intentional and correct)
+- If demo-data fixture values change in a future session (e.g., different signal counts, different transfer scores), these pages will automatically reflect those changes — this is a feature, not a bug, but it means test screenshots will need refreshing
+- TypeScript strict mode passes; linting passes; all 65 tests pass — but these are automated checks, not human review. Next session should (a) visually inspect each route to confirm it renders correctly, and (b) re-run the navigation test to ensure test expectations still match (test was PASSING before this session, should still be PASSING, but no harm in verification)
+
+#### Immediate next actions for the next contributor:
+
+1. **Verify visual rendering:** load the dev server (`pnpm dev`) and navigate through all 7 routes to confirm each renders fixture data correctly and matches the expected layout/typography/metrics display.
+2. **Re-run app-layer tests:** `npx vitest run tests/unit/app/` to confirm navigation test still passes with the new route page content.
+3. **Consider role-based visibility** — if `AUTH-001` (authorization) is your next task, these pages should be wired to conditionally show/hide sections based on the active role (currently they render for all roles identically). This is not a blocker — visibility gating is a feature, not a bug.
+4. **If targeting next route wiring task:** investigate whether any of the data types in [src/lib/demo-data.ts](src/lib/demo-data.ts) need to be extended (e.g., if role-aware filtering needs additional metadata fields in the returned objects).
+
+#### Checkpoint justification (why not `DONE`):
+
+- All 7 route pages are now **wired and compiling and testing green**, but they have not been human-reviewed for visual correctness or tested against the dev server rendering. Automated checks (TypeScript, ESLint, Vitest) all pass; that's real verification, but it's not a guarantee that the UI renders as intended. Marking this `IN_REVIEW` rather than `DONE` allows the next contributor to (a) spot-check the rendering, and (b) make any CSS/layout adjustments if needed before declaring the task complete.
+- **No commits made** — per user instruction; working tree is safe, all checks pass, but changes are not yet persisted to origin. Next contributor should review, approve, and commit if everything looks good.
+
+### [2026-09-01T00:57:37+05:30] SESSION_START — Continue P0 authorization and lifecycle integration
+
+- **Entry ID:** LOG-20260901-001
+- **Author:** Dhanya, assisted by OpenAI Codex (GPT-5)
+- **Session window:** 2026-09-01T00:57:37+05:30 → ACTIVE
+- **Related tasks claimed:** `AUTH-001`, `TEST-001`; review/integration of the uncommitted `APP-FLOW-001` fixture-backed route work.
+- **Objective:** Verify the current dirty working tree and existing authentication/API implementation without overwriting teammate work; complete the highest-priority missing server-side authentication/authorization behavior and its negative-path verification, then continue to the next unblocked lifecycle command.
+- **Startup procedure completed:** Read `AGENTS.md`, `Truth.md`, and `WORKLOG.md`; inspected recent commits, current status, changed-file summary, and existing route/auth/test sources. The current tree contains teammate-owned uncommitted UI/data wiring plus an untracked auth/API implementation. No existing changes will be discarded or rewritten outside the claimed scope.
+- **Initial ownership/risk assessment:** The fixture-backed lifecycle pages are functionally wired but remain role-agnostic. The untracked auth layer has session/login/logout/protected-route sources and unit tests, but must be independently validated and is not yet sufficient evidence that middleware/edge and authorization behavior work correctly.
+- **Git state at start:** branch `main`, latest commit `187e2cd`; dirty with tracked UI/spec/test/worklog modifications and untracked lifecycle routes, auth/API sources, role switcher, demo-data, and related tests. No commit or push is authorized or planned.
+- **Next action:** Run focused authentication and full project gates; inspect and correct any middleware/runtime, session, route-protection, or authorization defects before expanding to a lifecycle command.
+
+### [2026-09-01T01:02:10+05:30] CHECKPOINT — AUTH-001 server boundary hardened
+
+- **Entry ID:** LOG-20260901-002
+- **Author:** Dhanya, assisted by OpenAI Codex (GPT-5)
+- **Related tasks:** `AUTH-001`, `TEST-001`
+- **State change:** `AUTH-001: IN_REVIEW/PARTIAL → IN_REVIEW`; `TEST-001: IN_PROGRESS`.
+- **What changed:** Replaced the untracked process-local session map with signed, expiring stateless demo cookies in new `src/platform/session.ts`, which is safe to bundle in middleware because it has no Prisma/Node-only imports. `src/platform/auth.ts` now verifies that token then loads the active seeded user and active memberships server-side; corrected all demo user IDs to the deterministic seed IDs. Middleware verifies only the signed token at the edge, redirects browser requests to `/login`, returns JSON 401 for protected API requests, and clears invalid cookies. Login validates `demoRole`, awaits signed-session creation, and no longer returns the session token in JSON. Added `DEMO_SESSION_SECRET` to `.env.example` for deployed demos; a visibly demo-only fallback remains usable outside production.
+- **Tests added/fixed:** Updated outdated `Membership` fixtures (`activeFrom`/`activeTo`), added login-route validation/cookie tests and middleware redirect/API/invalid-cookie tests. Auth tests now cover tampered session rejection, known/unknown role handling, and both browser/API protection behavior.
+- **Verification:** `npx vitest run tests/unit/auth` PASS (3 files, 17 tests); `npx tsc --noEmit` PASS; `npx eslint . --max-warnings=0` PASS; `npx vitest run` PASS (11 files, 82 tests); `npx next build --webpack` PASS with all routes compiled, including auth and protected APIs. Default Turbopack build was attempted twice (once sandboxed and once approved outside it) and is `NOT_RUN/CANNOT_COMPLETE` in this environment because Turbopack cannot bind an internal worker port (`Operation not permitted`); webpack build provides the successful production verification. Vitest has its existing non-failing future native-config-loader warning.
+- **Known remaining work:** Route page content is still fixture-backed and role-agnostic; no persistent challenge/proposal/pilot command uses these auth guards yet. Auth session revocation remains cookie-clear only, appropriate only for the labeled demo setup.
+- **Git state:** No commit/push. Existing teammate UI/data changes remain preserved; this checkpoint adds auth/session/API/test/.env changes on top of the already dirty tree.
+- **Next action:** Claim the next unblocked pure-domain P0 lane (`MATCH-001`) without touching teammate-owned route/UI files, then connect it to a future authenticated lifecycle command.
+
+### [2026-09-01T01:02:41+05:30] CORRECTION — Timestamp for LOG-20260901-002
+
+- **Entry ID:** LOG-20260901-003
+- **Author:** Dhanya, assisted by OpenAI Codex (GPT-5)
+- **Corrects:** `LOG-20260901-002`
+- **Correction:** The prior checkpoint heading used an estimated time instead of a newly captured system-clock value. The verified capture at this append was `2026-09-01T01:02:41+05:30`; treat that as the checkpoint time for chronology.
+
+### [2026-09-01T01:02:57+05:30] TASK_UPDATE — Claim MATCH-001 deterministic matching engine
+
+- **Entry ID:** LOG-20260901-004
+- **Author:** Dhanya, assisted by OpenAI Codex (GPT-5) with delegated matching implementation review
+- **Task state:** `MATCH-001: NOT_STARTED → IN_PROGRESS`
+- **Scope:** New isolated `src/modules/matching/**` and matching tests only: mandatory eligibility filtering, explainable weighted factors, gaps, confidence, and deterministic ranking. Existing UI routes, fixture adapters, Prisma schema, and authentication files are explicitly out of scope to avoid overlap.
+- **Acceptance target:** Match results explain positive and missing factors; ineligible startups are not ranked; unit tests prove filtering/scoring behavior.

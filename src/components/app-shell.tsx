@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { useState, type ReactNode } from "react";
 
 import { governmentNavigation } from "@/platform/navigation";
 
+import { getRoleProfile, RoleSwitcher, type DemoRole } from "./role-switcher";
 import { SimulationBanner } from "./simulation-banner";
 
 type AppShellProps = {
@@ -10,6 +14,10 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+  const [activeRole, setActiveRole] = useState<DemoRole>("problem-owner");
+  const profile = getRoleProfile(activeRole);
+
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">
@@ -33,28 +41,32 @@ export function AppShell({ children }: AppShellProps) {
 
         <nav>
           <ul className="nav-list">
-            {governmentNavigation.map((item, index) => (
-              <li key={item.href}>
-                <Link
-                  className={index === 0 ? "nav-link nav-link--active" : "nav-link"}
-                  href={{ pathname: item.href }}
-                  aria-current={index === 0 ? "page" : undefined}
-                >
-                  <span aria-hidden="true">{item.shortLabel}</span>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {governmentNavigation.map((item) => {
+              const isActive = pathname === item.href || (item.href === "/" && pathname === "/");
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    className={isActive ? "nav-link nav-link--active" : "nav-link"}
+                    href={item.href as Parameters<typeof Link>[0]["href"]}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    <span aria-hidden="true">{item.shortLabel}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
         <div className="sidebar__footer">
           <span className="avatar" aria-hidden="true">
-            AK
+            {profile.initials}
           </span>
           <span>
-            <strong>Aditi Kulkarni</strong>
-            <small>Problem owner · Demo account</small>
+            <strong>{profile.personName}</strong>
+            <small>{profile.personLabel}</small>
           </span>
         </div>
       </aside>
@@ -70,9 +82,7 @@ export function AppShell({ children }: AppShellProps) {
             <button className="quiet-button" type="button">
               English · EN
             </button>
-            <button className="role-button" type="button">
-              Switch demo role
-            </button>
+            <RoleSwitcher value={activeRole} onChange={setActiveRole} />
           </div>
         </header>
         <main id="main-content" className="main-content" tabIndex={-1}>
