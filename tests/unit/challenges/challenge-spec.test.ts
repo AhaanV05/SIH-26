@@ -1,15 +1,33 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import {
   canonicalizeJson,
   challengeSpecSchema,
   computeChallengeSpecContentHash,
   freezeChallengeSpec,
+  parseChallengeSpec,
   validateChallengeSpec,
   verifyChallengeSpecContentHash,
   type ChallengeSpec,
 } from "../../../src/modules/challenges";
 import { cloneChallengeSpec, createChallengeSpecDraft } from "./fixture";
+
+const satisfiedApprovals = ["PROBLEM_OWNER", "PROCUREMENT_REVIEWER"] as const;
+
+function createReviewReadySpec(): ChallengeSpec {
+  const specification = createChallengeSpecDraft();
+  specification.status = "UNDER_REVIEW";
+  return specification;
+}
+
+function freezeValidChallenge(): ChallengeSpec {
+  return freezeChallengeSpec(createReviewReadySpec(), {
+    frozenAt: "2026-09-01T08:30:00+05:30",
+    satisfiedApproverRoles: satisfiedApprovals,
+    operatingMode: "DEMO",
+  });
+}
 
 function reverseObjectKeys(value: unknown): unknown {
   if (Array.isArray(value)) {
@@ -38,12 +56,20 @@ describe("ChallengeSpec v1", () => {
 
   it("rejects duplicate identifiers, dangling references, invalid weights, and over-allocation", () => {
     const invalid = cloneChallengeSpec(createChallengeSpecDraft());
-    invalid.metrics.push({ ...invalid.metrics[0] });
-    invalid.outcomes[0].metricIds = ["MET-MISSING"];
-    invalid.milestones[0].requiredMetricIds = ["MET-UNKNOWN"];
-    invalid.rubric[0].weight = 31;
+    const firstMetric = invalid.metrics[0];
+    const firstOutcome = invalid.outcomes[0];
+    const firstMilestone = invalid.milestones[0];
+    const firstRubricCriterion = invalid.rubric[0];
+    if (!firstMetric || !firstOutcome || !firstMilestone || !firstRubricCriterion) {
+      throw new Error("The valid fixture must include metric, outcome, milestone, and rubric records");
+    }
+
+    invalid.metrics.push({ ...firstMetric });
+    firstOutcome.metricIds = ["MET-MISSING"];
+    firstMilestone.requiredMetricIds = ["MET-UNKNOWN"];
+    firstRubricCriterion.weight = 31;
     invalid.milestones.push({
-      ...invalid.milestones[0],
+      ...firstMilestone,
       id: "MS-2",
       paymentPercent: 1,
     });
@@ -62,23 +88,17 @@ describe("ChallengeSpec v1", () => {
   });
 
   it("freezes a mutable spec with a valid canonical content hash", () => {
-    const frozen = freezeChallengeSpec(
-      createChallengeSpecDraft(),
-      "2026-09-01T10:00:00+05:30",
-    );
+    const frozen = freezeValidChallenge();
 
     expect(frozen.status).toBe("APPROVED");
-    expect(frozen.integrity.frozenAt).toBe("2026-09-01T10:00:00+05:30");
+    expect(frozen.integrity.frozenAt).toBe("2026-09-01T08:30:00+05:30");
     expect(frozen.integrity.contentHash).toMatch(/^[a-f0-9]{64}$/);
     expect(verifyChallengeSpecContentHash(frozen)).toBe(true);
     expect(validateChallengeSpec(frozen).success).toBe(true);
   });
 
   it("produces the same hash for equivalent object key orderings", () => {
-    const frozen = freezeChallengeSpec(
-      createChallengeSpecDraft(),
-      "2026-09-01T10:00:00+05:30",
-    );
+    const frozen = freezeValidChallenge();
     const reordered = reverseObjectKeys(frozen) as ChallengeSpec;
 
     expect(computeChallengeSpecContentHash(reordered)).toBe(
@@ -87,10 +107,7 @@ describe("ChallengeSpec v1", () => {
   });
 
   it("detects a material mutation after freeze", () => {
-    const frozen = freezeChallengeSpec(
-      createChallengeSpecDraft(),
-      "2026-09-01T10:00:00+05:30",
-    );
+    const frozen = freezeValidChallenge();
     const tampered = cloneChallengeSpec(frozen);
     tampered.problem.title = "Tampered community-bin challenge";
 
@@ -102,6 +119,116 @@ describe("ChallengeSpec v1", () => {
         expect.objectContaining({
           path: "integrity.contentHash",
           code: "integrity_mismatch",
+        }),
+      );
+    }
+  });
+
+  it("preserves the immutable content hash across frozen lifecycle statuses", () => {
+    const approved = freezeValidChallenge();
+
+    for (const status of ["PUBLISHED", "SUPERSEDED"] as const) {
+      const transitioned = { ...approved, status };
+      expect(computeChallengeSpecContentHash(transitioned)).toBe(
+        approved.integrity.contentHash,
+      );
+      expect(verifyChallengeSpecContentHash(transitioned)).toBe(true);
+      expect(validateChallengeSpec(transitioned).success).toBe(true);
+    }
+  });
+
+  it("requires review state, resolved blockers, and every required approval", () => {
+    expect(() =>
+      freezeChallengeSpec(createChallengeSpecDraft(), {
+        frozenAt: "2026-09-01T08:30:00+05:30",
+        satisfiedApproverRoles: satisfiedApprovals,
+        operatingMode: "DEMO",
+      }),
+    ).toThrow("Only UNDER_REVIEW");
+
+    const blocked = createReviewReadySpec();
+    if (!blocked.requirements) throw new Error("Fixture requirements are required");
+    delete blocked.requirements.securityAndPrivacy;
+    expect(() =>
+      freezeChallengeSpec(blocked, {
+        frozenAt: "2026-09-01T08:30:00+05:30",
+        satisfiedApproverRoles: satisfiedApprovals,
+        operatingMode: "DEMO",
+      }),
+    ).toThrow("MS-PROC-014");
+
+    expect(() =>
+      freezeChallengeSpec(createReviewReadySpec(), {
+        frozenAt: "2026-09-01T08:30:00+05:30",
+        satisfiedApproverRoles: ["PROBLEM_OWNER"],
+        operatingMode: "DEMO",
+      }),
+    ).toThrow("PROCUREMENT_REVIEWER");
+  });
+
+  it("protects production citizen data and prohibits it in demo mode", () => {
+    const specification = createReviewReadySpec();
+    specification.sandbox.usesProductionCitizenData = true;
+    specification.sandbox.dataClassification = "PUBLIC";
+    specification.sandbox.dataOwner = "Authorized departmental data steward";
+    specification.sandbox.legalBasis =
+      "Reviewed lawful purpose for controlled production processing.";
+
+    expect(challengeSpecSchema.safeParse(specification).success).toBe(false);
+
+    specification.sandbox.dataClassification = "RESTRICTED";
+    expect(challengeSpecSchema.safeParse(specification).success).toBe(true);
+    expect(() =>
+      freezeChallengeSpec(specification, {
+        frozenAt: "2026-09-01T08:30:00+05:30",
+        satisfiedApproverRoles: satisfiedApprovals,
+        operatingMode: "DEMO",
+      }),
+    ).toThrow("must not use production citizen data");
+
+    expect(
+      freezeChallengeSpec(specification, {
+        frozenAt: "2026-09-01T08:30:00+05:30",
+        satisfiedApproverRoles: satisfiedApprovals,
+        operatingMode: "PRODUCTION",
+      }).status,
+    ).toBe("APPROVED");
+  });
+
+  it("requires a strict freeze timestamp no later than applications opening", () => {
+    expect(() =>
+      freezeChallengeSpec(createReviewReadySpec(), {
+        frozenAt: "2026-09-01T08:30:00+14:01",
+        satisfiedApproverRoles: satisfiedApprovals,
+        operatingMode: "DEMO",
+      }),
+    ).toThrow("valid timezone-aware ISO timestamp");
+
+    expect(() =>
+      freezeChallengeSpec(createReviewReadySpec(), {
+        frozenAt: "2026-09-01T09:00:01+05:30",
+        satisfiedApproverRoles: satisfiedApprovals,
+        operatingMode: "DEMO",
+      }),
+    ).toThrow("no later than applicationsOpenAt");
+  });
+
+  it("preserves native Zod issue codes and numeric paths", () => {
+    const invalid = createChallengeSpecDraft();
+    const firstMetric = invalid.metrics[0];
+    if (!firstMetric) throw new Error("Fixture metric is required");
+    firstMetric.target = "not-a-number" as unknown as number;
+
+    try {
+      parseChallengeSpec(invalid);
+      throw new Error("Expected parseChallengeSpec to reject invalid input");
+    } catch (error) {
+      expect(error).toBeInstanceOf(z.ZodError);
+      if (!(error instanceof z.ZodError)) throw error;
+      expect(error.issues).toContainEqual(
+        expect.objectContaining({
+          code: "invalid_type",
+          path: ["metrics", 0, "target"],
         }),
       );
     }
@@ -124,4 +251,3 @@ describe("canonical JSON", () => {
     expect(() => canonicalizeJson(circular)).toThrow(/Circular reference/);
   });
 });
-

@@ -4,7 +4,7 @@
 >
 > **Project window:** 2026-08-31 through 2026-09-05 (Asia/Kolkata)  
 > **Deadline:** 2026-09-05  
-> **Status:** Discovery and project initialization  
+> **Status:** Foundation implementation in progress
 > **Canonical file:** `Truth.md` at the repository root
 
 ---
@@ -1195,6 +1195,7 @@ No owner is assigned until a contributor appends a `TASK_UPDATE` claiming the ta
 | AUTH-001 | P0 | NOT_STARTED | Implement seeded authentication, roles, and authorization | DEV-001, DB-001 | Protected routes/actions tested |
 | AUDIT-001 | P0 | NOT_STARTED | Implement tamper-evident audit events | DB-001, AUTH-001 | Chain verification test passes |
 | CHAL-001 | P0 | NOT_STARTED | Challenge intake, draft, review, publish, and freeze | DB-001, AUTH-001 | Valid state flow works |
+| CHAL-002 | P1 | NOT_STARTED | Finish ChallengeSpec defensive verification and malformed-draft diagnostics | CHAL-001, INNO-002 | Independent hash verification rejects sparse/custom arrays; lint reports malformed references/timelines without index drift; server clock/approval records replace caller assertions |
 | AI-001 | P0 | NOT_STARTED | Provider adapter and deterministic fallback for drafting/lint | CHAL-001 | Demo works with and without provider key |
 | PASS-001 | P0 | NOT_STARTED | Startup Passport and mock evidence verification | DB-001, AUTH-001 | Reusable evidence/freshness visible |
 | MATCH-001 | P0 | NOT_STARTED | Explainable eligibility and matching engine | CHAL-001, PASS-001 | Reasons and tests present |
@@ -1328,6 +1329,7 @@ Never blur these classes during judging.
 | R-010 | Authorization bugs expose proposals | Medium | Critical | Server-side role tests and IDOR tests |
 | R-011 | Deadline interpretation is wrong | Medium | Critical | Verify exact cutoff in GOV-001; freeze a day early |
 | R-012 | Append-only file becomes hard to use | Medium | Medium | Structured entries, status snapshots, stable IDs, supersession links |
+| R-013 | Prisma 6.19.3 configuration tooling resolves vulnerable `deepmerge-ts` 7.1.5 (`GHSA-ggr8-5vv4-36mx`) | Medium | High | Keep Prisma configuration inputs repository-controlled, never merge untrusted objects through tooling, track a compatible upstream fix, and rerun `pnpm audit --prod` before submission; do not force an unsupported major transitive override |
 
 ---
 
@@ -2750,11 +2752,19 @@ Research was performed on 2026-08-31 using current authoritative/standards sourc
 - **Supersedes:** Reinforces DEC-INIT-003.
 - **Revisit trigger:** A provided government infrastructure or explicit judging requirement mandates a ledger.
 
-### OPEN_QUESTION OQ-013 — Choose exact shared development stack
+### DEC-20260831-005 — Adopt the verified Day 1 foundation toolchain
 
-- **Question:** Will the team accept the proposed Next.js + TypeScript + PostgreSQL + Prisma default, and which hosted auth/database/storage/deployment providers are available?
-- **Why it matters:** `ARCH-001` cannot be marked `DONE` until the team confirms skills and deployment constraints.
-- **Safe default:** Adopt the proposed stack if no objection exists before scaffolding, but append the exact versions/providers after verifying local tooling.
+- **Decision:** The implemented MVP foundation uses pnpm 10.25.0, Next.js 16.3.3, React 19.2.8, TypeScript 6.0.3, Tailwind CSS 4.3.3 with PostCSS 8.5.26, Prisma 6.19.3, Zod 4.5.4, Vitest 4.1.11, and ESLint 9.39.5.
+- **Context:** The initial scaffold selected TypeScript 7.0.2 and ESLint 10.9.1, but Next's current `typescript-eslint` dependency supports TypeScript below 6.1 and `eslint-plugin-react` supports ESLint 9. The original pair prevented lint from executing.
+- **Rationale:** Pin the newest compatible toolchain versions that pass installation, lint, type checking, tests, Prisma generation/validation, and the production build instead of suppressing tool failures.
+- **Consequences:** Tailwind is now an implemented styling dependency; Prisma's unresolved transitive audit advisory is tracked as `R-013`; major upgrades require a compatibility review and complete verification.
+- **Supersedes/resolves:** Resolves `OQ-013` for the local MVP foundation. Hosted authentication, database, storage, and deployment providers remain separate open delivery choices.
+- **Revisit trigger:** A verified provider/deployment constraint or a compatible upstream security/toolchain release requires a version change.
+
+### RESOLVED_QUESTION OQ-013 — Choose exact shared development stack
+
+- **Resolution:** `DEC-20260831-005` adopts the verified Next.js + TypeScript + PostgreSQL + Prisma foundation and exact local toolchain versions.
+- **Still open:** Hosted authentication, database, object-storage, and deployment providers are not selected; those choices must be recorded before deployment work is marked complete.
 
 ### OPEN_QUESTION OQ-014 — Choose hero depth versus breadth
 

@@ -4,10 +4,32 @@ import { z } from "zod";
 
 import { canonicalizeJson } from "./canonical-json";
 import {
+  challengeTimestampSchema,
   challengeSpecSchema,
   frozenChallengeStatuses,
+  parseChallengeTimestamp,
   type ChallengeSpec,
 } from "./challenge-spec";
+import {
+  hasBlockingProcurementFindings,
+  lintChallengeSpec,
+} from "./procurement-lint";
+
+export const challengeSpecOperatingModes = ["DEMO", "PRODUCTION"] as const;
+
+export interface FreezeChallengeSpecRequest {
+  readonly frozenAt: string;
+  readonly satisfiedApproverRoles: readonly string[];
+  readonly operatingMode: (typeof challengeSpecOperatingModes)[number];
+}
+
+const freezeChallengeSpecRequestSchema = z
+  .object({
+    frozenAt: challengeTimestampSchema,
+    satisfiedApproverRoles: z.array(z.string().trim().min(1)),
+    operatingMode: z.enum(challengeSpecOperatingModes),
+  })
+  .strict();
 
 export interface ChallengeSpecValidationIssue {
   readonly path: string;
@@ -23,10 +45,14 @@ export type ChallengeSpecValidationResult =
     };
 
 function contentHashPayload(specification: ChallengeSpec): Record<string, unknown> {
-  const { contentHash: _storedHash, ...integrityWithoutHash } = specification.integrity;
+  const immutableSpecification: Partial<ChallengeSpec> = { ...specification };
+  delete immutableSpecification.status;
+  const integrityWithoutHash = {
+    frozenAt: specification.integrity.frozenAt,
+  };
 
   return {
-    ...specification,
+    ...immutableSpecification,
     integrity: integrityWithoutHash,
   };
 }
@@ -81,36 +107,90 @@ export function validateChallengeSpec(input: unknown): ChallengeSpecValidationRe
 }
 
 export function parseChallengeSpec(input: unknown): ChallengeSpec {
-  const result = validateChallengeSpec(input);
-  if (result.success) {
-    return result.data;
+  const parsed = challengeSpecSchema.safeParse(input);
+  if (!parsed.success) {
+    throw parsed.error;
   }
 
-  throw new z.ZodError(
-    result.issues.map((issue) => ({
-      code: z.ZodIssueCode.custom,
-      path: issue.path ? issue.path.split(".") : [],
-      message: issue.message,
-    })),
+  const isFrozen = frozenChallengeStatuses.includes(
+    parsed.data.status as (typeof frozenChallengeStatuses)[number],
   );
+  if (isFrozen && !verifyChallengeSpecContentHash(parsed.data)) {
+    throw new z.ZodError([
+      {
+        code: z.ZodIssueCode.custom,
+        path: ["integrity", "contentHash"],
+        message: "Content hash does not match the canonical ChallengeSpec document",
+      },
+    ]);
+  }
+
+  return parsed.data;
 }
 
 export function freezeChallengeSpec(
   input: unknown,
-  frozenAt: string,
+  requestInput: FreezeChallengeSpecRequest,
 ): ChallengeSpec {
-  const timestamp = z.string().datetime({ offset: true }).parse(frozenAt);
+  const request = freezeChallengeSpecRequestSchema.parse(requestInput);
   const draft = challengeSpecSchema.parse(input);
 
-  if (draft.status !== "DRAFT" && draft.status !== "UNDER_REVIEW") {
-    throw new Error(`Only mutable ChallengeSpecs can be frozen; received ${draft.status}`);
+  if (draft.status !== "UNDER_REVIEW") {
+    throw new Error(
+      `Only UNDER_REVIEW ChallengeSpecs can be frozen; received ${draft.status}`,
+    );
+  }
+
+  const findings = lintChallengeSpec(draft);
+  if (hasBlockingProcurementFindings(findings)) {
+    const blockingCodes = findings
+      .filter((finding) => finding.severity === "BLOCKING")
+      .map((finding) => finding.ruleCode);
+    throw new Error(
+      `ChallengeSpec has unresolved blocking procurement findings: ${[
+        ...new Set(blockingCodes),
+      ].join(", ")}`,
+    );
+  }
+
+  const satisfiedRoles = new Set(request.satisfiedApproverRoles);
+  const missingApproverRoles = draft.governance.requiredApproverRoles.filter(
+    (role) => !satisfiedRoles.has(role),
+  );
+  if (missingApproverRoles.length > 0) {
+    throw new Error(
+      `ChallengeSpec is missing required approvals from: ${missingApproverRoles.join(", ")}`,
+    );
+  }
+
+  if (
+    request.operatingMode === "DEMO" &&
+    draft.sandbox.usesProductionCitizenData
+  ) {
+    throw new Error("DEMO ChallengeSpecs must not use production citizen data");
+  }
+
+  if (draft.timeline) {
+    const frozenAt = parseChallengeTimestamp(request.frozenAt);
+    const applicationsOpenAt = parseChallengeTimestamp(
+      draft.timeline.applicationsOpenAt,
+    );
+    if (
+      frozenAt === undefined ||
+      applicationsOpenAt === undefined ||
+      frozenAt > applicationsOpenAt
+    ) {
+      throw new Error(
+        "ChallengeSpec must be frozen no later than applicationsOpenAt",
+      );
+    }
   }
 
   const pendingHash = {
     ...draft,
     status: "APPROVED" as const,
     integrity: {
-      frozenAt: timestamp,
+      frozenAt: request.frozenAt,
       contentHash: "0".repeat(64),
     },
   } satisfies ChallengeSpec;
@@ -125,4 +205,3 @@ export function freezeChallengeSpec(
 
   return parseChallengeSpec(frozen);
 }
-

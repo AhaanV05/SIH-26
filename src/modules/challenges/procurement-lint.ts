@@ -24,6 +24,7 @@ export interface ProcurementLintRule {
 type PartialMetric = DeepPartial<ChallengeSpec["metrics"][number]>;
 type PartialEligibility = DeepPartial<ChallengeSpec["eligibility"][number]>;
 type PartialMilestone = DeepPartial<ChallengeSpec["milestones"][number]>;
+type PartialBaseline = DeepPartial<ChallengeSpec["problem"]["baseline"][number]>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -74,7 +75,7 @@ const baselineRule: ProcurementLintRule = {
   title: "Measurable baseline",
   defaultSeverity: "BLOCKING",
   evaluate(specification) {
-    const baselines = records(specification.problem?.baseline);
+    const baselines = records<PartialBaseline>(specification.problem?.baseline);
     if (baselines.length === 0) {
       return [
         finding(
@@ -392,6 +393,9 @@ const productionDataRule: ProcurementLintRule = {
     }
 
     const missing = [
+      specification.sandbox.dataClassification !== "RESTRICTED"
+        ? "dataClassification=RESTRICTED"
+        : null,
       !hasText(specification.sandbox.dataOwner) ? "dataOwner" : null,
       !hasText(specification.sandbox.legalBasis) ? "legalBasis" : null,
     ].filter((field): field is string => field !== null);
@@ -581,4 +585,3 @@ export function hasBlockingProcurementFindings(
 ): boolean {
   return findings.some((item) => item.severity === "BLOCKING");
 }
-

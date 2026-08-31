@@ -1,17 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #f4f7f3;
+  --color-danger: #a64236;
+  --color-forest: #0b3b32;
+  --color-forest-soft: #155d4d;
+  --color-ink: #10241f;
+  --color-ink-muted: #5c6e68;
+  --color-line: #d9e2dd;
+  --color-mint: #dff5e9;
+  --color-mint-bright: #92e3bb;
+  --color-paper: #fffef9;
+  --color-saffron: #f5a623;
+  --color-saffron-soft: #fff4d8;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --shadow-panel: 0 18px 50px rgba(22, 54, 45, 0.08);
+}
+
 :root {
-  --ink: #10241f;
-  --ink-muted: #5c6e68;
-  --forest: #0b3b32;
-  --forest-soft: #155d4d;
-  --mint: #dff5e9;
-  --mint-bright: #92e3bb;
-  --saffron: #f5a623;
-  --saffron-soft: #fff4d8;
-  --canvas: #f4f7f3;
-  --paper: #fffef9;
-  --line: #d9e2dd;
-  --danger: #a64236;
-  --shadow: 0 18px 50px rgba(22, 54, 45, 0.08);
+  --ink: var(--color-ink);
+  --ink-muted: var(--color-ink-muted);
+  --forest: var(--color-forest);
+  --forest-soft: var(--color-forest-soft);
+  --mint: var(--color-mint);
+  --mint-bright: var(--color-mint-bright);
+  --saffron: var(--color-saffron);
+  --saffron-soft: var(--color-saffron-soft);
+  --canvas: var(--color-canvas);
+  --paper: var(--color-paper);
+  --line: var(--color-line);
+  --danger: var(--color-danger);
+  --shadow: var(--shadow-panel);
   --radius-sm: 0.75rem;
   --radius-md: 1.1rem;
   --radius-lg: 1.6rem;
@@ -42,6 +64,8 @@ a {
 
 button,
 a {
+  @apply touch-manipulation;
+
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -88,8 +112,8 @@ button {
 }
 
 .brand {
-  align-items: center;
-  display: flex;
+  @apply flex min-h-11 items-center;
+
   gap: 0.8rem;
   margin: 0 0.55rem 2.25rem;
 }
@@ -157,14 +181,13 @@ button {
 }
 
 .nav-link {
-  align-items: center;
+  @apply flex min-h-11 items-center;
+
   border-radius: 0.7rem;
   color: #c7d9d2;
-  display: flex;
   font-size: 0.86rem;
   font-weight: 620;
   gap: 0.8rem;
-  min-height: 2.7rem;
   padding: 0.62rem 0.78rem;
 }
 
@@ -265,14 +288,11 @@ button {
 .role-button,
 .primary-button,
 .secondary-button {
-  align-items: center;
-  border-radius: 999px;
+  @apply inline-flex min-h-11 items-center justify-center rounded-full;
+
   cursor: pointer;
-  display: inline-flex;
   font-size: 0.78rem;
   font-weight: 760;
-  justify-content: center;
-  min-height: 2.65rem;
   padding: 0.68rem 1rem;
 }
 
@@ -528,6 +548,8 @@ button {
 }
 
 .panel__heading > a {
+  @apply inline-flex min-h-11 items-center;
+
   color: var(--forest-soft);
   font-size: 0.72rem;
   font-weight: 760;
@@ -700,14 +722,14 @@ button {
 }
 
 .loading-state__mark {
-  animation: pulse 1s ease-in-out infinite alternate;
+  animation: loading-pulse 1s ease-in-out infinite alternate;
   background: var(--forest-soft);
   border-radius: 50%;
   height: 0.7rem;
   width: 0.7rem;
 }
 
-@keyframes pulse {
+@keyframes loading-pulse {
   to {
     opacity: 0.3;
     transform: scale(0.72);
@@ -805,8 +827,8 @@ button {
   }
 
   .nav-link {
-    min-height: 2.2rem;
-    min-width: 2.2rem;
+    @apply min-h-11 min-w-11;
+
     padding: 0.4rem;
   }
 

@@ -37,7 +37,72 @@ const identifierSchema = z
 
 const shortTextSchema = z.string().trim().min(1).max(240);
 const longTextSchema = z.string().trim().min(10).max(10_000);
-const isoTimestampSchema = z.string().datetime({ offset: true });
+const TIMEZONE_AWARE_ISO_TIMESTAMP =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(Z|[+-](?:(?:0\d|1[0-3]):[0-5]\d|14:00))$/;
+
+function isLeapYear(year: number): boolean {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+export function parseChallengeTimestamp(value: string): number | undefined {
+  const match = TIMEZONE_AWARE_ISO_TIMESTAMP.exec(value);
+  if (!match) {
+    return undefined;
+  }
+
+  const [
+    ,
+    yearPart,
+    monthPart,
+    dayPart,
+    hourPart,
+    minutePart,
+    secondPart,
+    ,
+    timezonePart,
+  ] = match;
+  const year = Number(yearPart);
+  const month = Number(monthPart);
+  const day = Number(dayPart);
+  const hour = Number(hourPart);
+  const minute = Number(minutePart);
+  const second = Number(secondPart);
+  const daysInMonth = [
+    31,
+    isLeapYear(year) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+
+  if (
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > (daysInMonth[month - 1] ?? 0) ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59 ||
+    timezonePart === "-00:00"
+  ) {
+    return undefined;
+  }
+
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
+export const challengeTimestampSchema = z.string().refine(
+  (value) => parseChallengeTimestamp(value) !== undefined,
+  "Expected a valid timezone-aware ISO timestamp",
+);
 const sha256Schema = z
   .string()
   .regex(/^[a-f0-9]{64}$/i, "Expected a 64-character SHA-256 digest");
@@ -48,7 +113,7 @@ export const baselineObservationSchema = z
     value: z.number().finite(),
     unit: shortTextSchema,
     source: shortTextSchema,
-    observedAt: isoTimestampSchema.optional(),
+    observedAt: challengeTimestampSchema.optional(),
   })
   .strict();
 
@@ -165,10 +230,10 @@ export const challengeRequirementsSchema = z
 
 export const challengeTimelineSchema = z
   .object({
-    applicationsOpenAt: isoTimestampSchema,
-    applicationsCloseAt: isoTimestampSchema,
-    pilotStartAt: isoTimestampSchema,
-    pilotEndAt: isoTimestampSchema,
+    applicationsOpenAt: challengeTimestampSchema,
+    applicationsCloseAt: challengeTimestampSchema,
+    pilotStartAt: challengeTimestampSchema,
+    pilotEndAt: challengeTimestampSchema,
     dependencyLeadTimeDays: z.number().int().nonnegative().default(0),
   })
   .strict();
@@ -206,7 +271,7 @@ export const challengeSpecBaseSchema = z
       .strict(),
     integrity: z
       .object({
-        frozenAt: isoTimestampSchema.nullable(),
+        frozenAt: challengeTimestampSchema.nullable(),
         contentHash: sha256Schema.nullable(),
       })
       .strict(),
@@ -313,17 +378,49 @@ export const challengeSpecSchema = challengeSpecBaseSchema.superRefine(
     }
 
     if (specification.timeline) {
-      const open = Date.parse(specification.timeline.applicationsOpenAt);
-      const close = Date.parse(specification.timeline.applicationsCloseAt);
-      const pilotStart = Date.parse(specification.timeline.pilotStartAt);
-      const pilotEnd = Date.parse(specification.timeline.pilotEndAt);
+      const open = parseChallengeTimestamp(specification.timeline.applicationsOpenAt);
+      const close = parseChallengeTimestamp(specification.timeline.applicationsCloseAt);
+      const pilotStart = parseChallengeTimestamp(specification.timeline.pilotStartAt);
+      const pilotEnd = parseChallengeTimestamp(specification.timeline.pilotEndAt);
 
-      if (!(open < close && close <= pilotStart && pilotStart < pilotEnd)) {
+      if (
+        open === undefined ||
+        close === undefined ||
+        pilotStart === undefined ||
+        pilotEnd === undefined ||
+        !(open < close && close <= pilotStart && pilotStart < pilotEnd)
+      ) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["timeline"],
           message:
             "Expected applicationsOpenAt < applicationsCloseAt <= pilotStartAt < pilotEndAt",
+        });
+      }
+    }
+
+    if (specification.sandbox.usesProductionCitizenData) {
+      if (specification.sandbox.dataClassification !== "RESTRICTED") {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sandbox", "dataClassification"],
+          message: "Production citizen data must be classified RESTRICTED",
+        });
+      }
+
+      if (!specification.sandbox.dataOwner) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sandbox", "dataOwner"],
+          message: "Production citizen data requires an accountable data owner",
+        });
+      }
+
+      if (!specification.sandbox.legalBasis) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sandbox", "legalBasis"],
+          message: "Production citizen data requires a reviewed legal basis",
         });
       }
     }
@@ -365,4 +462,3 @@ export type DeepPartial<T> = T extends readonly (infer Item)[]
     : T;
 
 export type ChallengeSpecDraft = DeepPartial<ChallengeSpec>;
-

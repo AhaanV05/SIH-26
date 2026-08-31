@@ -4,6 +4,8 @@ MahaSetu is an SIH 2026 software demonstrator for a startup-friendly public proc
 
 The prototype uses synthetic demonstration data and explicit offline/mock adapters. It does not connect to live government identity, procurement, sandbox, or payment systems.
 
+The verified foundation uses Next.js 16, React 19, TypeScript 6, Tailwind CSS 4, Prisma 6, Zod 4, Vitest 4, and ESLint 9. Exact reproducible versions are locked in `pnpm-lock.yaml`.
+
 ## Local setup
 
 Prerequisites:
@@ -35,6 +37,8 @@ pnpm.cmd build
 ```
 
 `db:validate` parses the schema and connection URL; it does not require the database server to be running. Database migrations and deterministic seed data are not yet included.
+
+`pnpm audit --prod` currently reports the transitive Prisma configuration-tooling advisory tracked as `R-013` in `Truth.md`. Do not silence it with an unverified major override; rerun the audit before submission and adopt a compatible upstream fix when available.
 
 ## Project context
 

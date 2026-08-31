@@ -37,7 +37,8 @@ export function AppShell({ children }: AppShellProps) {
               <li key={item.href}>
                 <Link
                   className={index === 0 ? "nav-link nav-link--active" : "nav-link"}
-                  href={item.href}
+                  href={{ pathname: item.href }}
+                  aria-current={index === 0 ? "page" : undefined}
                 >
                   <span aria-hidden="true">{item.shortLabel}</span>
                   {item.label}

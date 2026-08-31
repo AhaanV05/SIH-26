@@ -34,10 +34,10 @@ export default function OverviewPage() {
             controlled pilots, milestone evidence, and responsible reuse.
           </p>
           <div className="button-row">
-            <Link className="primary-button" href="/pulse">
+            <Link className="primary-button" href={{ pathname: "/pulse" }}>
               Review problem radar
             </Link>
-            <Link className="secondary-button" href="/challenges">
+            <Link className="secondary-button" href={{ pathname: "/challenges" }}>
               Open challenge forge
             </Link>
           </div>
@@ -108,7 +108,7 @@ export default function OverviewPage() {
               <span className="eyebrow">Recent evidence</span>
               <h2>Audit-ready activity</h2>
             </div>
-            <Link href="/audit">View thread</Link>
+            <Link href={{ pathname: "/audit" }}>View thread</Link>
           </div>
           <ol className="activity-list">
             {activity.map((item) => (
@@ -129,7 +129,7 @@ export default function OverviewPage() {
           <p>
             The draft is schema-valid, but publication remains human-authorized.
           </p>
-          <Link className="secondary-button" href="/challenges">
+          <Link className="secondary-button" href={{ pathname: "/challenges" }}>
             Review findings
           </Link>
         </article>

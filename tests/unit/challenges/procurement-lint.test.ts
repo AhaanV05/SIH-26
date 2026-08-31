@@ -99,7 +99,11 @@ describe("deterministic procurement lint pack", () => {
 
     expect(lintChallengeSpec(draft).map((item) => item.ruleCode)).toContain("MS-PROC-006");
 
-    draft.eligibility[1].justification =
+    const turnoverCriterion = draft.eligibility[1];
+    if (!turnoverCriterion) {
+      throw new Error("The test must append a turnover eligibility criterion");
+    }
+    turnoverCriterion.justification =
       "Documented financial exposure requires this proportionate threshold, subject to review.";
     expect(lintChallengeSpec(draft).map((item) => item.ruleCode)).not.toContain(
       "MS-PROC-006",
@@ -119,6 +123,13 @@ describe("deterministic procurement lint pack", () => {
     draft.sandbox.dataOwner = "Authorized departmental data steward";
     draft.sandbox.legalBasis =
       "Reviewed purpose and legal authority recorded by the authorized department.";
+    draft.sandbox.dataClassification = "PUBLIC";
+    findings = lintChallengeSpec(draft);
+    expect(findings).toContainEqual(
+      expect.objectContaining({ ruleCode: "MS-PROC-009", severity: "BLOCKING" }),
+    );
+
+    draft.sandbox.dataClassification = "RESTRICTED";
     findings = lintChallengeSpec(draft);
     expect(findings.map((item) => item.ruleCode)).not.toContain("MS-PROC-009");
   });

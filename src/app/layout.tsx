@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en-IN">
-      <body>
+      <body className="min-w-80 bg-canvas text-ink antialiased">
         <AppShell>{children}</AppShell>
       </body>
     </html>
