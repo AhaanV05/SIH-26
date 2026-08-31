@@ -25,15 +25,15 @@
 
 ## 1. Current confirmed contributor rotation
 
-Working assumption: this rotation repeats daily in Asia/Kolkata during the active project window until Ahaan supersedes it.
+Working assumption: this rotation repeats daily in Asia/Kolkata during the active project window until Ahaan supersedes it. Full decision record: `DEC-OPS-20260831-002` (supersedes the earlier TBD placeholders in `DEC-20260831-005`).
 
 | Sequence | Contributor | Working window | Status |
 |---:|---|---|---|
 | 1 | Ahaan | 09:30–11:30 IST | CONFIRMED |
 | 2 | Drishika | 11:30–13:30 IST | CONFIRMED |
 | 3 | Taanish | 13:30–15:30 IST | CONFIRMED |
-| 4 | Contributor TBD-1 | Within 15:30–23:00 IST | UNCONFIRMED |
-| 5 | Contributor TBD-2 | Within 15:30–23:00 IST | UNCONFIRMED |
+| 4 | Zuhair | 18:00–20:00 IST | CONFIRMED |
+| 5 | Dhanya | 21:00–23:00 IST | CONFIRMED |
 | 6 | Om | 23:00–01:00 IST, ending next calendar day | CONFIRMED |
 
 The last ten minutes of every confirmed slot are reserved for verification and handoff documentation. Do not invent the unconfirmed names, order, or boundaries.
@@ -586,3 +586,12 @@ The entries below preserve the original activity history and identifiers. Entrie
 - **Git state at close:** branch `main`; local and remote both at `9b03f07`; working tree clean (`git status` reports no pending changes) other than the remote-URL note above.
 - **Next action for the next contributor:** (1) optionally update `origin` to the new GitHub URL; (2) fix `tsconfig.json` so `pnpm typecheck` passes under TypeScript 7.0.2 (remove/replace `baseUrl` per the TS5102 message); (3) proceed with the ordered next actions already listed in LOG-20260831-016 (Tailwind install/config, mojibake fix, lint/Prisma/build checks, payment/audit hardening findings) before marking any P0 task `DONE`.
 - **Handoff note:** This was a narrow, explicitly-scoped session (confirm schedule, commit and push). No product or architecture decisions were made or altered.
+
+### [2026-08-31T11:37:04+05:30] CORRECTION — Sync Section 1 rotation table with DEC-OPS-20260831-002
+
+- **Entry ID:** LOG-20260831-022
+- **Author:** Ahaan, assisted by Claude Sonnet 5
+- **Corrects:** The "Current confirmed contributor rotation" table in Section 1 (top of this file), which still listed `Contributor TBD-1`/`Contributor TBD-2` as `UNCONFIRMED` even though `DEC-OPS-20260831-002` had already named Zuhair and Dhanya earlier in this same file.
+- **Correction:** Updated Section 1's table to list all six confirmed contributors — Ahaan, Drishika, Taanish, Zuhair (18:00–20:00 IST), Dhanya (21:00–23:00 IST), Om — and added a pointer to `DEC-OPS-20260831-002` as the governing decision. Ahaan confirmed the roster is exactly these six people; no gap rows are shown in this summary table (the underlying 15:30–18:00 and 20:00–21:00 unassigned windows are still documented in `DEC-OPS-20260831-002` itself).
+- **Cause:** Section 1 is a "current state" summary meant to always reflect the latest rotation decision, but it was not updated when `DEC-OPS-20260831-002` was appended earlier, so the two disagreed until this correction.
+- **Scope note:** This is a display/sync fix only. `DEC-OPS-20260831-002` and `DEC-20260831-005` remain unchanged and are not superseded by this entry; Section 1 now simply reflects what those decisions already say.
