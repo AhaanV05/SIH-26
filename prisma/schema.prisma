@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationType {
+  GOVERNMENT
+  STARTUP
+  PLATFORM
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum MembershipRole {
+  PROBLEM_OWNER
+  PROCUREMENT_REVIEWER
+  FINANCE_OFFICER
+  EVALUATOR
+  STARTUP_ADMIN
+  STARTUP_CONTRIBUTOR
+  PLATFORM_ADMIN
+  AUDITOR
+}
+
+enum ChallengeStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  PUBLISHED
+  APPLICATIONS_CLOSED
+  EVALUATION
+  PILOT_SELECTED
+  PILOT_ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum SpecVersionStatus {
+  DRAFT
+  APPROVED
+  FROZEN
+  SUPERSEDED
+}
+
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL_BUSINESS
+  RESTRICTED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PUBLISHED
+  FAILED
+}
+
+model User {
+  id              String       @id @default(cuid())
+  name            String
+  email           String       @unique
+  locale          String       @default("en-IN")
+  status          UserStatus   @default(ACTIVE)
+  memberships     Membership[]
+  ownedChallenges Challenge[]  @relation("ChallengeOwner")
+  createdSpecs    ChallengeSpecVersion[] @relation("SpecCreator")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Organization {
+  id             String             @id @default(cuid())
+  type           OrganizationType
+  legalName      String
+  displayName    String
+  status         OrganizationStatus @default(ACTIVE)
+  memberships    Membership[]
+  departments    Department[]
+  startupProfile StartupProfile?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([type, status])
+}
+
+model Department {
+  id             String        @id @default(cuid())
+  organizationId String
+  parentId       String?
+  name           String
+  jurisdiction   String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  parent         Department?   @relation("DepartmentTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Department[]  @relation("DepartmentTree")
+  challenges     Challenge[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId])
+  @@index([parentId])
+}
+
+model Membership {
+  id             String         @id @default(cuid())
+  userId         String
+  organizationId String
+  role           MembershipRole
+  activeFrom     DateTime       @default(now())
+  activeTo       DateTime?
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId, role])
+  @@index([organizationId, role])
+}
+
+model StartupProfile {
+  id                 String       @id @default(cuid())
+  organizationId     String       @unique
+  summary            String
+  website            String?
+  foundedOn          DateTime?
+  stage              String?
+  employeeBand       String?
+  deploymentModels   Json
+  supportedLanguages Json
+  capabilityCodes    Json
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+model Challenge {
+  id             String          @id @default(cuid())
+  processId      String          @unique
+  departmentId   String
+  ownerId        String
+  title          String
+  problem        String
+  status         ChallengeStatus @default(DRAFT)
+  version        Int             @default(1)
+  publishedAt    DateTime?
+  department     Department      @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  owner          User            @relation("ChallengeOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  specVersions   ChallengeSpecVersion[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([departmentId, status])
+  @@index([ownerId])
+}
+
+model ChallengeSpecVersion {
+  id            String            @id @default(cuid())
+  challengeId   String
+  version       Int
+  schemaVersion String
+  document      Json
+  contentHash   String
+  status        SpecVersionStatus @default(DRAFT)
+  createdBy     String
+  frozenAt      DateTime?
+  challenge     Challenge         @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  creator       User              @relation("SpecCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  createdAt     DateTime          @default(now())
+
+  @@unique([challengeId, version])
+  @@index([contentHash])
+}
+
+model AuditEvent {
+  id             String             @id @default(cuid())
+  occurredAt     DateTime           @default(now())
+  actorType      String
+  actorId        String?
+  actorRole      String?
+  action         String
+  entityType     String
+  entityId       String
+  correlationId  String
+  causationId    String?
+  reason         String?
+  classification DataClassification @default(INTERNAL)
+  metadata       Json
+  previousHash   String?
+  eventHash      String             @unique
+
+  @@index([entityType, entityId, occurredAt])
+  @@index([correlationId])
+}
+
+model OutboxEvent {
+  id            String       @id @default(cuid())
+  eventType     String
+  aggregateType String
+  aggregateId   String
+  payload       Json
+  status        OutboxStatus @default(PENDING)
+  attempts      Int          @default(0)
+  availableAt   DateTime     @default(now())
+  processedAt   DateTime?
+  lastError     String?
+  createdAt     DateTime     @default(now())
+
+  @@index([status, availableAt])
+}

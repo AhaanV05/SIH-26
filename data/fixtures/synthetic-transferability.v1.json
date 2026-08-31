@@ -1,0 +1,196 @@
+{
+  "metadata": {
+    "fixtureId": "synthetic-transferability",
+    "fixtureVersion": "1.0.0",
+    "fixtureType": "SYNTHETIC_FOR_DEMO_ONLY",
+    "isSynthetic": true,
+    "displayLabel": "Synthetic demonstration data",
+    "containsPersonalData": false
+  },
+  "scenarios": {
+    "strongFit": {
+      "assessmentId": "SYN-ASSESS-STRONG",
+      "solutionCardId": "SYN-SOLUTION-WASTE-001",
+      "sourceContextId": "SYN-PUNE-WASTE-CONTEXT",
+      "targetContextId": "SYN-SATARA-CONNECTED-CONTEXT",
+      "synthetic": true,
+      "displayLabel": "Synthetic demonstration data",
+      "factors": [
+        {
+          "key": "problemSimilarity",
+          "score": 0.92,
+          "rationale": "The target has the same community-bin overflow problem.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-problemSimilarity"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "operatingContextFit",
+          "score": 0.86,
+          "rationale": "Collection workflows and device availability are closely aligned.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-operatingContextFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "dataFit",
+          "score": 0.9,
+          "rationale": "Both synthetic contexts use compatible bin-event fields.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-dataFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "integrationFit",
+          "score": 0.9,
+          "rationale": "The same mock operations API contract is available.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-integrationFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "scaleFit",
+          "score": 0.85,
+          "rationale": "The target volume is within the evidenced operating range.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-scaleFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "evidenceStrength",
+          "score": 0.9,
+          "rationale": "Controlled fixture metrics and a limitations note support the outcome.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-evidenceStrength"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "evidenceFreshness",
+          "score": 0.92,
+          "rationale": "The simulated pilot evidence uses the current solution version.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-evidenceFreshness"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "localizationCostFit",
+          "score": 0.8,
+          "rationale": "Only low-cost configuration changes are expected.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-localizationCostFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        }
+      ]
+    },
+    "intermittentConnectivityGap": {
+      "assessmentId": "SYN-ASSESS-OFFLINE-GAP",
+      "solutionCardId": "SYN-SOLUTION-WASTE-001",
+      "sourceContextId": "SYN-PUNE-WASTE-CONTEXT",
+      "targetContextId": "SYN-SATARA-INTERMITTENT-CONTEXT",
+      "synthetic": true,
+      "displayLabel": "Synthetic demonstration data",
+      "factors": [
+        {
+          "key": "problemSimilarity",
+          "score": 0.92,
+          "rationale": "The target has the same community-bin overflow problem.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-problemSimilarity"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "operatingContextFit",
+          "score": 0.45,
+          "rationale": "The target has intermittent connectivity not exercised by the source pilot.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-operatingContextFit"
+          ],
+          "gaps": [
+            "Intermittent-connectivity support is not evidenced."
+          ],
+          "constraint": "LOCALIZED_MICRO_PILOT_REQUIRED"
+        },
+        {
+          "key": "dataFit",
+          "score": 0.9,
+          "rationale": "Both synthetic contexts use compatible bin-event fields.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-dataFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "integrationFit",
+          "score": 0.9,
+          "rationale": "The mock API is compatible when connectivity is available.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-integrationFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "scaleFit",
+          "score": 0.85,
+          "rationale": "The target volume is within the evidenced operating range.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-scaleFit"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "evidenceStrength",
+          "score": 0.9,
+          "rationale": "Controlled fixture metrics and a limitations note support the outcome.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-evidenceStrength"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "evidenceFreshness",
+          "score": 0.92,
+          "rationale": "The simulated pilot evidence uses the current solution version.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-evidenceFreshness"
+          ],
+          "gaps": [],
+          "constraint": "NONE"
+        },
+        {
+          "key": "localizationCostFit",
+          "score": 0.55,
+          "rationale": "Offline synchronization requires localized engineering.",
+          "evidenceIds": [
+            "SYN-EVIDENCE-localizationCostFit"
+          ],
+          "gaps": [
+            "Offline queue and resynchronization behavior must be tested."
+          ],
+          "constraint": "NONE"
+        }
+      ]
+    }
+  }
+}

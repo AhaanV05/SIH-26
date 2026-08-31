@@ -11,45 +11,34 @@
 
 ## 0. How to use this document
 
-This file is the durable memory shared by every human contributor, coding agent, LLM, and provider working on the project. It must contain enough context for someone with no access to earlier chats to understand what is being built, why it is being built, what has already happened, what remains, and what they should do next.
+`Truth.md` is the curated single source of truth for **what the project is**: the problem, users, scope, product behavior, architecture, data model, security model, decisions, research, risks, backlog, acceptance criteria, and delivery strategy.
 
-### 0.1 Non-negotiable append-only rule
+It is intentionally separate from contributor activity tracking:
 
-1. **Read this entire file before starting work.** Also inspect the repository and current Git diff; this document describes intent, but the working tree is evidence of implementation.
-2. **Never delete, rewrite, reorder, or silently correct existing content.** History is immutable, including mistakes.
-3. **Only append.** Add new information at the bottom under `Append-Only Project Ledger` using the entry template in this file.
-4. If an earlier statement becomes incorrect, append a new correction or decision that explicitly supersedes it. Do not edit the old statement.
-5. Every work session must have a `SESSION_START` entry before material work and a `SESSION_END` or `BLOCKED` entry before handoff.
-6. Use timestamps in ISO 8601 format with the India offset: `YYYY-MM-DDTHH:mm:ss+05:30`.
-7. Every entry must identify the human or agent/provider responsible. Never use an ambiguous author such as only `AI`.
-8. Record evidence: files changed, commands run, tests, screenshots, commit hashes, URLs, and important output. Do not report a task as complete without verification evidence.
-9. Never expose secrets, tokens, passwords, private keys, personal citizen data, or private credentials in this file. Record only the secret's environment-variable name and where an authorized teammate can obtain it.
-10. Treat scope changes, architectural decisions, and rejected approaches as first-class entries. A future contributor must know not only what was chosen but why.
-11. New work should reference stable task IDs from the backlog. If a new task is discovered, create a task ID in the ledger and state its priority, owner, dependencies, and acceptance criteria.
-12. Do not claim that a law, policy, API, integration, or government permission exists until it has been verified from an authoritative source. Mark such items `UNVERIFIED` or `SIMULATED_FOR_DEMO`.
+- `Truth.md` contains current project details and durable product decisions.
+- `WORKLOG.md` is the append-only record of people, time slots, sessions, changes, checkpoints, tests, partial work, blockers, and handoffs.
+- `AGENTS.md` and `CLAUDE.md` contain mandatory working rules for agents and contributors.
 
-### 0.2 Git is still required
+### 0.1 Rules for maintaining Truth.md
 
-Append-only documentation does not replace version control. Contributors should create small, descriptive commits where practical. Do not overwrite another contributor's uncommitted changes. At handoff, state whether the working tree is clean and provide the last known commit hash.
+1. Read this entire file before making product or architectural changes.
+2. Keep it current, cohesive, and free of session-by-session work logs.
+3. Update it when requirements, scope, architecture, interfaces, data models, product decisions, risks, sources, or acceptance criteria change.
+4. Record the corresponding human/time/change details in `WORKLOG.md`.
+5. Preserve important decision history by marking a decision `SUPERSEDED` and linking the replacement instead of silently reversing it.
+6. Do not copy transient command output, Git status, rate-limit notes, or personal work diaries into this file.
+7. Do not claim laws, policies, APIs, integrations, or government permissions without authoritative evidence. Use `UNVERIFIED` or `SIMULATED_FOR_DEMO` where appropriate.
+8. Never place passwords, tokens, API keys, private keys, private citizen data, or sensitive credentials here.
+9. Use stable IDs for requirements, tasks, risks, decisions, and open questions.
+10. When implementation and documentation disagree, inspect and test the repository, correct the project description, and document the correction activity in `WORKLOG.md`.
 
-### 0.3 Resolving contradictions
+### 0.2 Status vocabulary
 
-When two entries conflict, apply this order:
-
-1. The newest explicit `DECISION` that names the older decision it supersedes.
-2. Verified repository behavior and automated test output.
-3. The newest timestamped status snapshot.
-4. The initial baseline in this document.
-
-Contradictions that cannot be resolved safely must be appended as `OPEN_QUESTION` entries rather than guessed away.
-
-### 0.4 Status vocabulary
-
-Use only these task states:
+Use these task states:
 
 - `NOT_STARTED` — accepted into the backlog but no implementation has begun.
-- `IN_PROGRESS` — actively being worked on by a named owner.
-- `BLOCKED` — cannot proceed; the exact blocker and required resolution are recorded.
+- `IN_PROGRESS` — actively being worked on by a named owner recorded in `WORKLOG.md`.
+- `BLOCKED` — cannot proceed; the blocker and required resolution are recorded.
 - `IN_REVIEW` — implementation exists and awaits verification or teammate review.
 - `DONE` — acceptance criteria have been met and evidence is recorded.
 - `DEFERRED` — intentionally excluded from the current delivery; reason recorded.
@@ -62,23 +51,16 @@ Priority vocabulary:
 - `P2` — valuable stretch goal.
 - `P3` — post-hackathon concept only.
 
-### 0.5 Ledger entry types
+### 0.3 Resolving contradictions
 
-- `SESSION_START`
-- `SESSION_END`
-- `STATUS_SNAPSHOT`
-- `TASK_CREATED`
-- `TASK_UPDATE`
-- `DECISION`
-- `CORRECTION`
-- `DISCOVERY`
-- `OPEN_QUESTION`
-- `RISK`
-- `BLOCKED`
-- `REVIEW`
-- `TEST_RESULT`
-- `DEMO_RESULT`
-- `RELEASE`
+Apply this order:
+
+1. The newest unsuperseded explicit project decision in this file.
+2. Verified repository behavior and automated test evidence.
+3. The current scoped requirements and acceptance criteria in this file.
+4. Historical context in Git and `WORKLOG.md`.
+
+Unresolved contradictions must become explicit open questions.
 
 ---
 
@@ -1354,7 +1336,7 @@ Never blur these classes during judging.
 - `OQ-001 (P0)`: What is the official SIH 2026 submission cutoff, timezone, and required artifact list?
 - `OQ-002 (P0)`: What exact judging criteria and weights apply?
 - `OQ-003 (P0)`: Is the official problem statement accompanied by an image/PDF containing constraints not present in the supplied text?
-- `OQ-004 (P0)`: Who are the team members, availability windows, and strongest technical/design/research skills?
+- `OQ-004 (P0)`: What are each confirmed contributor's strongest technical/design/research skills and preferred implementation lane? Names and availability are maintained in `WORKLOG.md`, not in this project specification.
 - `OQ-005 (P0)`: Which stack can the team deliver fastest and deploy most reliably?
 - `OQ-006 (P0)`: Is `MahaSetu` acceptable as the product name?
 - `OQ-007 (P0)`: Will the waste-management scenario be the canonical demo or is a domain specified by the organizers?
@@ -1366,126 +1348,28 @@ Never blur these classes during judging.
 
 ---
 
-## 19. Team operating protocol
+## 19. Documentation and collaboration boundary
 
-### 19.1 Before a work session
+Detailed contributor rules live in `AGENTS.md` and `CLAUDE.md`. The operational history and team rotation live in `WORKLOG.md`.
 
-1. Read `Truth.md` fully.
-2. Inspect `git status`, recent log, and relevant code.
-3. Check the latest `STATUS_SNAPSHOT` and `SESSION_END`.
-4. Append `SESSION_START` with intended tasks and assumptions.
-5. Claim specific task IDs. Avoid vague claims such as `work on frontend`.
-6. If another session may overlap, coordinate at file/module boundaries.
+Project-specific maintenance rules:
 
-### 19.2 During a work session
-
-- Prefer one vertical result over many half-built files.
-- Preserve others' changes.
-- Run focused tests as work proceeds.
-- Append important decisions as soon as they materially affect others.
-- If changing a public interface or data model, record downstream impact.
-- Do not leave undocumented background services or manual setup.
-
-### 19.3 At handoff
-
-Append `SESSION_END` containing:
-
-- Objective and outcome.
-- Task status changes.
-- Files created/changed.
-- Commands/tests and exact results.
-- Commits and working-tree state.
-- Decisions made and assumptions used.
-- Known bugs, partial implementations, and risks.
-- Exact next recommended action.
-- Any credentials/config needed by name only.
-
-### 19.4 Session entry template
-
-Copy this template and append it at the bottom. Do not modify the template here.
-
-```markdown
-### [YYYY-MM-DDTHH:mm:ss+05:30] ENTRY_TYPE — Short title
-
-- **Entry ID:** LOG-YYYYMMDD-NNN
-- **Author:** Human name / agent name / provider and model
-- **Session window:** start timestamp → end timestamp or `ACTIVE`
-- **Related tasks:** TASK-ID, TASK-ID
-- **Status changes:** `TASK-ID: OLD_STATE → NEW_STATE`
-- **Summary:** What happened and why.
-- **Changes:**
-  - `path/to/file`: concise description
-- **Decisions/assumptions:**
-  - Decision, rationale, and what it supersedes (if anything)
-- **Verification:**
-  - `command`: PASS/FAIL and meaningful output
-- **Known issues/risks:**
-  - Concrete issue and impact
-- **Git state:** branch, commit hash, clean/dirty, uncommitted files
-- **Next action:** The first concrete action for the next contributor
-- **Handoff note:** Anything needed to resume without chat history
-```
-
-### 19.5 Decision entry template
-
-```markdown
-### [YYYY-MM-DDTHH:mm:ss+05:30] DECISION — Decision title
-
-- **Entry ID:** DEC-YYYYMMDD-NNN
-- **Author:** ...
-- **Related tasks:** ...
-- **Decision:** ...
-- **Context:** ...
-- **Options considered:** ...
-- **Rationale:** ...
-- **Consequences:** ...
-- **Supersedes:** entry ID or `None`
-- **Revisit trigger:** concrete condition or `No planned revisit`
-```
-
-### 19.6 Status snapshot template
-
-Use a snapshot at least once daily and whenever a major handoff occurs. A newer snapshot supersedes only status, not historical decisions.
-
-```markdown
-### [YYYY-MM-DDTHH:mm:ss+05:30] STATUS_SNAPSHOT — Current project state
-
-- **Entry ID:** SNAP-YYYYMMDD-NNN
-- **Author:** ...
-- **Overall health:** GREEN / AMBER / RED
-- **Current demo readiness:** brief statement
-- **P0 done:** ...
-- **P0 in progress:** ...
-- **P0 blocked:** ...
-- **Next three actions:**
-  1. ...
-  2. ...
-  3. ...
-- **Latest verified build/test:** ...
-- **Latest commit:** ...
-- **Deadline risk:** ...
-```
-
-### 19.7 Rules for LLM/agent contributors
-
-- This file is the context source; do not rely on unavailable chat history.
-- Verify repository state instead of trusting a prior agent's claim.
-- Do not re-scaffold or replace architecture without a recorded decision.
-- Do not edit unrelated user/team work.
-- Use established components, types, patterns, and commands.
-- If context/rate limits approach, stop at a coherent boundary and append a complete handoff.
-- Never fabricate test results, integration access, sources, or completion.
-- Prefer small reviewable patches and commands that teammates can reproduce.
+- Keep product requirements, architecture, current backlog definitions, decisions, research, and risk treatment in this file.
+- Keep timestamps, session ownership, commands, test runs, Git state, partial work, and handoffs in `WORKLOG.md`.
+- A product change is incomplete until the relevant project detail is updated here and the contributor records the work in `WORKLOG.md`.
+- Do not use this file as a chronological diary.
+- Do not use `WORKLOG.md` as a substitute for updating stale product documentation here.
+- Every future provider must read all three instruction/context files before material work: `AGENTS.md` or `CLAUDE.md`, `Truth.md`, and `WORKLOG.md`.
 
 ---
 
 ## 20. Initial decisions
 
-### DEC-INIT-001 — Truth.md is append-only
+### DEC-INIT-001 — Original combined documentation model (SUPERSEDED)
 
-- **Decision:** `Truth.md` will be the canonical, append-only project memory.
-- **Rationale:** Contributors will rotate across time periods, chat contexts, LLMs, and providers. An append-only ledger preserves history and prevents silent context loss.
-- **Consequence:** Corrections and status changes are appended and explicitly supersede earlier entries. Git remains the source of implementation history.
+- **Original decision:** `Truth.md` would combine project truth and an append-only activity ledger.
+- **Current status:** `SUPERSEDED` by DEC-DOC-001.
+- **Reason for supersession:** Combining current product context with timestamped session history made the file difficult to navigate and blurred project truth with work tracking.
 
 ### DEC-INIT-002 — Build a lifecycle orchestration layer
 
@@ -1509,58 +1393,1375 @@ Use a snapshot at least once daily and whenever a major handoff occurs. A newer 
 
 ---
 
-# Append-Only Project Ledger
+---
 
-> **All new project information goes below this line. Never insert above or edit earlier content.**
+## 21. Documentation architecture
 
-### [2026-08-31T10:11:23+05:30] SESSION_START — Initialize the shared project truth
+### DEC-DOC-001 — Separate project truth from the work ledger
 
-- **Entry ID:** LOG-20260831-001
-- **Author:** OpenAI Codex, primary project-initialization session
-- **Session window:** 2026-08-31T10:11:23+05:30 → ACTIVE
-- **Related tasks:** Project initialization
-- **Status changes:** None; backlog initialized.
-- **Summary:** Created the first canonical project context from the user's SIH 2026 problem statement and supplied architectural report. Established an append-only collaboration protocol for rotating human/LLM work sessions and drafted the product vision, lifecycle, P0/P1/P2 scope, architecture, data model, security model, delivery schedule, acceptance criteria, risks, questions, and handoff templates.
-- **Source context received:**
-  - Problem statement: startup-friendly public procurement mechanism enabling departments to identify, pilot, procure, and scale innovative solutions from eligible startups.
-  - Supplied concepts included AI challenge/RFP translation, startup matching, reusable credentials, synthetic data sandboxes, milestone payment workflows, smart contracts, real-time evaluation, risk-adjusted EMD logic, reverse pitching, OCR compliance, a GovTech app store, W3C Verifiable Credentials, zero-knowledge proofs, PFMS integration, and permissioned ledgers.
-  - This baseline narrows those concepts into a credible five-day vertical slice while retaining advanced features as staged extensions.
-- **Changes:**
-  - `Truth.md`: created as the single source of truth.
-- **Decisions/assumptions:**
-  - Deadline interpreted as 2026-09-05 in Asia/Kolkata because the environment date is 2026-08-31 and the user stated September 5.
-  - Exact cutoff and official requirements remain unverified.
-  - The workspace appeared empty at initialization.
-- **Verification:**
-  - Initial workspace listing returned no project files.
-  - File verification will be recorded in the corresponding session-end entry.
-- **Known issues/risks:**
-  - Team identities, stack preferences, official SIH artifacts, and cutoff are unknown.
-  - Policy and integration claims in the supplied report require authoritative verification.
-- **Git state:** Not yet verified; workspace showed no files before this document was added.
-- **Next action:** Verify `Truth.md`, then have the first implementation contributor append a session start, claim GOV-001/ARCH-001, inspect official artifacts, and scaffold the chosen stack.
-- **Handoff note:** Read this entire document. Do not implement blockchain/ZKP before the P0 lifecycle is stable.
+- **Decision:** `Truth.md` is the curated product and architecture specification. `WORKLOG.md` is the append-only contributor/time/change ledger.
+- **Rationale:** Product understanding should be readable without traversing session history, while detailed human/agent accountability and handoffs must still be preserved.
+- **Consequences:** Session entries never belong in this file. Product changes must update this file and be logged separately in `WORKLOG.md`. Agent instructions must point operational entries to `WORKLOG.md`.
+- **Supersedes:** DEC-INIT-001 and all earlier instructions that describe `Truth.md` as the append-only work ledger.
+- **Historical preservation:** All ledger entries formerly embedded in `Truth.md` were migrated to `WORKLOG.md`; no intentional historical entry was discarded.
+- **Revisit trigger:** Only if the team explicitly chooses another documented information architecture.
 
-### [2026-08-31T10:17:06+05:30] SESSION_END — Shared project truth initialized
 
-- **Entry ID:** LOG-20260831-002
-- **Author:** OpenAI Codex, primary project-initialization session
-- **Session window:** 2026-08-31T10:11:23+05:30 → 2026-08-31T10:17:06+05:30
-- **Related tasks:** Project initialization
-- **Status changes:** Project initialization: `IN_PROGRESS → DONE`
-- **Summary:** Finished and verified the initial append-only project record. It is ready to serve as the handoff context for subsequent contributors and providers.
-- **Changes:**
-  - `Truth.md`: created with 1,542 lines before this closing ledger entry and approximately 71.6 KB of project context.
-- **Decisions/assumptions:**
-  - No new decisions beyond DEC-INIT-001 through DEC-INIT-005.
-- **Verification:**
-  - `Get-Item Truth.md`: PASS; file exists at the repository/workspace root.
-  - `(Get-Content Truth.md).Count`: PASS; returned 1,542 before appending this entry.
-  - `Get-Content Truth.md -TotalCount 6` and `-Tail 8`: PASS; canonical header and ledger tail are present.
-  - `git rev-parse --is-inside-work-tree`: FAIL; the current workspace is not yet a Git repository.
-- **Known issues/risks:**
-  - The folder is not initialized as a Git repository. This document recommends Git, but initialization was not requested or performed in this session.
-  - The terminal displayed the UTF-8 em dash in the title incorrectly under its current output encoding; the source file was created as UTF-8 and should be viewed in a UTF-8-aware editor.
-- **Git state:** No Git repository detected.
-- **Next action:** The next contributor should read this file, append `SESSION_START`, claim `GOV-001` and/or `ARCH-001`, and record whether the team authorizes Git initialization.
-- **Handoff note:** The baseline is intentionally detailed, but it is not frozen product truth. Supersede assumptions through explicit appended decisions; never edit prior history.
+## Innovation Expansion A — The new product thesis
+
+### A.1 The platform should optimize learning, not merely purchasing
+
+Public innovation fails when a department must commit to a full solution before it has evidence. MahaSetu should therefore minimize the cost and time of producing trustworthy learning:
+
+```text
+Observe a problem
+    -> define an outcome
+    -> test several plausible approaches cheaply
+    -> measure evidence consistently
+    -> expand only what works
+    -> preserve both successes and failures as institutional knowledge
+```
+
+This turns procurement from a one-time document transaction into a controlled learning loop. The principal product artifact is not the tender PDF. It is a continuously versioned `Public Problem Record` containing signals, hypotheses, challenge rules, proposals, decisions, pilot telemetry, financial state, outcomes, and reuse history.
+
+### A.2 The core flywheel
+
+```mermaid
+flowchart LR
+    S[Service signals] --> P[Problem Radar]
+    P --> C[Challenge Compiler]
+    C --> M[Capability & Coalition Match]
+    M --> L[Sovereign Pilot Lab]
+    L --> E[Outcome Evidence Graph]
+    E --> F[Payment-Ready Packet]
+    E --> X[Proven Solution Exchange]
+    X --> T[Transferability Simulation]
+    T --> L
+    E --> P
+```
+
+The loop compounds value:
+
+- More problem signals improve challenge quality.
+- More pilots improve capability evidence and risk estimates.
+- More outcome evidence improves matching and transferability.
+- More reuse reduces repeated discovery work.
+- Failed pilots prevent other departments from repeating known mistakes.
+
+### A.3 The true moat: an evidence graph
+
+A conventional marketplace stores vendors and listings. MahaSetu should store relationships between:
+
+- Public problems and affected populations.
+- Outcomes and measurement methods.
+- Challenges and frozen rule versions.
+- Startups and evidence-backed capabilities.
+- Evaluators and conflict declarations.
+- Pilots and operating contexts.
+- Metrics, observations, evidence, and reviewers.
+- Payments and accepted milestones.
+- Solutions and the contexts in which they succeeded or failed.
+- Departments and follow-on adoption decisions.
+
+This graph answers high-value questions:
+
+- Which approaches have already been tested for this kind of problem?
+- Which capabilities predict pilot success in low-connectivity districts?
+- Which contract stages cause the largest delay?
+- Can a solution that worked in Pune transfer to a smaller municipal council?
+- Which startups have delivered measurable outcomes, not just won bids?
+- Which requirements repeatedly exclude otherwise capable startups?
+- What failed, in what context, and why?
+
+The MVP may implement the graph as normalized PostgreSQL tables and recursive/relational queries. A separate graph database is unnecessary until query complexity and production scale justify it.
+
+---
+
+## Innovation Expansion B — High-leverage product modules
+
+Each idea includes the public value, functional workflow, hackathon representation, and guardrail. `Hero` features belong in the judging story. `Expansion` features can appear as designed screens/architecture. `Moonshot` features should be pitched as a future capability unless the core loop is stable.
+
+### B.1 MahaSetu Pulse — Public Problem Radar (`Hero`)
+
+**Idea:** Government should not depend only on an officer manually authoring a problem. Pulse finds recurring operational pain from approved, de-identified signals and creates candidate problem clusters.
+
+Potential production signal sources, subject to authority and data-sharing agreements:
+
+- Aggregate grievance categories and resolution times.
+- Service-level telemetry such as turnaround time, failure rate, backlog, or downtime.
+- Departmental audit observations and inspection findings.
+- Budget utilization and repeated emergency purchases.
+- Call-center classifications.
+- Field-officer observations submitted through voice/text.
+- Citizen feedback aggregated above privacy thresholds.
+- Existing challenge and pilot history.
+
+Workflow:
+
+1. Approved connectors create normalized `ProblemSignal` events.
+2. PII is removed or tokenized before analytical processing.
+3. Rules and embeddings cluster semantically similar signals by geography, service, and time.
+4. A priority score combines frequency, severity, affected population, trend, strategic alignment, addressability, and existing-solution gap.
+5. The system shows evidence and confidence, never only a score.
+6. A nodal officer promotes a cluster into a problem discovery record.
+7. The officer validates the baseline and data owner before challenge compilation.
+
+Provisional opportunity score:
+
+```text
+priority =
+    0.25 * normalized_frequency +
+    0.20 * severity +
+    0.15 * affected_population +
+    0.15 * worsening_trend +
+    0.10 * strategic_alignment +
+    0.10 * technical_addressability +
+    0.05 * cross_department_reuse_potential
+```
+
+The UI must show every factor and permit authorized manual reprioritization with a reason.
+
+Hackathon representation:
+
+- Seed 50–100 synthetic, non-personal waste-management signals across wards.
+- Show a heatmap/timeline and one automatically clustered candidate: `overflow reports concentrated in Ward 12 after route changes`.
+- Promote it into the Challenge Compiler with one click.
+
+Guardrails:
+
+- Do not profile individual citizens or employees.
+- Do not use grievance count alone; digitally connected areas can generate more reports.
+- Apply minimum aggregation thresholds.
+- Record source, freshness, quality, and allowed purpose.
+- Human approval is required before a cluster becomes a public challenge.
+
+### B.2 MahaSetu Forge — Executable Procurement Compiler (`Hero`)
+
+**Idea:** Convert an approved problem into an `Executable Challenge Specification` rather than only prose. The same specification drives the public brief, eligibility checks, evaluation form, sandbox tests, milestone contract, and transparency export.
+
+Compiler pipeline:
+
+```text
+Unstructured problem statement
+  -> structured extraction
+  -> missing-information interview
+  -> policy-pack evaluation
+  -> outcome/metric validation
+  -> exclusion and vendor-lock-in lint
+  -> risk/data classification
+  -> generated ChallengeSpec JSON
+  -> human review and digital approval
+  -> frozen version + public/private views
+```
+
+Static-analysis rules should detect:
+
+- No measurable baseline.
+- Target with no unit or measurement source.
+- Brand, product, or architecture prescribed without justification.
+- Experience/turnover/EMD clauses that conflict with the selected policy template or lack reasoning.
+- Criteria that cannot be verified.
+- Evaluation weights that do not total 100.
+- Timeline shorter than dependency lead times.
+- Pilot asking for production citizen data without a data owner or legal basis.
+- Milestone payment percentage inconsistent with milestone value.
+- Missing accessibility, interoperability, exit, security, or grievance clauses.
+- A criterion added after publication.
+
+The compiler emits four synchronized projections:
+
+1. **Public Challenge Brief:** readable, multilingual problem and application instructions.
+2. **Evaluation Contract:** frozen eligibility/rubric definitions.
+3. **Pilot Contract:** metrics, synthetic tests, milestones, and evidence types.
+4. **Interoperability Release:** OCDS-shaped planning/tender event plus internal extensions.
+
+Hackathon representation:
+
+- Paste a deliberately poor paragraph.
+- Show a side-by-side diff and 5–8 findings.
+- Accept selected fixes.
+- Publish version `1.0.0` with a visible hash and criteria freeze.
+
+Guardrail: `compiled` means schema-valid and internally consistent, not automatically legally approved. The UI must say `Requires authorized procurement review`.
+
+### B.3 MahaSetu Passport+ — Capability Genome and Evidence Wallet (`Hero`)
+
+**Idea:** Replace the flat vendor profile with a capability genome: a structured, evidence-backed map of what a startup can do, under which deployment conditions, and how fresh the evidence is.
+
+Evidence classes:
+
+- `AUTHORITY_ASSERTED`: authoritative issuer or approved integration.
+- `OFFICER_VERIFIED`: reviewed by an authorized officer.
+- `SYSTEM_OBSERVED`: generated from a controlled sandbox/pilot.
+- `THIRD_PARTY_ATTESTED`: audit/certification with issuer metadata.
+- `SELF_DECLARED`: startup statement; useful but lower assurance.
+- `SIMULATED_FOR_DEMO`: seeded or mock evidence.
+
+Each evidence claim stores issuer, subject, claim, context, method, issued time, expiry, revocation status, visibility, sensitivity, and a content hash. The UI must never flatten these into the same green checkmark.
+
+Useful capability dimensions:
+
+- Domain: civic operations, health, agriculture, education, mobility, finance, climate.
+- Technology: computer vision, forecasting, workflow, IoT, geospatial, language AI, cybersecurity.
+- Operating fit: offline capability, data residency, edge deployment, supported languages, accessibility.
+- Delivery: integration maturity, support model, team capacity, deployment lead time.
+- Evidence: relevant pilot outcomes, security checks, uptime, customer references, failure history.
+
+Novel extension — **proof decay**:
+
+- Compliance and security evidence loses freshness over time.
+- A successful outcome remains historical truth but its transferability confidence falls as product version/context diverges.
+- The platform warns before evidence expires and recomputes confidence without erasing history.
+
+Hackathon representation:
+
+- Show mixed evidence levels and a `Passport completeness/freshness` view.
+- Issue a simulated pilot attestation after the reference pilot.
+- Make that attestation improve discovery evidence but not automatically confer eligibility for unrelated work.
+
+### B.4 MahaSetu Sangam — Startup Coalition Builder (`Expansion`)
+
+**Idea:** Many public problems are too broad for one startup but too small for a large systems integrator. Sangam recommends complementary, temporary startup consortia.
+
+Example:
+
+- Startup A: computer vision.
+- Startup B: routing optimization.
+- Startup C: Marathi/offline field app.
+- Combined coalition: end-to-end waste pilot.
+
+Workflow:
+
+1. Match engine identifies unmet capability gaps in an otherwise strong proposal/profile.
+2. It recommends complementary eligible startups without revealing confidential bid material.
+3. Startups opt in to a neutral collaboration room.
+4. They define lead entity, work packages, IP boundaries, data access, liability, payment split, and exit rules.
+5. The combined proposal is evaluated under the same frozen rubric.
+
+Guardrails:
+
+- Never auto-form a consortium.
+- Do not expose competitor pricing or unpublished proposals.
+- Add conflict and anti-collusion review.
+- Production use requires policy/legal templates and authorized acceptance of consortium bids.
+
+Hackathon representation: show a `92% combined capability coverage` recommendation built from seeded profiles; do not implement contracting mechanics.
+
+### B.5 MahaSetu Lab — Sovereign Sandbox Factory (`Hero`)
+
+**Idea:** Every challenge can generate a safe, disposable test environment from its executable specification.
+
+Sandbox manifest includes:
+
+- Approved synthetic dataset version.
+- OpenAPI/mock API contract.
+- Network egress allow-list.
+- CPU/memory/time quota.
+- Secrets references, never secret values.
+- Test cases and metric calculations.
+- Data retention time.
+- Logging and telemetry policy.
+- Allowed users and purpose.
+- Teardown conditions.
+
+Production sequence:
+
+```text
+ChallengeSpec approved
+  -> sandbox manifest generated
+  -> policy validation
+  -> ephemeral namespace/container provisioned
+  -> dataset mounted read-only
+  -> startup build deployed
+  -> contract and load tests executed
+  -> signed telemetry exported
+  -> environment destroyed
+```
+
+Hackathon representation:
+
+- Do not build a real multi-tenant Kubernetes platform.
+- Implement a `Sandbox Run` page backed by deterministic fixture data.
+- Run local/API-level tests against a mock waste-event API.
+- Display test case results, telemetry, dataset version, and `SIMULATED SANDBOX` label.
+- Calculate one real metric from seeded event data in code so the evidence flow is authentic.
+
+Guardrails:
+
+- Synthetic does not automatically mean private; test for memorization/leakage and small-group disclosure.
+- No production citizen data in the SIH demo.
+- Treat startup containers as hostile in a real deployment.
+- Separate control-plane identity from sandbox workload identity.
+
+### B.6 MahaSetu Proof — Outcome Oracle and Reproducible Evidence Pack (`Hero`)
+
+**Idea:** A milestone should be accepted from reproducible evidence, not a slide deck. Proof combines machine observations and authorized human attestations into an evidence packet.
+
+Evidence sources:
+
+- API/load/contract test result.
+- Timestamped pilot telemetry.
+- Dataset and algorithm version.
+- Officer site observation.
+- Beneficiary/citizen aggregate feedback.
+- Security/accessibility test.
+- Startup explanation and limitations.
+
+Metric contract:
+
+```text
+metric name
+baseline and target
+unit and direction (higher/lower is better)
+population/window
+calculation expression/version
+data source and quality threshold
+minimum sample size
+exclusions and missing-data rule
+reviewer role
+acceptance rule
+```
+
+Every `EvidenceClaim` should record:
+
+- The claim (`median response time <= 20 minutes`).
+- The evidence objects supporting it.
+- The computation version.
+- The submitter and reviewer.
+- Whether verification is automatic, manual, or hybrid.
+- Contradicting evidence.
+- Acceptance decision and reason.
+
+Novel extension — **counterfactual card**:
+
+- Compare pilot outcome against a baseline/control/simulation.
+- Show confidence and limitations rather than a single vanity percentage.
+- Prevent `95% accuracy` from being accepted without dataset and class-balance context.
+
+Hackathon representation:
+
+- Compute metrics from a versioned JSON/CSV fixture.
+- Display evidence lineage visually.
+- Approve one milestone only when its rule evaluates true.
+- Permit a human override only with reason and an audit event.
+
+### B.7 MahaSetu PayFlow — Payment Predictability Engine (`Hero`)
+
+**Idea:** The platform cannot promise unauthorized instant payment, but it can make a request `payment ready`, eliminate missing-document loops, and expose exactly where it is waiting.
+
+Capabilities:
+
+- Milestone readiness checklist.
+- Auto-assembled acceptance/invoice/evidence packet.
+- SLA clock per approval stage.
+- Returned-item reason taxonomy.
+- Duplicate invoice/payment prevention.
+- Finance workload dashboard.
+- Mock external adapter with idempotency key and reconciliation reference.
+- Startup-facing expected next action and responsible role, not private officer details.
+
+Novel extension — **Delay Early Warning**:
+
+- Predict likely delay from missing inputs, approaching budget lapse, officer absence/reassignment, unresolved discrepancy, or adapter failure.
+- Recommend a corrective action.
+- Never bypass approval or shame an individual officer.
+
+Hackathon representation:
+
+- Demonstrate the packet completeness score moving from 80% to 100% after milestone acceptance.
+- Advance through simulated finance states.
+- Show an SLA warning and exact missing artifact in a second seeded request.
+
+### B.8 MahaSetu ScaleGraph — Transferability and Outcome Marketplace (`Hero`)
+
+**Idea:** Catalog outcomes and evidence, not software screenshots. A second department should understand whether a solution is likely to work in its context.
+
+Transferability factors:
+
+- Problem similarity.
+- Population/transaction scale ratio.
+- Geography and density.
+- Connectivity and device environment.
+- Language and accessibility needs.
+- Data schema/sensitivity compatibility.
+- Required integrations.
+- Process and legal differences.
+- Local operating capability.
+- Evidence strength and recency.
+- Cost-to-localize and expected benefit.
+
+Provisional recommendation:
+
+```text
+transferability =
+    0.20 * problem_similarity +
+    0.15 * operating_context_fit +
+    0.15 * data_fit +
+    0.10 * integration_fit +
+    0.10 * scale_fit +
+    0.15 * evidence_strength +
+    0.10 * evidence_freshness +
+    0.05 * localization_cost_fit
+```
+
+Outputs:
+
+- `REUSE_EVIDENCE_AND_ROUTE_TO_AUTHORIZED_PROCUREMENT`
+- `RUN_LOCALIZED_MICRO_PILOT`
+- `REQUIRE_FRESH_COMPETITIVE_DISCOVERY`
+- `NOT_CURRENTLY_TRANSFERABLE`
+
+The output is advisory and explains each factor.
+
+Hackathon representation:
+
+- Compare the completed Pune-like reference context with a smaller municipal council.
+- Show why offline field support is a gap.
+- Recommend a two-week localized micro-pilot rather than naïve one-click deployment.
+
+### B.9 MahaSetu Sentinel — Fairness, Integrity, and Anti-Capture Radar (`Expansion`)
+
+**Idea:** Detect process risk early without accusing people or allowing an algorithm to cancel a procurement.
+
+Red-flag indicators:
+
+- Criteria changed after publication.
+- Extremely narrow specification or rare phrase matching one vendor's marketing material.
+- Evaluator failed to declare a conflict.
+- Unusually divergent scores without rationale.
+- Multiple evaluators submitting identical commentary.
+- Proposal access outside assigned roles.
+- Repeated single-bid outcomes.
+- Suspicious sequence/timing of approvals.
+- Milestone acceptance without required evidence.
+- Contract value/milestones repeatedly modified.
+
+Architecture:
+
+- Deterministic rules over audit events first.
+- Optional statistical anomaly detection after sufficient legitimate data exists.
+- Every alert stores rule, evidence, confidence, severity, reviewer, resolution, and false-positive status.
+
+Guardrails:
+
+- An alert means `review required`, not guilt.
+- Restrict investigative details.
+- Maintain due process and appeal/correction.
+- Monitor models for department/startup-size bias.
+
+Hackathon representation: seed one post-publication criterion-change attempt and show it blocked plus logged; seed one score-divergence review alert.
+
+### B.10 MahaSetu Demand Mesh — Cross-Department Challenge Fusion (`Expansion`)
+
+**Idea:** Detect when departments are independently trying to solve the same problem and let authorized officers aggregate demand or share a discovery effort.
+
+Benefits:
+
+- Larger, more attractive market for startups.
+- Shared research and sandbox cost.
+- Common interoperability requirements.
+- Fewer duplicate pilots.
+
+Workflow:
+
+1. Compare draft challenges before publication.
+2. Explain overlap by outcomes, capabilities, data, geography, and timing.
+3. Invite owners to a private coordination workspace.
+4. Allow `keep separate`, `share evidence`, `joint challenge`, or `common framework exploration`.
+5. Preserve each department's authority and budget boundaries.
+
+Hackathon representation: show a non-blocking duplicate warning linking waste-routing needs from two seeded departments.
+
+### B.11 MahaSetu Failure Commons — Institutional Memory for What Did Not Work (`Expansion`)
+
+**Idea:** Failed pilots are valuable public knowledge if recorded safely. Capture structured failure without publicly humiliating a startup or leaking IP.
+
+Failure taxonomy:
+
+- Problem misunderstood.
+- Data unavailable or low quality.
+- Integration dependency failed.
+- Outcome target unrealistic.
+- Adoption/change-management failure.
+- Security/privacy constraint.
+- Startup delivery failure.
+- Department dependency failure.
+- External event changed context.
+- Evidence inconclusive.
+
+Views:
+
+- Private full postmortem for authorized parties.
+- Redacted learning note for other departments.
+- Startup right-to-respond.
+- `Failure was context-specific` flag to prevent permanent stigmatization.
+
+Guardrail: failure data must never silently become a universal blacklist score.
+
+### B.12 MahaSetu JanPramaan — Beneficiary Impact Attestation (`Moonshot`)
+
+**Idea:** Where appropriate, include opt-in, privacy-preserving feedback from the people or frontline workers affected by a pilot. This prevents technical metrics from masking a poor service experience.
+
+Examples:
+
+- Frontline sanitation worker reports whether route suggestions were usable.
+- Citizens provide an anonymous short service-quality pulse.
+- Accessibility testers attest that the new workflow works with assistive technology.
+
+Guardrails:
+
+- Participation cannot affect entitlement to government service.
+- Do not collect unnecessary identity.
+- Minimum aggregation threshold and anti-coercion design.
+- Feedback informs milestone review; it does not directly award a contract.
+- Provide Marathi/other language and assisted/offline channels.
+
+### B.13 MahaSetu Continuity Capsule — Vendor Exit Without Government Lock-In (`Expansion`)
+
+**Idea:** Every solution includes an executable exit/continuity plan from day one.
+
+Capsule contents:
+
+- Open data export schema.
+- API contract and version policy.
+- Deployment/infrastructure manifest.
+- Configuration ownership map.
+- Government-owned data inventory.
+- Documentation completeness.
+- Key-person and support risks.
+- Source escrow/open-source condition if contractually appropriate.
+- Replacement/migration rehearsal evidence.
+
+The Challenge Compiler lints for missing portability and exit provisions. This makes startups safer to adopt without forcing them to surrender unrelated intellectual property.
+
+### B.14 MahaSetu VoiceBridge — Multilingual Voice-to-Challenge (`Expansion`)
+
+**Idea:** A block/field officer can describe a problem by voice in Marathi, Hindi, or English; the system transcribes it, extracts a draft, reads back the interpretation, and asks focused questions.
+
+Guardrails:
+
+- Always show/edit transcript.
+- Store audio only when necessary and authorized.
+- Indicate transcription uncertainty.
+- Never publish without human confirmation.
+- Design for intermittent connectivity and resumable uploads.
+
+### B.15 MahaSetu Open Thread — Open Contracting Digital Thread (`Hero architecture`, optional UI)
+
+**Idea:** Give every innovation procurement a durable identifier and an append-only series of publishable lifecycle releases. Internal sensitive records remain protected, while approved public facts can be exported in an interoperable form.
+
+OCDS alignment:
+
+- `planning`: public problem, rationale, budget context.
+- `tender`: challenge, enquiries, criteria, timeline.
+- `award`: selected pilot and public rationale.
+- `contract`: pilot agreement and amendments.
+- `implementation`: milestones, payments, progress, completion.
+- `relatedProcesses`: connect a pilot to a follow-on procurement or parent program.
+
+The internal domain model remains richer. An anti-corruption/transparency projection creates a redacted OCDS-style release only after a publication policy approves individual fields.
+
+---
+
+## Innovation Expansion C — Concrete system architecture
+
+### C.1 Architectural principles
+
+1. **One deployable for the hackathon, clear modules for the future.** Use a modular monolith; do not spend the sprint operating microservices.
+2. **PostgreSQL is the system of record.** Search, vector similarity, caches, and graph-like views are derived capabilities.
+3. **State transitions are domain operations, not arbitrary CRUD.** `publishChallenge()` enforces rules; generic update endpoints do not.
+4. **Every important mutation emits a domain event and audit event.** Use a transaction/outbox pattern so the state and pending event commit together.
+5. **AI never owns authoritative state.** It produces typed proposals that a human or deterministic domain rule accepts/rejects.
+6. **Files are evidence objects, not anonymous uploads.** Each has purpose, sensitivity, owner, hash, retention, and allowed audience.
+7. **Public and private projections are separate.** Redaction happens before publication, never only in the browser.
+8. **Adapters isolate unavailable government systems.** The mock and production adapter implement the same interface.
+9. **Privacy is purpose-bound.** A connector records why data is accessed and which fields are necessary.
+10. **No irreversible infrastructure choice is needed for the MVP.** Cryptographic and standards-based exports can be added around conventional trustworthy storage.
+
+### C.2 Logical planes
+
+```mermaid
+flowchart TB
+    subgraph Experience[Experience Plane]
+      GOV[Government workspace]
+      START[Startup workspace]
+      EVAL[Evaluator/finance workspace]
+      PUB[Public transparency view]
+    end
+
+    subgraph Edge[Edge and API]
+      BFF[Web BFF / API routes]
+      AUTHZ[Authentication + RBAC/ABAC]
+      VALID[Schema validation + rate limits]
+    end
+
+    subgraph Control[Procurement Control Plane]
+      PULSE[Problem Radar]
+      CHALLENGE[Challenge lifecycle]
+      APPLICATION[Applications]
+      EVALUATION[Evaluation]
+      PILOT[Pilot workflow]
+      PAYMENT[Payment readiness]
+      SCALE[Scale/adoption]
+    end
+
+    subgraph Intelligence[Intelligence Plane]
+      AIGW[Model gateway]
+      COMPILER[Challenge compiler]
+      MATCH[Matching engine]
+      RISK[Risk/integrity rules]
+      TRANSFER[Transferability engine]
+    end
+
+    subgraph Trust[Evidence and Trust Plane]
+      PASS[Passport/claims]
+      PROOF[Evidence graph]
+      AUDIT[Audit hash chain]
+      OCDS[Redacted OCDS projection]
+    end
+
+    subgraph Data[Data Plane]
+      PG[(PostgreSQL)]
+      OBJ[(Object storage)]
+      OUTBOX[(Outbox/worker)]
+      OBS[(Logs, metrics, traces)]
+    end
+
+    subgraph Integration[Integration Plane]
+      VERIFY[Credential verifier adapter]
+      APIS[API/sandbox adapter]
+      TREASURY[Payment/treasury adapter]
+      NOTIFY[Notification adapter]
+    end
+
+    Experience --> Edge
+    Edge --> Control
+    Control --> Intelligence
+    Control --> Trust
+    Control --> Data
+    Intelligence --> Data
+    Trust --> Data
+    Control --> Integration
+```
+
+### C.3 Recommended hackathon deployment
+
+Concrete default unless the team records a superseding stack decision:
+
+- **Application:** Next.js + TypeScript modular monolith.
+- **UI:** Tailwind CSS and one accessible component system.
+- **Database:** PostgreSQL. Use hosted PostgreSQL for shared work; maintain seed/reset scripts.
+- **ORM:** Prisma as the default recommendation because of schema/migration ergonomics; Drizzle is acceptable only through an explicit team decision.
+- **Authentication:** standard provider/library or hosted auth with seeded demo accounts. Server-side authorization remains mandatory.
+- **Object evidence:** S3-compatible/hosted storage. For local-only demo, checked-in synthetic fixtures are allowed; uploads must not contain secrets.
+- **AI:** `ModelGateway` interface with `LiveModelProvider` and `FixtureModelProvider`.
+- **Background work:** database outbox plus a simple worker invoked by an authenticated job route/CLI. Do not add Kafka/Temporal during the hackathon.
+- **Matching:** deterministic filters + weighted taxonomy. Add pgvector only after deterministic matching and explanations pass tests.
+- **Charts/maps:** lightweight client visualization using seeded aggregate data.
+- **Testing:** Vitest or project-standard unit runner plus Playwright for cross-role golden path.
+- **Deployment:** one web deployment + managed PostgreSQL/object storage. Maintain an offline/local fallback for the presentation.
+
+### C.4 Production evolution
+
+Only after demonstrated load/team boundaries justify it:
+
+- Web application behind WAF/API gateway.
+- Government identity federation plus strong MFA.
+- Container orchestration with separate web, worker, compiler, sandbox-control, and integration workloads.
+- Durable workflow engine for long-lived approval/pilot/payment workflows.
+- Event broker for high-volume telemetry and cross-domain projections.
+- PostgreSQL per bounded ownership domain or carefully governed schemas.
+- Search index for public challenge/solution discovery.
+- Object storage with malware scanning, legal holds, lifecycle rules, and KMS encryption.
+- Central secrets manager/KMS/HSM.
+- Policy engine for authorization and publication decisions.
+- OpenTelemetry-compatible traces/metrics/logs and security monitoring.
+- Isolated sandbox cluster/accounts, separate from the procurement control plane.
+- Disaster recovery, backup restoration exercises, and external audit-log anchoring.
+
+The production diagram is a migration path, not hackathon scope.
+
+### C.5 Module/package boundaries
+
+```text
+src/
+  app/                         # routes, layouts, server actions/API boundary
+  modules/
+    identity/                  # actors, orgs, departments, role/attribute checks
+    signals/                   # ProblemSignal ingestion and clustering projection
+    challenges/                # ChallengeSpec, versions, approvals, publication
+    policy/                    # versioned rule packs and deterministic findings
+    passport/                  # capability claims, evidence, expiry/revocation
+    matching/                  # eligibility, match factors, explanations
+    coalitions/                # opt-in team formation (designed/stub for MVP)
+    applications/              # proposals, clarification, submission
+    evaluations/               # conflicts, rubric, scoring, moderation
+    sandboxes/                 # manifests, runs, test observations
+    evidence/                  # claims, lineage, reviews, hashes
+    pilots/                    # charter, milestones, metrics, risks, changes
+    payments/                  # readiness, approval, external adapter states
+    solutions/                 # outcome cards, transferability, adoption
+    integrity/                 # red-flag rules and review cases
+    publishing/                # redaction and OCDS-style projections
+    audit/                     # application audit chain
+  adapters/
+    ai/
+    credential-verification/
+    sandbox/
+    payment/
+    notifications/
+    object-storage/
+  platform/
+    db/
+    auth/
+    outbox/
+    observability/
+    config/
+  shared/
+    contracts/                 # Zod schemas and generated shared types
+    ui/
+    i18n/
+```
+
+Enforcement rules:
+
+- Modules expose use-case functions, not tables.
+- A module cannot import another module's ORM model directly; use its public service or a read projection.
+- UI components do not make authorization decisions.
+- Adapters cannot change domain state without passing through a domain use case.
+- AI provider types never leak into the domain model.
+
+### C.6 Executable ChallengeSpec v1
+
+The following is illustrative. The real schema should be implemented in Zod and persisted as a versioned JSON document alongside normalized searchable fields.
+
+```json
+{
+  "schemaVersion": "mahasetu.challenge/1.0",
+  "challengeId": "CH-WASTE-001",
+  "version": 1,
+  "status": "APPROVED",
+  "problem": {
+    "title": "Reduce community-bin overflow events",
+    "statement": "Overflow is detected too late for dynamic collection response.",
+    "affectedUsers": ["residents", "sanitation workers"],
+    "geography": ["synthetic-ward-12"],
+    "baseline": [
+      {
+        "metric": "overflow_events_per_week",
+        "value": 42,
+        "unit": "events/week",
+        "source": "synthetic-baseline-v1"
+      }
+    ]
+  },
+  "outcomes": [
+    {
+      "id": "OUT-1",
+      "statement": "Detect overflow early enough for operational response",
+      "metricIds": ["MET-1", "MET-2"]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "MET-1",
+      "name": "detection_recall",
+      "direction": "GTE",
+      "target": 0.9,
+      "unit": "ratio",
+      "window": "sandbox-dataset-v1",
+      "calculatorVersion": "waste-metrics/1.0",
+      "minimumSampleSize": 100
+    },
+    {
+      "id": "MET-2",
+      "name": "median_assignment_minutes",
+      "direction": "LTE",
+      "target": 20,
+      "unit": "minutes",
+      "window": "pilot-week-2"
+    }
+  ],
+  "eligibility": [
+    {
+      "id": "EL-1",
+      "kind": "STARTUP_RECOGNITION",
+      "mandatory": true,
+      "acceptedEvidence": ["AUTHORITY_ASSERTED", "OFFICER_VERIFIED", "SIMULATED_FOR_DEMO"]
+    }
+  ],
+  "rubric": [
+    {"id": "R-1", "name": "Outcome approach", "weight": 30},
+    {"id": "R-2", "name": "Pilot feasibility", "weight": 25},
+    {"id": "R-3", "name": "Security and privacy", "weight": 20},
+    {"id": "R-4", "name": "Interoperability and exit", "weight": 15},
+    {"id": "R-5", "name": "Pilot cost", "weight": 10}
+  ],
+  "sandbox": {
+    "datasetVersion": "synthetic-waste-v1",
+    "apiContractVersion": "waste-events-openapi/1.0",
+    "egress": "DENY_ALL",
+    "retentionHours": 24,
+    "testSuiteVersion": "waste-pilot/1.0"
+  },
+  "milestones": [
+    {
+      "id": "MS-1",
+      "name": "Sandbox benchmark",
+      "paymentPercent": 20,
+      "requiredMetricIds": ["MET-1"],
+      "requiredEvidenceTypes": ["TEST_RUN", "LIMITATIONS_NOTE"]
+    }
+  ],
+  "governance": {
+    "policyPackVersion": "demo-maharashtra-innovation/0.1",
+    "requiredApproverRoles": ["PROBLEM_OWNER", "PROCUREMENT_REVIEWER"],
+    "publicationProfile": "PUBLIC_CHALLENGE_V1"
+  },
+  "integrity": {
+    "frozenAt": "2026-09-01T10:00:00+05:30",
+    "contentHash": "demo-generated-at-runtime"
+  }
+}
+```
+
+### C.7 New/expanded data entities
+
+Append these to the baseline model:
+
+#### Problem intelligence
+
+- `SignalSource(id, name, sourceType, ownerDepartmentId, classification, purpose, qualityPolicy, status)`
+- `ProblemSignal(id, sourceId, occurredAt, geographyCode, serviceCode, severity, payloadRedacted, sourceRefHash)`
+- `ProblemCluster(id, title, summary, status, firstSeenAt, lastSeenAt, frequency, priorityScore, confidence)`
+- `ClusterSignal(clusterId, signalId, membershipScore)`
+- `ProblemNomination(id, clusterId, nominatedBy, decision, reason, at)`
+
+#### Challenge compiler
+
+- `ChallengeSpecVersion(id, challengeId, version, schemaVersion, document, contentHash, status, createdBy, createdAt, frozenAt)`
+- `PolicyPack(id, jurisdiction, procurementPath, version, effectiveFrom, effectiveTo, sourceRefs, status)`
+- `PolicyRule(id, policyPackId, code, severity, deterministicExpression, message, remediation)`
+- `CompilerFinding(id, challengeSpecVersionId, ruleCode, severity, path, message, evidence, disposition, disposedBy)`
+
+#### Evidence graph
+
+- `EvidenceObject(id, storageRef, mediaType, size, sha256, classification, ownerOrgId, retentionUntil, malwareScanStatus)`
+- `EvidenceClaim(id, subjectType, subjectId, predicate, value, context, assuranceLevel, issuedBy, issuedAt, expiresAt, revokedAt)`
+- `ClaimEvidence(claimId, evidenceObjectId, relationship)`
+- `MetricDefinition(id, version, name, expression, inputSchema, outputUnit, qualityRules)`
+- `MetricObservation(id, metricDefinitionId, pilotId, windowStart, windowEnd, value, sampleSize, datasetVersion, calculatedAt, runId)`
+- `Attestation(id, claimId, attestorId, role, decision, reason, signatureRef, at)`
+
+#### Sandbox
+
+- `SandboxManifest(id, challengeSpecVersionId, version, document, status, approvedBy)`
+- `SandboxRun(id, manifestId, startupId, buildRef, status, startedAt, completedAt, teardownAt)`
+- `TestCase(id, suiteVersion, code, inputRef, expectedRule)`
+- `TestResult(id, runId, testCaseId, status, measurements, logsRef, evidenceObjectId)`
+
+#### Integrity and interoperability
+
+- `IntegrityAlert(id, ruleCode, entityType, entityId, severity, evidence, confidence, status, reviewerId, resolution)`
+- `PublicationRelease(id, processId, releaseId, schemaVersion, tag, redactedPayload, publishedAt, supersedesReleaseId)`
+- `ProcessLink(id, fromProcessId, toProcessId, relationship, reason)`
+- `PurposeGrant(id, actorOrOrgId, purposeCode, dataClasses, grantedAt, expiresAt, revokedAt, evidenceRef)`
+
+### C.8 Domain commands and events
+
+Commands are requests that may be rejected. Events are immutable facts after successful state change.
+
+| Command | Primary validation | Emitted event |
+|---|---|---|
+| `NominateProblemCluster` | authorized officer; minimum evidence | `ProblemClusterNominated` |
+| `CompileChallengeDraft` | approved problem record; model/fallback available | `ChallengeDraftCompiled` |
+| `ResolveCompilerFinding` | authorized reviewer; reason required for override | `CompilerFindingResolved` |
+| `FreezeChallengeSpec` | no blocking findings; approvals complete | `ChallengeSpecFrozen` |
+| `PublishChallenge` | frozen version; dates valid | `ChallengePublished` |
+| `VerifyPassportClaim` | verifier authority and provenance | `PassportClaimVerified` |
+| `GenerateMatches` | published challenge; current profiles | `MatchesGenerated` |
+| `SubmitProposal` | eligible/open; declaration complete | `ProposalSubmitted` |
+| `SubmitEvaluation` | assignment; no conflict; complete rubric | `EvaluationSubmitted` |
+| `SelectPilot` | moderation complete; authorized decision | `PilotSelected` |
+| `StartSandboxRun` | approved manifest; startup access | `SandboxRunStarted` |
+| `RecordMetricObservation` | schema/version/sample checks | `MetricObserved` |
+| `SubmitMilestoneEvidence` | milestone active; required objects present | `MilestoneEvidenceSubmitted` |
+| `AcceptMilestone` | reviewer role; acceptance rules or override reason | `MilestoneAccepted` |
+| `CreatePaymentRequest` | accepted milestone; packet complete; no duplicate | `PaymentRequestCreated` |
+| `AdvancePaymentAdapter` | finance role/mock adapter; idempotency | `PaymentStatusChanged` |
+| `CompletePilot` | final evidence and closeout | `PilotCompleted` |
+| `PublishSolutionCard` | publication approval/redaction | `SolutionCardPublished` |
+| `AssessTransferability` | target context complete | `TransferabilityAssessed` |
+
+Event envelope:
+
+```json
+{
+  "eventId": "uuid",
+  "eventType": "MilestoneAccepted.v1",
+  "aggregateType": "Milestone",
+  "aggregateId": "MS-1",
+  "aggregateVersion": 7,
+  "occurredAt": "2026-09-03T12:30:00+05:30",
+  "actor": {"type": "USER", "id": "user-id", "role": "PILOT_REVIEWER"},
+  "correlationId": "uuid",
+  "causationId": "uuid",
+  "classification": "INTERNAL",
+  "payload": {},
+  "previousHash": "hex",
+  "eventHash": "hex"
+}
+```
+
+### C.9 Transaction and event consistency
+
+For each command:
+
+1. Authenticate actor.
+2. Authorize command using role, organization, department, assignment, object classification, and purpose.
+3. Load aggregate and expected version.
+4. Validate state transition and invariants.
+5. Update domain tables.
+6. Insert audit event and outbox event in the same database transaction.
+7. Commit.
+8. Worker publishes/handles outbox item idempotently.
+9. Projection updates analytics/notifications/OCDS draft.
+
+Use optimistic concurrency (`version` column) so two rotating users cannot silently overwrite a challenge or milestone.
+
+### C.10 Adapter interfaces
+
+```ts
+interface ModelGateway {
+  compileChallenge(input: CompileInput): Promise<StructuredDraft>;
+  explainMatch(input: MatchExplanationInput): Promise<MatchExplanation>;
+  summarizeEvidence(input: EvidenceSummaryInput): Promise<EvidenceSummary>;
+}
+
+interface CredentialVerifier {
+  verify(request: VerificationRequest): Promise<VerificationResult>;
+}
+
+interface SandboxProvider {
+  provision(manifest: SandboxManifest): Promise<SandboxHandle>;
+  runTests(handle: SandboxHandle, suite: TestSuite): Promise<TestRunResult>;
+  destroy(handle: SandboxHandle): Promise<void>;
+}
+
+interface PaymentAdapter {
+  submit(packet: PaymentPacket, idempotencyKey: string): Promise<ExternalPaymentRef>;
+  getStatus(ref: ExternalPaymentRef): Promise<ExternalPaymentStatus>;
+}
+
+interface PublicationAdapter {
+  validate(release: PublicRelease): Promise<ValidationResult>;
+  publish(release: PublicRelease): Promise<PublicationRef>;
+}
+```
+
+Every interface has a fixture implementation. The UI obtains integration metadata:
+
+```text
+mode: LIVE | SANDBOX | SIMULATED | OFFLINE_FIXTURE
+providerName
+checkedAt
+externalReference (optional)
+limitations[]
+```
+
+### C.11 AI pipelines and evaluations
+
+#### Challenge compilation
+
+- Input: problem record plus an approved policy/template context.
+- AI role: extract and propose; no direct database mutation.
+- Deterministic post-processing: schema validation, weight sum, date logic, prohibited field checks.
+- Human gate: diff review and finding disposition.
+- Evaluation set: 10–20 deliberately poor seeded problem statements with expected missing fields/findings.
+- Metrics: schema validity, expected-finding recall, hallucinated-policy rate, human acceptance rate, latency.
+
+#### Matching
+
+- Mandatory criteria: deterministic.
+- Taxonomy overlap: deterministic weighted set comparison.
+- Semantic similarity: optional embedding feature.
+- Explanation: derive factor statements from actual stored features; an LLM may rewrite but cannot add reasons.
+- Evaluation set: known positive/negative startup-challenge pairs.
+- Metrics: top-k recall on seeded truth, explanation faithfulness, protected-feature absence.
+
+#### Signal clustering
+
+- Use only normalized/redacted text and metadata.
+- Embeddings suggest clusters; a human names/promotes them.
+- Monitor geographic/source-volume bias.
+- MVP uses seeded clusters and may calculate similarity, but must not imply connection to real grievance systems.
+
+#### Evidence summary
+
+- AI can summarize long evidence for reviewers.
+- Numeric acceptance is calculated deterministically from metric definitions.
+- Summary links each statement to evidence IDs.
+- Reviewer sees contradictions and original evidence.
+
+#### Transferability
+
+- Base score from transparent structured factors.
+- AI generates caveats only from factor gaps and prior evidence.
+- No automatic procurement authorization.
+
+### C.12 Authorization model
+
+Combine RBAC with contextual attributes:
+
+```text
+allow if
+  actor.role permits action
+  AND actor organization/department scope permits object
+  AND assignment/ownership rule passes
+  AND object classification permits access
+  AND stated purpose permits use
+  AND workflow state permits action
+```
+
+Examples:
+
+- An evaluator can read only assigned eligible proposals after the evaluation window opens.
+- A startup can read its own proposal and public clarification, never another proposal.
+- A pilot reviewer cannot accept a milestone belonging to an unrelated department.
+- Finance can read the redacted payment packet and acceptance evidence, not unnecessary proprietary source code.
+- A public viewer receives a server-generated redacted projection, never the internal object with client-side hidden fields.
+
+### C.13 Data protection and retention
+
+- Collect the minimum identity/contact data needed for roles and audit.
+- Keep business evidence separate from user identity data.
+- Purpose-tag sensitive access.
+- Encrypt transport and storage; field-encrypt high-risk identifiers in production.
+- Mask identifiers in ordinary UI/logs.
+- Store content hashes separately from files.
+- Define retention per evidence class and legal requirement.
+- Support correction/erasure where applicable without erasing legally required audit facts; use tombstone/redaction records.
+- If consent is the applicable basis, record notice version, purpose, fields, affirmative action, timestamp, withdrawal, and downstream processors.
+- Do not train models on confidential proposals or citizen data by default.
+
+### C.14 Publication and redaction boundary
+
+Maintain three views:
+
+1. `INTERNAL_RECORD`: full authorized operational data.
+2. `PARTICIPANT_VIEW`: startup/evaluator/department-specific projection.
+3. `PUBLIC_RELEASE`: explicitly approved fields only.
+
+Publication pipeline:
+
+```text
+domain event
+  -> publication candidate
+  -> field policy/redaction
+  -> human publication approval where required
+  -> schema validation
+  -> immutable release
+  -> public record projection
+```
+
+Never use a deny-list alone. Use an allow-list of publishable fields.
+
+### C.15 Observability and service objectives
+
+MVP telemetry:
+
+- Structured request logs with correlation ID and no sensitive payloads.
+- Domain transition counters.
+- AI latency/fallback/error counts.
+- Mock adapter state and failure events.
+- Basic health endpoint.
+
+Production targets to validate, not promises:
+
+- Control-plane availability target: 99.9% excluding planned maintenance.
+- No acknowledged domain mutation lost.
+- Audit event chain verification daily/continuous.
+- Critical authorization denial and suspicious access alerts near real time.
+- RPO/RTO defined with departmental criticality; restoration tested.
+- Sandbox failure must not affect procurement control-plane availability.
+
+### C.16 Threat boundaries
+
+```text
+Internet user
+  -> WAF/rate limit
+  -> authenticated web boundary
+  -> server authorization boundary
+  -> domain command boundary
+  -> database/object boundary
+
+Confidential upload
+  -> size/type check
+  -> quarantine
+  -> malware scan
+  -> classification
+  -> access-controlled storage
+
+Startup workload
+  -> isolated sandbox identity/network
+  -> synthetic/read-only dataset
+  -> controlled telemetry export
+  -> teardown
+
+AI request
+  -> data minimization/redaction
+  -> prompt template boundary
+  -> structured output validation
+  -> deterministic rule checks
+  -> human approval
+```
+
+### C.17 Required security tests
+
+- IDOR across every organization-owned entity.
+- State transition invoked out of order.
+- Replay payment request with same idempotency key.
+- Modify frozen ChallengeSpec through generic endpoint.
+- Inject hidden prompt instructions through a proposal attachment.
+- Submit evidence object belonging to another pilot.
+- Publish a private evidence field through a projection bug.
+- Concurrent milestone reviews causing double acceptance.
+- Tamper with an audit event and verify chain failure.
+- Use expired/revoked Passport claim for eligibility.
+- Access sandbox telemetry after retention teardown.
+
+---
+
+## Innovation Expansion D — What to build by September 5
+
+### D.1 Scope decision: one spectacular loop, not fifteen shallow modules
+
+The demo should expose five hero moments:
+
+1. **Pulse:** a synthetic cluster of service pain becomes a nominated problem.
+2. **Forge:** a bad paragraph compiles into a measurable, inclusive ChallengeSpec with visible findings.
+3. **Match/Passport:** an eligible startup is recommended for specific evidence-backed reasons.
+4. **Lab + Proof + PayFlow:** a deterministic sandbox test produces evidence, satisfies a milestone, and creates a simulated payment-ready packet.
+5. **ScaleGraph:** another department receives a context-aware reuse recommendation.
+
+Evaluation, audit, and authorization connect the moments but do not need every enterprise feature.
+
+### D.2 Eight-screen demo cut
+
+| Screen | Must demonstrate | Data/logic |
+|---|---|---|
+| 1. `Pulse` | problem cluster, heatmap/trend, evidence, nominate | seeded `ProblemSignal` + deterministic score |
+| 2. `Forge` | raw text, compiled spec, lint findings, accept diff, freeze | fixture/live AI + Zod + deterministic rules |
+| 3. `Matches` | explainable startup shortlist and Passport evidence | eligibility filters + weighted taxonomy |
+| 4. `Evaluation` | conflict gate, frozen rubric, selection reason | state machine + seeded proposals |
+| 5. `Pilot Lab` | sandbox manifest/run and real calculated test result | JSON fixture + metric function |
+| 6. `Evidence & Payment` | lineage, milestone acceptance, packet completeness, simulated status | evidence graph + payment state machine |
+| 7. `ScaleGraph` | contextual comparison and localized micro-pilot recommendation | transparent factor score |
+| 8. `Audit/Public Thread` | immutable event timeline and redacted release | audit chain + publication projection |
+
+### D.3 Implementation order
+
+#### Foundation — must happen first
+
+1. Scaffold app and shared UI shell.
+2. Implement schema, seed/reset, users/roles.
+3. Implement domain transition helper, audit hash chain, and mock-mode banner.
+4. Seed the complete golden-path dataset before building all screens.
+
+#### Vertical slice 1 — signal to published challenge
+
+1. Pulse read model and nomination action.
+2. ChallengeSpec schema and version table.
+3. Compiler fixture provider.
+4. Deterministic lint rules.
+5. Review/freeze/publish actions.
+
+#### Vertical slice 2 — match to selected pilot
+
+1. Passport cards and claims.
+2. Eligibility and weighted match function.
+3. Proposal/evaluator seeded workflow.
+4. Selection action that generates pilot charter.
+
+#### Vertical slice 3 — evidence to scale
+
+1. Sandbox run fixture and actual metric calculation.
+2. Evidence object/claim/observation records.
+3. Milestone acceptance rule.
+4. Payment packet and mock adapter.
+5. Solution Card and transferability function.
+6. Audit/public projection.
+
+#### Stabilization
+
+1. Cross-role E2E flow.
+2. Authorization negative tests.
+3. Offline/live-AI toggle test.
+4. Responsive/accessibility pass.
+5. Timed demo rehearsal and backup recording.
+
+### D.4 Features explicitly not to build during the sprint
+
+- Live citizen grievance ingestion.
+- Real government identity or payment connections.
+- Real container orchestration for untrusted startups.
+- General-purpose no-code rules engine.
+- Graph database.
+- Blockchain network.
+- Production verifiable-credential wallet.
+- ZK circuit.
+- Autonomous evaluator/award agent.
+- Full consortium contracting.
+- Statistical corruption accusations.
+
+Represent only the architecture and carefully labeled UI stub if it helps the narrative.
+
+### D.5 Suggested team lanes
+
+These lanes are recommendations until actual members claim tasks:
+
+- **Lane 1 — Product/UI:** design system, Pulse, Forge, story cohesion.
+- **Lane 2 — Domain/backend:** database, state machines, audit, authorization, seed/reset.
+- **Lane 3 — Intelligence/evidence:** compiler adapter, matching, metric engine, transferability.
+- **Lane 4 — Pilot/integration/quality:** sandbox fixture, payment adapter, E2E, deployment, demo assets.
+
+Each lane must avoid exclusive ownership silos: use shared schemas/contracts and record handoffs in this file.
+
+### D.6 Demo seed universe
+
+Departments:
+
+- `Maharashtra Urban Services Innovation Cell` — fictional demo organization.
+- `Pune Metro Region Waste Operations` — fictionalized, not presented as a live official deployment.
+- `Satara Municipal Services` — fictionalized transfer target.
+
+Startups:
+
+- `DrishtiLoop Labs` — computer vision, strong detection evidence, cloud-first.
+- `RouteMitra Technologies` — routing and offline field support.
+- `CivicSense AI` — broad claims but weak verified evidence.
+- `GreenPulse Systems` — IoT hardware strength, longer deployment lead time.
+
+Reference outcome:
+
+- Baseline: 42 synthetic overflow events/week.
+- Sandbox: 120 labeled synthetic observations.
+- Selected approach: `DrishtiLoop Labs` alone for simple demo, or a designed Sangam recommendation with `RouteMitra`.
+- Milestone target: recall >= 0.90 and complete limitations note.
+- Simulated result: recall derived by code from fixture; do not hard-code the displayed percentage separately.
+- Transfer gap: target department requires intermittent-connectivity support, prompting a localized micro-pilot.
+
+All names and numbers must display `Synthetic demonstration data`.
+
+---
+
+## Innovation Expansion E — New backlog items
+
+| ID | Priority | State | Task | Dependencies | Acceptance criteria |
+|---|---:|---|---|---|---|
+| INNO-001 | P0 | NOT_STARTED | Create synthetic Problem Radar dataset and cluster screen | DB-001, UX-001 | Cluster evidence and nomination work; all data labeled synthetic |
+| INNO-002 | P0 | NOT_STARTED | Define and validate ChallengeSpec v1 | ARCH-001, CHAL-001 | Zod/schema tests cover valid/invalid spec and frozen hash |
+| INNO-003 | P0 | NOT_STARTED | Implement deterministic procurement lint pack | INNO-002 | At least 8 rules with path, severity, explanation, remediation |
+| INNO-004 | P0 | NOT_STARTED | Implement evidence object/claim/metric lineage | DB-001, PILOT-001 | Sandbox observation traces to milestone decision |
+| INNO-005 | P0 | NOT_STARTED | Implement one real fixture-backed metric calculation | INNO-004, SBOX-001 | Result is derived, versioned, tested, and demoable offline |
+| INNO-006 | P0 | NOT_STARTED | Implement payment readiness packet score | PAY-001, INNO-004 | Missing artifacts block readiness and explain why |
+| INNO-007 | P0 | NOT_STARTED | Implement contextual transferability score/recommendation | SCALE-001, INNO-004 | Factors visible and seeded gap changes recommendation |
+| INNO-008 | P0 | NOT_STARTED | Implement public/private projection and demo release | AUDIT-001, INNO-002 | Confidential fixture never appears in public payload |
+| INNO-009 | P1 | NOT_STARTED | Add integrity rules for frozen criteria and score divergence | EVAL-001, AUDIT-001 | Seeded violations create review alerts, not accusations |
+| INNO-010 | P1 | NOT_STARTED | Design Sangam coalition recommendation | MATCH-001 | Capability gaps and consent-first workflow shown |
+| INNO-011 | P1 | NOT_STARTED | Implement challenge duplicate/demand-mesh suggestion | INNO-002 | Similar seeded draft produces explainable non-blocking alert |
+| INNO-012 | P1 | NOT_STARTED | Add structured pilot failure/postmortem model | PILOT-001 | Private and redacted learning views differ correctly |
+| INNO-013 | P1 | NOT_STARTED | Add Continuity Capsule checklist | INNO-002, SCALE-001 | Portability/exit finding flows into transferability evidence |
+| INNO-014 | P2 | NOT_STARTED | Add Verifiable Credential-shaped pilot attestation export | VC-001, INNO-004 | Standards-shaped simulated credential with issuer/status metadata |
+| INNO-015 | P3 | DEFERRED | Production sovereign sandbox provisioning | P0 complete, external authority | Architecture and threat model reviewed; not built for SIH |
+
+---
+
+## Innovation Expansion F — Evidence-backed external rails
+
+Research was performed on 2026-08-31 using current authoritative/standards sources. These findings guide architecture; they do not establish that MahaSetu has access to any API or that central rules automatically apply to every Maharashtra procurement.
+
+### F.1 Public procurement startup support
+
+- The current Startup India scheme page describes public procurement benefits for DPIIT-recognized startups, including GeM participation, an EMD/bid-security exemption statement, and a more narrowly worded prior-experience/turnover statement tied on that page to manufacturing startups and quality/technical capability. Source: [Startup India Scheme — Public Procurement](https://www.startupindia.gov.in/content/sih/en/startup-scheme.html), accessed 2026-08-31.
+- The Department of Expenditure publishes an updated GFR 2017 compilation current through 2026-01-31. The discovered GFR text says prior turnover and experience **may be relaxed** for startups subject to quality/technical specifications and suitable bidding-document provisions; this supports a policy linter and reviewer workflow, not an unconditional automatic waiver engine. Source: [Department of Expenditure — GFR updated through 2026-01-31](https://doe.gov.in/bi-annual-compilationupdation-general-financial-rules-2017-upto-31012026general-financial-rules), accessed 2026-08-31.
+- `CORRECTION TO INITIAL SOURCE NARRATIVE:` The supplied report's broad language about automatic universal relaxations should not be reused without jurisdiction/procurement-specific verification. MahaSetu must version policy packs and preserve human review.
+
+### F.2 Maharashtra proof-of-concept policy precedent
+
+- Maharashtra's 2018 Innovative Start-up Policy describes a Startup Week expression-of-interest model, sector panels, work orders of INR 10–15 lakh for proof of concept, and an expected 15–20 startup opportunities per year in that policy. Source: [Maharashtra State Innovative Start-up Policy 2018, MSInS PDF](https://msins.in/assets/1653723198952-V8PUa4sr.pdf), accessed 2026-08-31.
+- This is a credible precedent for a challenge/pilot workflow. It does **not** prove that the exact figures/process remain unchanged in 2026; current program rules remain part of `RES-001`.
+- `CORRECTION TO SUPPLIED REPORT:` The reviewed 2018 policy says 15–20 expected opportunities and three startups per selected sector, not a blanket current claim of 24 winners.
+
+### F.3 API-first integration rail
+
+- API Setu's official documentation describes an MeitY Open API platform intended for interoperable, safe, reliable exchange across government systems and an API-first approach. Its onboarding documentation also makes clear that access requires registration, use-case review, API-provider approval, credentials, and permissions. Sources: [API Setu introduction](https://docs.apisetu.gov.in/document-central/explore-apisetu/Introduction.html) and [API Setu consumer SOP](https://cdn.apisetu.gov.in/portal/assets/sop-apisetu-v1.pdf), accessed 2026-08-31.
+- Architecture implication: use API Setu-compatible/provider adapters and never assume an API is public merely because the platform exists.
+
+### F.4 Open contracting interoperability
+
+- The Open Contracting Data Standard models planning, tender, award, contract, and implementation information. Its release model is event-like: releases are immutable, and a new release represents a change. It also supports related processes and multilingual fields. Sources: [OCDS data standard overview](https://www.open-contracting.org/data-standard/) and [OCDS 1.1.5 release reference](https://standard.open-contracting.org/latest/en/schema/reference/), accessed 2026-08-31.
+- Architecture implication: assign a durable innovation procurement process ID, retain internal domain events, and export approved/redacted OCDS-shaped releases. MahaSetu is still an application; OCDS itself is not an e-procurement system.
+
+### F.5 Verifiable credential interoperability
+
+- W3C Verifiable Credentials Data Model 2.0 became a W3C Recommendation on 2025-05-15; version 2.1 is a working draft in 2026. The standard describes issuer-holder-verifier claims that can be cryptographically secured and machine-verifiable. Source: [W3C Verifiable Credentials data model family](https://www.w3.org/TR/vc-data-model/all/), accessed 2026-08-31.
+- Architecture implication: target stable VC 2.0 semantics for a future Passport/attestation export, keep the relational claim model authoritative for the MVP, and do not invent a blockchain requirement.
+
+### F.6 Personal-data handling
+
+- India's Digital Personal Data Protection Act, 2023 states, among other requirements, that consent where used must be free, specific, informed, unconditional, unambiguous, affirmative, and limited to necessary personal data; it also provides for clear/plain-language notice and withdrawal. Source: [MeitY — Digital Personal Data Protection Act, 2023 PDF](https://www.meity.gov.in/static/uploads/2024/02/Digital-Personal-Data-Protection-Act-2023.pdf), accessed 2026-08-31.
+- Architecture implication: design purpose and consent/notice records, data minimization, multilingual notices, withdrawal/retention workflows, and grievance paths. Production legal compliance needs formal review of the Act, current rules/commencement, exemptions, and the actual processing context.
+
+---
+
+## Innovation Expansion G — Architecture decisions and unresolved choices
+
+### DEC-20260831-001 — Use the signal-to-scale flywheel as the master narrative
+
+- **Decision:** MahaSetu's primary narrative is `Pulse → Forge → Match → Lab → Proof → PayFlow → ScaleGraph`.
+- **Context:** The earlier lifecycle was correct but could resemble a feature-rich portal. The flywheel emphasizes government learning and reusable evidence.
+- **Rationale:** It provides a unique product thesis and a clear demo arc while preserving the required identify, pilot, procure, and scale stages.
+- **Consequences:** Every implemented screen must advance or explain the flywheel. Standalone gimmicks are deferred.
+- **Supersedes:** It refines, but does not contradict, DEC-INIT-002.
+- **Revisit trigger:** Official SIH constraints explicitly require a narrower artifact.
+
+### DEC-20260831-002 — Treat ChallengeSpec as the shared executable contract
+
+- **Decision:** Challenge, evaluation, sandbox, milestone, and publication views derive from a versioned ChallengeSpec rather than separate manually synchronized forms.
+- **Rationale:** This is the architectural center of the product and makes AI output testable.
+- **Consequences:** `INNO-002` blocks multiple downstream modules. Published versions are frozen and changes require a new version/event.
+- **Supersedes:** None.
+- **Revisit trigger:** Implementation complexity exceeds the sprint; in that case persist a minimal JSON document plus essential normalized fields.
+
+### DEC-20260831-003 — Align public exports with OCDS concepts
+
+- **Decision:** Internal records remain optimized for the product, while approved public projections use OCDS-aligned lifecycle concepts and immutable releases.
+- **Rationale:** Open interoperability is more valuable and credible than a proprietary app-store silo.
+- **Consequences:** Publication/redaction is a distinct server-side boundary. Full OCDS conformance is not claimed until validated.
+- **Supersedes:** None.
+- **Revisit trigger:** The official sponsor mandates another standard or schema.
+
+### DEC-20260831-004 — Keep advanced trust technology at the edge of a relational evidence model
+
+- **Decision:** Store claims, provenance, status, and hashes conventionally; add VC exports, external anchoring, selective disclosure, or ZK proofs later through adapters.
+- **Rationale:** This keeps the MVP auditable and lets the same evidence model support future cryptography.
+- **Consequences:** No Hyperledger/Polygon dependency in P0.
+- **Supersedes:** Reinforces DEC-INIT-003.
+- **Revisit trigger:** A provided government infrastructure or explicit judging requirement mandates a ledger.
+
+### OPEN_QUESTION OQ-013 — Choose exact shared development stack
+
+- **Question:** Will the team accept the proposed Next.js + TypeScript + PostgreSQL + Prisma default, and which hosted auth/database/storage/deployment providers are available?
+- **Why it matters:** `ARCH-001` cannot be marked `DONE` until the team confirms skills and deployment constraints.
+- **Safe default:** Adopt the proposed stack if no objection exists before scaffolding, but append the exact versions/providers after verifying local tooling.
+
+### OPEN_QUESTION OQ-014 — Choose hero depth versus breadth
+
+- **Question:** Should the first demo implement all eight screens shallowly, or implement Pulse/Forge/Proof/ScaleGraph deeply and seed the intervening evaluation screens?
+- **Recommendation:** Build the complete transition path but concentrate interactive depth and visual polish on Pulse, Forge, Proof, and ScaleGraph.
+
+### OPEN_QUESTION OQ-015 — Confirm availability of official problem image/artifacts
+
+- **Question:** Can `1000137663.png` or the official SIH page be added to the workspace?
+- **Why it matters:** The current scope is derived from user-provided text and may omit mandatory constraints.
