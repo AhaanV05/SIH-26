@@ -5,6 +5,15 @@ import {
   calculateWasteMetrics,
   parseSyntheticWasteEventDataset,
 } from "@/modules/evidence";
+<<<<<<< HEAD
+=======
+import {
+  rankStartupMatches,
+  type ChallengeMatchInput,
+  type StartupProfileMatchInput,
+  type StartupMatchResult,
+} from "@/modules/matching";
+>>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
 import { governmentNavigation } from "@/platform/navigation";
 
 export type DashboardMetricSummary = {
@@ -66,11 +75,26 @@ export type ChallengesRouteData = {
 export type MatchesRouteData = {
   readonly topFit: string;
   readonly topFitScore: number;
+<<<<<<< HEAD
   readonly topFitReferences: number;
   readonly matches: Array<{
     readonly name: string;
     readonly score: number;
     readonly note: string;
+=======
+  readonly topFitConfidence: number;
+  readonly topFitReferences: number;
+  readonly totalEvaluated: number;
+  readonly eligibleCount: number;
+  readonly ineligibleCount: number;
+  readonly rankedMatches: readonly StartupMatchResult[];
+  readonly matches: Array<{
+    readonly id: string;
+    readonly name: string;
+    readonly score: number;
+    readonly note: string;
+    readonly eligible: boolean;
+>>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
   }>;
 };
 
@@ -217,6 +241,7 @@ export function getChallengesRouteData(): ChallengesRouteData {
   };
 }
 
+<<<<<<< HEAD
 export function getMatchesRouteData(): MatchesRouteData {
   return {
     topFit: "UrbanLoop Labs",
@@ -244,6 +269,283 @@ export function getMatchesRouteData(): MatchesRouteData {
         note: "Needs more sandbox access to meet unique constraints.",
       },
     ],
+=======
+const demoChallengeMatchInput: ChallengeMatchInput = {
+  challengeId: "CHAL-WASTE-PUNE-001",
+  departmentId: "DEPT-PUNE-SWM",
+  title: "Reduce community-bin overflow events in Ward 12",
+  problem:
+    "Overflowing community bins in Ward 12 are reported too late for an efficient collection response, causing repeated citizen complaints and inefficient truck routing.",
+  requiredCapabilityCodes: [
+    "civic-ops.cv.overflow-detection",
+    "civic-ops.logistics.route-optimization",
+  ],
+  desiredCapabilityCodes: [
+    "civic-ops.iot.fill-sensing",
+    "localization.language.marathi",
+  ],
+  eligibilityCriteria: [
+    {
+      id: "EL-1",
+      kind: "STARTUP_RECOGNITION",
+      mandatory: true,
+      acceptedEvidence: [
+        "AUTHORITY_ASSERTED",
+        "OFFICER_VERIFIED",
+        "SIMULATED_FOR_DEMO",
+      ],
+    },
+    {
+      id: "EL-2",
+      kind: "SECURITY_READINESS",
+      mandatory: true,
+      acceptedEvidence: [
+        "OFFICER_VERIFIED",
+        "THIRD_PARTY_ATTESTED",
+        "SYSTEM_OBSERVED",
+      ],
+    },
+  ],
+  preferredDeploymentModels: [
+    "ON_PREMISE_GOVERNMENT_CLOUD",
+    "HYBRID",
+    "CLOUD_MANAGED",
+  ],
+  preferredLanguages: ["mr", "hi", "en", "mr-IN", "en-IN"],
+  targetLocations: ["Pune", "Maharashtra"],
+  keywords: [
+    "waste",
+    "overflow",
+    "detection",
+    "routing",
+    "computer-vision",
+    "sanitation",
+  ],
+};
+
+const demoStartups: StartupProfileMatchInput[] = [
+  {
+    startupId: "ORG-ECOSCAN",
+    organizationId: "ORG-ECOSCAN",
+    legalName: "EcoScan Intelligence Private Limited",
+    displayName: "EcoScan Labs",
+    summary:
+      "Computer vision and AI analytics for civic waste overflow detection, automated bin fill level alerts, and dynamic route optimization.",
+    capabilityCodes: [
+      "civic-ops.cv.overflow-detection",
+      "civic-ops.logistics.route-optimization",
+      "civic-ops.security.access-control",
+    ],
+    capabilities: [
+      {
+        capabilityCode: "civic-ops.cv.overflow-detection",
+        proficiency: 5,
+        taxonomyPath: "civic-ops.cv.overflow-detection",
+        evidenceSummary: "Sandbox benchmark on synthetic dataset",
+      },
+      {
+        capabilityCode: "civic-ops.logistics.route-optimization",
+        proficiency: 4,
+        taxonomyPath: "civic-ops.logistics.route-optimization",
+        evidenceSummary: "Prior logistics pilot module",
+      },
+      {
+        capabilityCode: "civic-ops.security.access-control",
+        proficiency: 4,
+        taxonomyPath: "civic-ops.security.access-control",
+      },
+    ],
+    credentialEvidence: [
+      {
+        id: "EV-ECO-1",
+        type: "DPIIT_RECOGNITION",
+        assuranceLevel: "AUTHORITY_ASSERTED",
+        status: "VERIFIED",
+      },
+      {
+        id: "EV-ECO-2",
+        type: "MSME_UDYAM",
+        assuranceLevel: "OFFICER_VERIFIED",
+        status: "VERIFIED",
+      },
+      {
+        id: "EV-ECO-3",
+        type: "SECURITY_TEST_REPORT",
+        assuranceLevel: "SYSTEM_OBSERVED",
+        status: "VERIFIED",
+      },
+    ],
+    deploymentModels: ["ON_PREMISE_GOVERNMENT_CLOUD", "HYBRID", "SAAS"],
+    supportedLanguages: ["en", "mr", "hi"],
+    operatingLocations: ["Pune", "Maharashtra"],
+    stage: "SEED",
+  },
+  {
+    startupId: "ORG-BINSENSE",
+    organizationId: "ORG-BINSENSE",
+    legalName: "BinSense IoT Solutions LLP",
+    displayName: "BinSense",
+    summary:
+      "Hardware IoT ultrasonic fill-level sensing for municipal waste bins with telemetry dashboard.",
+    capabilityCodes: [
+      "civic-ops.iot.fill-sensing",
+      "civic-ops.logistics.route-optimization",
+    ],
+    capabilities: [
+      {
+        capabilityCode: "civic-ops.iot.fill-sensing",
+        proficiency: 5,
+        taxonomyPath: "civic-ops.iot.fill-sensing",
+      },
+      {
+        capabilityCode: "civic-ops.logistics.route-optimization",
+        proficiency: 2,
+        taxonomyPath: "civic-ops.logistics.route-optimization",
+      },
+    ],
+    credentialEvidence: [
+      {
+        id: "EV-BIN-1",
+        type: "DPIIT_RECOGNITION",
+        assuranceLevel: "SELF_DECLARED",
+        status: "PENDING",
+      },
+      {
+        id: "EV-BIN-2",
+        type: "MSME_UDYAM",
+        assuranceLevel: "OFFICER_VERIFIED",
+        status: "VERIFIED",
+      },
+    ],
+    deploymentModels: ["HYBRID"],
+    supportedLanguages: ["en"],
+    operatingLocations: ["Pune"],
+    stage: "PRE_SEED",
+  },
+  {
+    startupId: "ORG-MARGDARSHAK",
+    organizationId: "ORG-MARGDARSHAK",
+    legalName: "RouteMitra Technologies",
+    displayName: "Margdarshak AI",
+    summary:
+      "High-performance route-optimization and dynamic fleet allocation engine for municipal operations.",
+    capabilityCodes: [
+      "civic-ops.geo.route-priority",
+      "civic-ops.logistics.route-optimization",
+    ],
+    capabilities: [
+      {
+        capabilityCode: "civic-ops.geo.route-priority",
+        proficiency: 5,
+        taxonomyPath: "civic-ops.geo.route-priority",
+      },
+      {
+        capabilityCode: "civic-ops.logistics.route-optimization",
+        proficiency: 4,
+        taxonomyPath: "civic-ops.logistics.route-optimization",
+      },
+    ],
+    credentialEvidence: [
+      {
+        id: "EV-MARG-1",
+        type: "DPIIT_RECOGNITION",
+        assuranceLevel: "AUTHORITY_ASSERTED",
+        status: "VERIFIED",
+      },
+      {
+        id: "EV-MARG-2",
+        type: "SECURITY_TEST_REPORT",
+        assuranceLevel: "THIRD_PARTY_ATTESTED",
+        status: "VERIFIED",
+      },
+    ],
+    deploymentModels: ["CLOUD_MANAGED", "HYBRID"],
+    supportedLanguages: ["en", "mr", "hi"],
+    operatingLocations: ["Pune", "Mumbai", "Maharashtra"],
+    stage: "SEED",
+  },
+  {
+    startupId: "ORG-SAHAYAK",
+    organizationId: "ORG-SAHAYAK",
+    legalName: "Sahayak Solutions Private Limited",
+    displayName: "Sahayak CivicTech",
+    summary:
+      "Offline-first Marathi field app for sanitation-worker reporting and voice alerts.",
+    capabilityCodes: [
+      "mobile.offline-first",
+      "localization.language.marathi",
+      "civic-ops.cv.overflow-detection",
+    ],
+    capabilities: [
+      {
+        capabilityCode: "mobile.offline-first",
+        proficiency: 5,
+        taxonomyPath: "mobile.offline-first",
+      },
+      {
+        capabilityCode: "localization.language.marathi",
+        proficiency: 5,
+        taxonomyPath: "localization.language.marathi",
+      },
+      {
+        capabilityCode: "civic-ops.cv.overflow-detection",
+        proficiency: 2,
+        taxonomyPath: "civic-ops.cv.overflow-detection",
+      },
+    ],
+    credentialEvidence: [
+      {
+        id: "EV-SAH-1",
+        type: "DPIIT_RECOGNITION",
+        assuranceLevel: "AUTHORITY_ASSERTED",
+        status: "VERIFIED",
+      },
+      {
+        id: "EV-SAH-2",
+        type: "MSME_UDYAM",
+        assuranceLevel: "OFFICER_VERIFIED",
+        status: "VERIFIED",
+      },
+      // Deliberately missing SECURITY_READINESS evidence
+    ],
+    deploymentModels: ["EDGE_DEVICE", "OFFLINE_FIRST"],
+    supportedLanguages: ["mr", "hi", "en"],
+    stage: "PRE_SEED",
+  },
+];
+
+export function getMatchesRouteData(): MatchesRouteData {
+  const batch = rankStartupMatches(demoChallengeMatchInput, demoStartups);
+  const topMatch = batch.rankedMatches[0];
+
+  const matches = batch.rankedMatches.map((m) => {
+    let note = "";
+    if (m.eligibilityPass) {
+      note = m.explanation.positiveReasons[0] ?? m.breakdown.capabilityOverlap.rationale;
+    } else {
+      note = m.explanation.gaps[0] ?? "Did not pass mandatory eligibility criteria.";
+    }
+
+    return {
+      id: m.startupId,
+      name: m.displayName,
+      score: m.overallScore,
+      note,
+      eligible: m.eligibilityPass,
+    };
+  });
+
+  return {
+    topFit: topMatch ? topMatch.displayName : "EcoScan Labs",
+    topFitScore: topMatch ? topMatch.overallScore : 0.9,
+    topFitConfidence: topMatch ? topMatch.confidence : 0.88,
+    topFitReferences: 3,
+    totalEvaluated: batch.totalEvaluated,
+    eligibleCount: batch.eligibleCount,
+    ineligibleCount: batch.ineligibleCount,
+    rankedMatches: batch.rankedMatches,
+    matches,
+>>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
   };
 }
 
@@ -337,4 +639,7 @@ export function getAuditRouteData(): AuditRouteData {
     ],
   };
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)

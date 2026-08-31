@@ -2784,6 +2784,24 @@ Research was performed on 2026-08-31 using current authoritative/standards sourc
 - **Supersedes:** None.
 - **Revisit trigger:** A shared development/staging Postgres becomes available, or the schema changes again before that first real deployment happens (in which case regenerate the migration rather than hand-editing the SQL).
 
+<<<<<<< HEAD
+=======
+### DEC-20260901-001 — Adopt deterministic explainable opportunity matching engine (MATCH-001)
+
+- **Decision:** Implemented `MATCH-001` as a pure-logic, deterministic, explainable matching module in `src/modules/matching/` (`types.ts`, `matching-engine.ts`, `index.ts`), accompanied by unit tests in `tests/unit/matching/matching-engine.test.ts`.
+- **Core Rules and Invariants:**
+  1. **Mandatory Eligibility Filter Gate:** Every challenge eligibility criterion marked `mandatory: true` must be satisfied with valid, unexpired, and accepted credential evidence. If any mandatory criterion fails, `eligibilityPass = false`, `overallScore = 0.0`, and ineligibility reasons are explicitly logged.
+  2. **4-Factor Weighted Scoring:** For eligible startups, the overall match score is calculated deterministically via:
+     `overallScore = 0.40 * capabilityOverlap + 0.25 * semanticSimilarity + 0.20 * evidenceStrength + 0.15 * deliveryFit`
+  3. **Structured Explainability Contract:** Every match output provides `positiveReasons`, `missingCapabilities`, `evidenceSummary`, `gaps`, `feedbackSuggestions` (actionable guidance for startups to improve their match standing), the exact mathematical `formula`, and enforces `sensitiveAttributesUsed: false`.
+  4. **Advisory Guardrail:** Matches are tagged `advisoryOnly: true` and `humanAuthorizationRequired: true` in strict accordance with AI governance principles (§7.7).
+  5. **Synthetic Labeling:** Demo match objects specify `synthetic: true` and `displayLabel: "Synthetic demonstration data"`.
+- **Rationale:** Ensures procurement fairness, transparency, explainability to startups, and audit compliance while preventing black-box discrimination or automated unauthorized awards.
+- **Consequences:** `MATCH-001` is completed and verified. Future API routes (`/api/challenges/[id]/matches`) and UI views can directly invoke `computeStartupMatch` and `rankStartupMatches` without side-effects or external dependencies.
+- **Supersedes:** Fulfills and refines the `MATCH-001` specification from `Truth.md` §6.3 and §7.8.
+- **Revisit trigger:** Introduction of Sangam multi-startup consortium recommendations (`INNO-010`) or localized domain taxonomy additions.
+
+>>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
 ### OPEN_QUESTION OQ-014 — Choose hero depth versus breadth
 
 - **Question:** Should the first demo implement all eight screens shallowly, or implement Pulse/Forge/Proof/ScaleGraph deeply and seed the intervening evaluation screens?

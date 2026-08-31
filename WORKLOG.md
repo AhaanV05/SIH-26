@@ -974,3 +974,136 @@ No staged changes; no commits this session
 - **Task state:** `MATCH-001: NOT_STARTED → IN_PROGRESS`
 - **Scope:** New isolated `src/modules/matching/**` and matching tests only: mandatory eligibility filtering, explainable weighted factors, gaps, confidence, and deterministic ranking. Existing UI routes, fixture adapters, Prisma schema, and authentication files are explicitly out of scope to avoid overlap.
 - **Acceptance target:** Match results explain positive and missing factors; ineligible startups are not ranked; unit tests prove filtering/scoring behavior.
+<<<<<<< HEAD
+=======
+
+### [2026-09-01T02:44:15+05:30] SESSION_START — Implement MATCH-001 deterministic explainable matching engine
+
+- **Entry ID:** LOG-20260901-005
+- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Session window:** 2026-09-01T02:44:15+05:30 → 2026-09-01T02:48:34+05:30
+- **Related tasks claimed:** `MATCH-001: IN_PROGRESS` (implement pure-logic matching module and tests), `TEST-001` (unit test coverage)
+- **Startup verification performed:**
+  - Read `Truth.md`, `AGENTS.md`, `CLAUDE.md`, and `WORKLOG.md` in full.
+  - Pre-check baseline execution: `npx pnpm test` (82/82 PASS across 11 test files), `npx pnpm lint` (PASS with 0 warnings), `npx pnpm typecheck` (PASS with 0 errors), and Prisma Client generated.
+  - Workspace status confirmed without modifying uncommitted teammate files.
+- **Objective:** Implement `MATCH-001` deterministic matching engine with mandatory eligibility filtering, explainable 4-factor scoring (`0.40*capability_overlap + 0.25*semantic_similarity + 0.20*evidence_strength + 0.15*delivery_fit`), gaps analysis, feedback recommendations, batch ranking, and thorough unit tests in `src/modules/matching/**` and `tests/unit/matching/**`.
+- **Planned files:**
+  - `src/modules/matching/types.ts`
+  - `src/modules/matching/matching-engine.ts`
+  - `src/modules/matching/index.ts`
+  - `tests/unit/matching/matching-engine.test.ts`
+- **Next action:** Author the matching module files and unit tests, verify test/type/lint gates, and record results in WORKLOG.md.
+
+### [2026-09-01T02:48:34+05:30] SESSION_END — MATCH-001 Explainable Matching Engine Completed and Verified
+
+- **Entry ID:** LOG-20260901-006
+- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Task state:** `MATCH-001: IN_PROGRESS → DONE`, `TEST-001: IN_PROGRESS → DONE`
+- **What was accomplished:**
+  - Implemented the complete deterministic explainable opportunity matching engine per `Truth.md` §6.3, §7.8, and `DEC-20260901-001`.
+  - **Eligibility Gate:** Added `evaluateEligibility()` to evaluate mandatory vs non-mandatory challenge criteria against startup credentials. Sets `eligibilityPass = false` and `overallScore = 0.0` when any mandatory criterion fails, with granular `ineligibilityReasons`.
+  - **Explainable 4-Factor Scoring:**
+    - `calculateCapabilityOverlap()` (weight 0.40): required and desired capability code coverage with proficiency (1..5) scaling.
+    - `calculateSemanticSimilarity()` (weight 0.25): keyword, problem summary, and domain taxonomy token matching.
+    - `calculateEvidenceStrength()` (weight 0.20): verified status, assurance level weighting (`AUTHORITY_ASSERTED`, `OFFICER_VERIFIED`, `SYSTEM_OBSERVED`, `THIRD_PARTY_ATTESTED`), and freshness.
+    - `calculateDeliveryFit()` (weight 0.15): deployment models (Cloud/Hybrid/On-Prem), localization (`mr-IN`, `hi-IN`, `en-IN`), and geographic operational readiness.
+  - **Transparency & Guardrails:** Match result generates `positiveReasons`, `missingCapabilities`, `evidenceSummary`, `gaps`, `feedbackSuggestions`, exact mathematical formula, `sensitiveAttributesUsed: false`, `advisoryOnly: true`, and `humanAuthorizationRequired: true`.
+  - **Batch Ranking:** `rankStartupMatches()` ranks eligible startups descending by overall score, with ineligible startups grouped at the bottom with detailed reasons.
+- **Files created:**
+  - `src/modules/matching/types.ts` — TypeScript types and interfaces for matching parameters, factors, explanations, and results.
+  - `src/modules/matching/matching-engine.ts` — Pure, deterministic matching algorithms.
+  - `src/modules/matching/index.ts` — Public module exports.
+  - `tests/unit/matching/matching-engine.test.ts` — 14 comprehensive unit tests.
+- **Files updated:**
+  - `Truth.md` — Added architectural decision `DEC-20260901-001`.
+  - `WORKLOG.md` — Recorded session start and closure entries.
+### [2026-09-01T02:56:46+05:30] SESSION_START — Implement /api/challenges/[id]/matches route integration
+
+- **Entry ID:** LOG-20260901-007
+- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Session window:** 2026-09-01T02:56:46+05:30 → 2026-09-01T02:58:26+05:30
+- **Related tasks claimed:** `MATCH-002: IN_PROGRESS` (Connect `/api/challenges/[id]/matches` to `rankStartupMatches()`), `TEST-002` (Route unit tests)
+- **Startup verification performed:**
+  - Verified baseline suite: `96/96 tests PASS across 12 test suites`, linter 0 warnings, TypeScript 0 errors.
+- **Objective:** Create the Next.js API route handler in `src/app/api/challenges/[id]/matches/route.ts` that retrieves challenge and startup profiles from Prisma DB, maps them into domain match inputs, invokes `rankStartupMatches()`, supports retrieval and persistence, and write comprehensive route unit tests in `tests/unit/challenges/matches-route.test.ts`.
+- **Planned files:**
+  - `src/app/api/challenges/[id]/matches/route.ts`
+  - `tests/unit/challenges/matches-route.test.ts`
+- **Next action:** Implement route handler and test suite, run vitest, eslint, and tsc.
+
+### [2026-09-01T02:58:26+05:30] SESSION_END — /api/challenges/[id]/matches Route Integration Completed and Verified
+
+- **Entry ID:** LOG-20260901-008
+- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Task state:** `MATCH-002: IN_PROGRESS → DONE`, `TEST-002: IN_PROGRESS → DONE`
+- **What was accomplished:**
+  - Created Next.js API route handler in `src/app/api/challenges/[id]/matches/route.ts` supporting `GET` and `POST` methods.
+  - Implemented `getChallengeAndStartups()` querying Prisma DB for Challenge (including active ChallengeSpecVersion document) and all StartupProfiles (including Organization, StartupCapabilities, and CredentialEvidence).
+  - Implemented robust DTO mapping from DB entities to domain inputs `ChallengeMatchInput` and `StartupProfileMatchInput`.
+  - Wired live calculation to `rankStartupMatches()` returning full explainable batch ranking (`totalEvaluated`, `eligibleCount`, `ineligibleCount`, `rankedMatches`).
+  - Added optional persistence support via `?persist=true` query param on `GET` and automatic match upsertion on `POST`.
+  - Handled 400 (invalid ID), 404 (challenge not found), and 500 (database error) statuses cleanly.
+  - Created 7 comprehensive route unit tests in `tests/unit/challenges/matches-route.test.ts` testing param validation, 404s, ranking computation, query-based persistence, POST persistence, and error handling.
+- **Files created:**
+  - `src/app/api/challenges/[id]/matches/route.ts` — API route handler for matching.
+  - `tests/unit/challenges/matches-route.test.ts` — 7 route unit tests.
+- **Files updated:**
+  - `WORKLOG.md` — Logged entries `LOG-20260901-007` and `LOG-20260901-008`.
+- **Verification evidence:**
+  - `npx pnpm test` (`vitest run`): **103/103 tests PASS across 13 test files** (0 failures, duration 2.03s).
+  - `npx pnpm lint` (`eslint . --max-warnings=0`): **PASS with 0 warnings, 0 errors**.
+  - `npx pnpm typecheck` (`tsc --noEmit`): **PASS with 0 errors**.
+- **Working tree & Git state:** Safe and isolated.
+- **Recommended next action:** Claim `EVAL-001` (Proposal evaluation engine) or wire the `/matches` UI page to consume data dynamically from `/api/challenges/[id]/matches`.
+
+### [2026-09-01T02:59:50+05:30] SESSION_START — Update /matches frontend UI with live explainable matching
+
+- **Entry ID:** LOG-20260901-009
+- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Session window:** 2026-09-01T02:59:50+05:30 → 2026-09-01T03:02:32+05:30
+- **Related tasks claimed:** `MATCH-003: IN_PROGRESS` (Frontend `/matches` UI integration with explainability cards and factor breakdowns), `TEST-003` (Frontend unit/snapshot verification)
+- **Startup verification performed:**
+  - Verified test baseline: `103/103 tests PASS across 13 test suites`, linter 0 warnings, TypeScript 0 errors.
+- **Objective:** Update `src/app/matches/page.tsx` and `src/lib/demo-data.ts` to fetch and render the live ranked matches, 4-factor breakdowns (Capability Overlap, Semantic Similarity, Evidence Strength, Delivery Fit), eligibility badges, explainable reasons, gaps, feedback suggestions, and advisory procurement guardrails.
+- **Planned files:**
+  - `src/lib/demo-data.ts`
+  - `src/app/matches/page.tsx`
+  - `tests/unit/app/navigation-pages.test.tsx` (if test assertions need expanding)
+- **Next action:** Update `src/lib/demo-data.ts` and `src/app/matches/page.tsx`, verify with vitest, eslint, and tsc.
+
+### [2026-09-01T03:02:32+05:30] SESSION_END — /matches UI Integration Completed and Verified
+
+- **Entry ID:** LOG-20260901-010
+- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Task state:** `MATCH-003: IN_PROGRESS → DONE`, `TEST-003: IN_PROGRESS → DONE`
+- **What was accomplished:**
+  - Integrated `rankStartupMatches()` into `src/lib/demo-data.ts` and `src/app/matches/page.tsx`.
+  - Replaced static placeholder values with live explainable matching over the demo seed universe (`EcoScan Labs`, `BinSense`, `Margdarshak AI`, `Sahayak CivicTech`).
+  - **Enhanced `/matches` UI Components:**
+    - **Hero Signal Panel:** Displays top recommended startup (`EcoScan Labs`), overall match score, confidence score, and synthetic demonstration data indicator.
+    - **KPI Summary Grid:** Shows evaluated startups count, eligible shortlist, ineligibility count, and transparent factor weights (40% Capability, 25% Semantic, 20% Evidence, 15% Delivery).
+    - **Interactive Match Cards:** Each ranked founder card displays overall score, confidence percentage, eligibility status badge (`✓ Eligible` vs `✕ Mandatory Gate Failed`), and organization identity.
+    - **4-Factor Visual Breakdown:** Detailed cards for Capability Overlap, Semantic Similarity, Evidence Strength, and Delivery Fit with individual scores and rationales.
+    - **Structured Explainability Drawer:** Positive match rationales, identified gaps/constraints, actionable founder feedback recommendations, formula display, and fairness audit check (`Sensitive attributes used: None`).
+    - **Procurement Principles Sidebar:** Key governance guardrails detailing deterministic evaluation, mandatory eligibility gates, assurance level hierarchy, human authorization requirement, and live API endpoint documentation.
+  - **Testing:** Created `tests/unit/app/matches-page.test.tsx` with 2 tests verifying full rendering of all factor breakdowns, eligibility badges, explainability items, and principles.
+- **Files created:**
+  - `tests/unit/app/matches-page.test.tsx` — UI render and explainability assertions.
+- **Files updated:**
+  - `src/lib/demo-data.ts` — Upgraded with deterministic matching engine.
+  - `src/app/matches/page.tsx` — Rich explainable matching view.
+  - `WORKLOG.md` — Logged entries `LOG-20260901-009` and `LOG-20260901-010`.
+- **Verification evidence:**
+  - `npx pnpm test` (`vitest run`): **105/105 tests PASS across 14 test files** (0 failures, duration 2.56s).
+  - `npx pnpm lint` (`eslint . --max-warnings=0`): **PASS with 0 warnings, 0 errors**.
+  - `npx pnpm typecheck` (`tsc --noEmit`): **PASS with 0 errors**.
+- **Working tree & Git state:** Clean, isolated, teammate files preserved.
+- **Recommended next action:** Claim `EVAL-001` (Proposal evaluation engine, conflict of interest declarations, rubric scoring, moderation decisions).
+
+
+
+
+
+
+>>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
