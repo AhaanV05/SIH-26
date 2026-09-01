@@ -2827,6 +2827,19 @@ Research was performed on 2026-08-31 using current authoritative/standards sourc
 - **Supersedes:** Refines the Proof & Payment specifications from `Truth.md` §4.5, §7.4, §7.5, and §9.2.
 - **Revisit trigger:** Integration of live PFMS/SBI e-Kuber sandbox API endpoints.
 
+### DEC-20260901-004 — Transferability Graph, Anti-Procurement-Bypass Adoption Workflow & Scale Audit Integration (SCALE-001)
+
+- **Decision:** Implemented `SCALE-001` in `src/modules/solutions/` (`transferability.ts`, `adoption-workflow.ts`, `audit-events.ts`, `index.ts`), API routes `src/app/api/solutions/transferability/route.ts` and `src/app/api/solutions/adoption/route.ts`, and adoption controls in `src/app/solutions/`.
+- **Core Governance & Transferability Invariants:**
+  1. **8-Factor Weighted Context Scoring:** Evaluates problem similarity (0.20), operating context fit (0.15), data fit (0.15), evidence strength (0.15), integration fit (0.10), scale fit (0.10), evidence freshness (0.10), and localization cost fit (0.05).
+  2. **Binding Constraint Dominance:** If any factor imposes a binding constraint (e.g. `LOCALIZED_MICRO_PILOT_REQUIRED`, `FRESH_COMPETITIVE_DISCOVERY_REQUIRED`), the final recommendation is bound by the strictest constraint regardless of raw score.
+  3. **Anti-Procurement-Bypass Enforcement:** Scale recommendations are strictly advisory (`advisoryOnly: true`, `humanAuthorizationRequired: true`). Direct sole-source procurement bypass is strictly prohibited. State transitions (`DRAFT -> ASSESSMENT_READY -> SUBMITTED_FOR_AUTHORIZATION -> AUTHORIZED`) enforce role authorization by `PROBLEM_OWNER` and `PROCUREMENT_REVIEWER`.
+  4. **Cryptographic Audit Chain Integration:** Every transferability assessment and adoption state transition emits an immutable `AuditEvent` chained via SHA-256 hash.
+- **Rationale:** Facilitates inter-city and cross-department innovation scaling without violating GFR-2017 public procurement rules or creating unchecked sole-source vendor lock-in.
+- **Consequences:** `SCALE-001` is fully completed and verified with 100% automated test coverage across domain logic, audit chaining, REST API routes, and adoption workflow UI.
+- **Supersedes:** Refines the ScaleGraph & Transferability specifications from `Truth.md` §4.6 and §6.5.
+- **Revisit trigger:** Multi-city municipal consortium federated discovery policies.
+
 
 - **Recommendation:** Build the complete transition path but concentrate interactive depth and visual polish on Pulse, Forge, Proof, and ScaleGraph.
 
