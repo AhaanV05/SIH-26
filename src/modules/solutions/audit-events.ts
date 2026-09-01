@@ -5,6 +5,7 @@ import type { TransferabilityAssessment } from "./transferability";
 export function buildTransferabilityEvaluatedAuditEvent(
   assessment: TransferabilityAssessment,
   actorId: string,
+  actorMembershipRole: string,
   correlationId?: string,
   occurredAt?: string,
 ): AuditEventInput {
@@ -14,7 +15,7 @@ export function buildTransferabilityEvaluatedAuditEvent(
     actor: {
       id: actorId,
       type: "USER",
-      role: "TRANSFERABILITY_ANALYST",
+      role: actorMembershipRole,
     },
     action: "TRANSFERABILITY_ASSESSMENT_EVALUATED",
     entityType: "TRANSFERABILITY_ASSESSMENT",
@@ -42,6 +43,7 @@ export function buildAdoptionTransitionAuditEvent(
   snapshot: AdoptionRequestSnapshot,
   latestHistory: AdoptionRequestSnapshot["history"][number],
   actorId: string,
+  actorMembershipRole: string,
   correlationId?: string,
   occurredAt?: string,
 ): AuditEventInput {
@@ -51,7 +53,7 @@ export function buildAdoptionTransitionAuditEvent(
     actor: {
       id: actorId,
       type: "USER",
-      role: latestHistory.actorRole,
+      role: actorMembershipRole,
     },
     action: `ADOPTION_STATE_${latestHistory.to}`,
     entityType: "ADOPTION_REQUEST",
@@ -68,6 +70,7 @@ export function buildAdoptionTransitionAuditEvent(
       recommendation: snapshot.recommendation,
       assessmentId: snapshot.assessmentId,
       pathwayAuthorizedByHuman: snapshot.pathwayAuthorizedByHuman,
+      workflowActorRole: latestHistory.actorRole,
       autonomousAdoption: false,
     },
   };

@@ -5,33 +5,24 @@ import {
   hasBlockingProcurementFindings,
   lintChallengeSpec,
 } from "@/modules/challenges";
+import { authorizeRouteRequest } from "@/platform/route-authorization";
 
-function strings(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
-    : [];
-}
+const DEMO_SERVER_RECORDED_APPROVER_ROLES = [
+  "PROBLEM_OWNER",
+  "PROCUREMENT_REVIEWER",
+] as const;
 
 export async function POST(request: NextRequest) {
   try {
+    const authorization = await authorizeRouteRequest(request, [
+      "PROBLEM_OWNER",
+      "PROCUREMENT_REVIEWER",
+    ]);
+    if (!authorization.authorized) return authorization.response;
+
     const input = (await request.json()) as Record<string, unknown>;
     if (!input || typeof input !== "object" || Array.isArray(input)) {
       return NextResponse.json({ error: "Expected a JSON object" }, { status: 400 });
-    }
-
-    if (input.humanApproved !== true) {
-      return NextResponse.json(
-        { error: "Explicit human approval is required before freezing" },
-        { status: 400 },
-      );
-    }
-
-    const approverName = typeof input.approverName === "string" ? input.approverName.trim() : "";
-    if (approverName.length < 3) {
-      return NextResponse.json(
-        { error: "The human approver name is required for the demo approval record" },
-        { status: 400 },
-      );
     }
 
     const findings = lintChallengeSpec(input.specification);
@@ -57,10 +48,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const frozenAt = typeof input.frozenAt === "string" ? input.frozenAt : "";
     const frozen = freezeChallengeSpec(input.specification, {
-      frozenAt,
-      satisfiedApproverRoles: strings(input.satisfiedApproverRoles),
+      frozenAt: new Date().toISOString(),
+      satisfiedApproverRoles: DEMO_SERVER_RECORDED_APPROVER_ROLES,
       operatingMode: "DEMO",
     });
 
@@ -68,11 +58,14 @@ export async function POST(request: NextRequest) {
       {
         status: "FROZEN_NOT_PUBLISHED",
         label: "SIMULATED_FOR_DEMO",
-        approvedBy: approverName,
+        approvedBy: authorization.user.name,
+        approvedByUserId: authorization.actor.id,
+        approvedByMembershipRole: authorization.actor.membershipRole,
+        approvalBasis: "SIMULATED_FOR_DEMO_SERVER_FIXTURE",
         humanAuthorizationRecorded: true,
         specification: frozen,
         contentHash: frozen.integrity.contentHash,
-        notice: "Frozen for demo review. No tender was published and no external system was contacted.",
+        notice: "Frozen by an authenticated demo reviewer using server-recorded synthetic approval roles. No tender was published and no external system was contacted.",
       },
       { status: 200 },
     );

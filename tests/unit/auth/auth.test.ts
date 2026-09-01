@@ -18,8 +18,8 @@ vi.mock("../../../src/platform/db/client", () => {
 });
 
 // Demo user IDs from the seed
-const DEMO_FINANCE_USER_ID = "USR_SUNITA";
-const DEMO_PROBLEM_OWNER_USER_ID = "USR_ANJALI";
+const DEMO_FINANCE_USER_ID = "USR-SUNITA-RANE";
+const DEMO_PROBLEM_OWNER_USER_ID = "USR-ANJALI-DESHMUKH";
 
 // Mock user data
 const mockFinanceUser: User & { memberships: Membership[] } = {
@@ -34,7 +34,7 @@ const mockFinanceUser: User & { memberships: Membership[] } = {
     {
       id: "mem-1",
       userId: DEMO_FINANCE_USER_ID,
-      organizationId: "ORG_GOV",
+      organizationId: "ORG-GOV",
       role: "FINANCE_OFFICER",
       activeFrom: new Date(),
       activeTo: null,
@@ -54,7 +54,7 @@ const mockProblemOwnerUser: User & { memberships: Membership[] } = {
     {
       id: "mem-2",
       userId: DEMO_PROBLEM_OWNER_USER_ID,
-      organizationId: "ORG_GOV",
+      organizationId: "ORG-GOV",
       role: "PROBLEM_OWNER",
       activeFrom: new Date(),
       activeTo: null,
@@ -104,6 +104,39 @@ describe("Authentication and Authorization", () => {
       expect(user?.memberships).toBeDefined();
       expect(user?.memberships.length).toBeGreaterThan(0);
       expect(user?.memberships.some((m) => m.role === "FINANCE_OFFICER")).toBe(true);
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: DEMO_FINANCE_USER_ID },
+        include: {
+          memberships: {
+            where: {
+              activeFrom: { lte: expect.any(Date) },
+              OR: [
+                { activeTo: null },
+                { activeTo: { gt: expect.any(Date) } },
+              ],
+            },
+          },
+        },
+      });
+    });
+
+    it("rejects a suspended database user despite a valid signed session", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({
+        ...mockFinanceUser,
+        status: "SUSPENDED",
+      });
+
+      const sessionId = await createSession(DEMO_FINANCE_USER_ID);
+
+      await expect(getSessionUser(sessionId)).resolves.toBeNull();
+    });
+
+    it("rejects a signed session whose database user no longer exists", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
+
+      const sessionId = await createSession(DEMO_FINANCE_USER_ID);
+
+      await expect(getSessionUser(sessionId)).resolves.toBeNull();
     });
   });
 

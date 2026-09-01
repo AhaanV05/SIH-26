@@ -97,7 +97,11 @@ describe("Scale & Transferability Audit Trail Integration", () => {
 
     const assessEvent = appendAuditEvent(
       undefined,
-      buildTransferabilityEvaluatedAuditEvent(assessment, "USR-ANALYST-1"),
+      buildTransferabilityEvaluatedAuditEvent(
+        assessment,
+        "USR-PROBLEM-OWNER-1",
+        "PROBLEM_OWNER",
+      ),
     );
     chain.push(assessEvent);
 
@@ -124,7 +128,8 @@ describe("Scale & Transferability Audit Trail Integration", () => {
       buildAdoptionTransitionAuditEvent(
         snapshot,
         snapshot.history[snapshot.history.length - 1]!,
-        "USR-ENGINE-1",
+        "USR-PROBLEM-OWNER-1",
+        "PROBLEM_OWNER",
       ),
     );
     chain.push(adoptEvent);

@@ -14,7 +14,7 @@ export function buildPaymentReadinessEvaluatedAuditEvent(
     actor: {
       id: actorId,
       type: "USER",
-      role: "FINANCE_REVIEWER",
+      role: "FINANCE_OFFICER",
     },
     action: "PAYMENT_READINESS_EVALUATED",
     entityType: "PAYMENT_REQUEST",
@@ -56,7 +56,7 @@ export function buildPaymentDisbursementAuthorizedAuditEvent(
     actor: {
       id: actorId,
       type: "USER",
-      role: "DRAWING_DISBURSING_OFFICER",
+      role: "FINANCE_OFFICER",
     },
     action: "PAYMENT_DISBURSEMENT_AUTHORIZED",
     entityType: "PAYMENT_DISBURSEMENT",

@@ -8,6 +8,7 @@ export function buildMilestoneTransitionAuditEvent(
   snapshot: MilestoneWorkflowSnapshot,
   latestEvent: MilestoneWorkflowEvent,
   actorId: string,
+  actorMembershipRole: string,
   correlationId?: string,
   occurredAt?: string,
 ): AuditEventInput {
@@ -17,7 +18,7 @@ export function buildMilestoneTransitionAuditEvent(
     actor: {
       id: actorId,
       type: "USER",
-      role: latestEvent.actorRole,
+      role: actorMembershipRole,
     },
     action: `MILESTONE_STATE_${latestEvent.to}`,
     entityType: "PILOT_MILESTONE",
@@ -32,6 +33,7 @@ export function buildMilestoneTransitionAuditEvent(
       evidenceObjectIds: snapshot.evidenceObjectIds,
       acceptanceEvaluationId: snapshot.acceptanceEvaluationId,
       evaluationId: latestEvent.evaluationId ?? null,
+      workflowActorRole: latestEvent.actorRole,
       humanAuthorizationRequired: true,
     },
   };

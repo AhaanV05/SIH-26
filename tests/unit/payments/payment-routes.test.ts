@@ -1,4 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { NextResponse } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { authorizeRouteRequest } = vi.hoisted(() => ({
+  authorizeRouteRequest: vi.fn(),
+}));
+
+vi.mock("@/platform/route-authorization", () => ({
+  authorizeRouteRequest,
+}));
+
 import { POST as readinessPOST } from "@/app/api/payments/readiness/route";
 import { POST as disbursePOST } from "@/app/api/payments/disburse/route";
 import type { PaymentPacketInput } from "@/modules/payments";
@@ -21,11 +31,24 @@ const validPacket: PaymentPacketInput = {
 };
 
 describe("Payment API Routes (/api/payments/*)", () => {
+  beforeEach(() => {
+    authorizeRouteRequest.mockReset();
+    authorizeRouteRequest.mockResolvedValue({
+      authorized: true,
+      user: { id: "USR-SUNITA-RANE", name: "Sunita Rane" },
+      actor: {
+        id: "USR-SUNITA-RANE",
+        membershipRole: "FINANCE_OFFICER",
+        organizationId: "ORG-GOV",
+      },
+    });
+  });
+
   it("POST /api/payments/readiness returns readiness assessment and creates audit event", async () => {
     const request = new Request("http://localhost:3000/api/payments/readiness", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ packet: validPacket, actorId: "USR-FIN-1" }),
+      body: JSON.stringify({ packet: validPacket, actorId: "USR-SPOOFED-FINANCE" }),
     });
 
     const response = await readinessPOST(request);
@@ -37,6 +60,8 @@ describe("Payment API Routes (/api/payments/*)", () => {
     expect(body.readiness.satisfiedChecks).toBe(10);
     expect(body.auditEvent).toBeDefined();
     expect(body.auditEvent.action).toBe("PAYMENT_READINESS_EVALUATED");
+    expect(body.auditEvent.actor.id).toBe("USR-SUNITA-RANE");
+    expect(body.auditEvent.actor.role).toBe("FINANCE_OFFICER");
   });
 
   it("POST /api/payments/disburse succeeds with authorized officer and full readiness", async () => {
@@ -45,7 +70,7 @@ describe("Payment API Routes (/api/payments/*)", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         packet: validPacket,
-        actor: { id: "USR-DDO-1", role: "DRAWING_DISBURSING_OFFICER" },
+        actor: { id: "USR-SPOOFED-STARTUP", role: "STARTUP_CONTRIBUTOR" },
         reason: "Disbursement approved following verification of Ward 12 sandbox milestone deliverables.",
       }),
     });
@@ -61,9 +86,18 @@ describe("Payment API Routes (/api/payments/*)", () => {
     expect(body.autonomousDisbursement).toBe(false);
     expect(body.auditEvent).toBeDefined();
     expect(body.auditEvent.action).toBe("PAYMENT_DISBURSEMENT_AUTHORIZED");
+    expect(body.auditEvent.actor.id).toBe("USR-SUNITA-RANE");
+    expect(body.auditEvent.actor.role).toBe("FINANCE_OFFICER");
   });
 
   it("POST /api/payments/disburse rejects unauthorized roles", async () => {
+    authorizeRouteRequest.mockResolvedValueOnce({
+      authorized: false,
+      response: NextResponse.json(
+        { success: false, error: "Insufficient permissions." },
+        { status: 403 },
+      ),
+    });
     const request = new Request("http://localhost:3000/api/payments/disburse", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -78,6 +112,23 @@ describe("Payment API Routes (/api/payments/*)", () => {
 
     expect(response.status).toBe(403);
     expect(body.success).toBe(false);
+  });
+
+  it("POST /api/payments/readiness rejects a missing session", async () => {
+    authorizeRouteRequest.mockResolvedValueOnce({
+      authorized: false,
+      response: NextResponse.json(
+        { success: false, error: "Authentication required." },
+        { status: 401 },
+      ),
+    });
+    const response = await readinessPOST(new Request("http://localhost:3000/api/payments/readiness", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ packet: validPacket }),
+    }));
+
+    expect(response.status).toBe(401);
   });
 
   it("POST /api/payments/disburse blocks incomplete payment packets", async () => {

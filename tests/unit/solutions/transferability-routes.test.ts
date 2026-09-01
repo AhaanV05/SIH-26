@@ -1,4 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { NextResponse } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { authorizeRouteRequest } = vi.hoisted(() => ({
+  authorizeRouteRequest: vi.fn(),
+}));
+
+vi.mock("@/platform/route-authorization", () => ({
+  authorizeRouteRequest,
+}));
+
 import { GET, POST } from "@/app/api/solutions/transferability/route";
 import type { TransferabilityFactorInput } from "@/modules/solutions";
 
@@ -14,6 +24,19 @@ const testFactors: TransferabilityFactorInput[] = [
 ];
 
 describe("Transferability API Route (/api/solutions/transferability)", () => {
+  beforeEach(() => {
+    authorizeRouteRequest.mockReset();
+    authorizeRouteRequest.mockResolvedValue({
+      authorized: true,
+      user: { id: "USR-PRAKASH-WAGH", name: "Prakash Wagh" },
+      actor: {
+        id: "USR-PRAKASH-WAGH",
+        membershipRole: "PROBLEM_OWNER",
+        organizationId: "ORG-GOV",
+      },
+    });
+  });
+
   it("GET returns standard demo transferability assessment", async () => {
     const request = new Request("http://localhost:3000/api/solutions/transferability?solutionCardId=SOL-1");
     const response = await GET(request);
@@ -41,7 +64,7 @@ describe("Transferability API Route (/api/solutions/transferability)", () => {
           displayLabel: "Synthetic demonstration data",
           factors: testFactors,
         },
-        actorId: "USR-ANALYST-1",
+        actorId: "USR-SPOOFED-ANALYST",
       }),
     });
 
@@ -54,6 +77,8 @@ describe("Transferability API Route (/api/solutions/transferability)", () => {
     expect(body.assessment.recommendation).toBe("RUN_LOCALIZED_MICRO_PILOT");
     expect(body.auditEvent).toBeDefined();
     expect(body.auditEvent.action).toBe("TRANSFERABILITY_ASSESSMENT_EVALUATED");
+    expect(body.auditEvent.actor.id).toBe("USR-PRAKASH-WAGH");
+    expect(body.auditEvent.actor.role).toBe("PROBLEM_OWNER");
   });
 
   it("POST returns 400 when missing factors", async () => {
@@ -68,5 +93,33 @@ describe("Transferability API Route (/api/solutions/transferability)", () => {
 
     expect(response.status).toBe(400);
     expect(body.success).toBe(false);
+  });
+
+  it("POST rejects a startup that claims a government analyst identity", async () => {
+    authorizeRouteRequest.mockResolvedValueOnce({
+      authorized: false,
+      response: NextResponse.json(
+        { success: false, error: "Insufficient permissions." },
+        { status: 403 },
+      ),
+    });
+    const response = await POST(new Request("http://localhost:3000/api/solutions/transferability", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assessmentInput: {
+          assessmentId: "ASSESS-DENIED",
+          solutionCardId: "SOL-1",
+          sourceContextId: "PUNE",
+          targetContextId: "SATARA",
+          synthetic: true,
+          displayLabel: "Synthetic demonstration data",
+          factors: testFactors,
+        },
+        actorId: "USR-PRAKASH-WAGH",
+      }),
+    }));
+
+    expect(response.status).toBe(403);
   });
 });

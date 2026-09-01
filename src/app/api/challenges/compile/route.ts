@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { compileChallengeDraft } from "@/modules/compiler";
+import { authorizeRouteRequest } from "@/platform/route-authorization";
 
 export async function POST(request: NextRequest) {
   try {
+    const authorization = await authorizeRouteRequest(request, ["PROBLEM_OWNER"]);
+    if (!authorization.authorized) return authorization.response;
+
     const input = (await request.json()) as unknown;
     if (typeof input !== "object" || input === null || Array.isArray(input)) {
       return NextResponse.json({ error: "Expected a JSON object" }, { status: 400 });

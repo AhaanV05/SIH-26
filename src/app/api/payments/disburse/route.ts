@@ -5,6 +5,7 @@ import {
   evaluatePaymentReadiness,
   type PaymentPacketInput,
 } from "@/modules/payments";
+import { authorizeRouteRequest } from "@/platform/route-authorization";
 
 const auditEventLog: AuditEvent[] = [];
 
@@ -19,31 +20,17 @@ function recordAuditEvent(
 
 export async function POST(request: Request) {
   try {
+    const authorization = await authorizeRouteRequest(request, ["FINANCE_OFFICER"]);
+    if (!authorization.authorized) return authorization.response;
+
     const body = await request.json();
     const packet = body.packet as PaymentPacketInput;
-    const actor = (body.actor as { id: string; role: string }) ?? {
-      id: "USR-DDO-1",
-      role: "DRAWING_DISBURSING_OFFICER",
-    };
     const reason = body.reason as string | undefined;
 
     if (!packet) {
       return NextResponse.json(
         { success: false, error: "Missing required 'packet' in request body." },
         { status: 400 },
-      );
-    }
-
-    if (
-      actor.role !== "DRAWING_DISBURSING_OFFICER" &&
-      actor.role !== "FINANCE_REVIEWER"
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Only authorized DRAWING_DISBURSING_OFFICER or FINANCE_REVIEWER roles may disburse payments.",
-        },
-        { status: 403 },
       );
     }
 
@@ -76,7 +63,7 @@ export async function POST(request: Request) {
           transactionReference,
           reason,
         },
-        actor.id,
+        authorization.actor.id,
         undefined,
         disbursedAt,
       ),

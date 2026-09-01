@@ -24,9 +24,9 @@ export const DEMO_FROZEN_RUBRIC: FrozenRubric = {
 };
 
 export const DEMO_PENDING_ASSIGNMENT: EvaluationAssignment = {
-  id: "ASSIGN-PROP-ECOSCAN-USR-EVAL-3",
+  id: "ASSIGN-PROP-ECOSCAN-USR-FARHAN-SHEIKH",
   proposalId: "PROP-ECOSCAN",
-  evaluatorId: "USR-EVAL-3",
+  evaluatorId: "USR-FARHAN-SHEIKH",
   rubricVersionId: DEMO_FROZEN_RUBRIC.versionId,
   rubricContentHash: DEMO_FROZEN_RUBRIC.contentHash,
   status: "ASSIGNED",
@@ -65,8 +65,8 @@ function seededSubmission(
 }
 
 export const DEMO_EXISTING_SUBMISSIONS: readonly EvaluationSubmission[] = [
-  seededSubmission("ASSIGN-PROP-ECOSCAN-USR-EVAL-1", "USR-EVAL-1", [9, 8, 9, 7, 7]),
-  seededSubmission("ASSIGN-PROP-ECOSCAN-USR-EVAL-2", "USR-EVAL-2", [8, 8, 5, 7, 6]),
+  seededSubmission("ASSIGN-PROP-ECOSCAN-USR-MEERA-JOSHI", "USR-MEERA-JOSHI", [9, 8, 9, 7, 7]),
+  seededSubmission("ASSIGN-PROP-ECOSCAN-USR-VIKRAM-RAO", "USR-VIKRAM-RAO", [8, 8, 5, 7, 6]),
 ];
 
 export const DEMO_EVALUATION_LABEL = "SIMULATED_FOR_DEMO · Synthetic evaluation fixture";

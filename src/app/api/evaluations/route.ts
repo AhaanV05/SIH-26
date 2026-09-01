@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { appendAuditEvent, type AuditEvent } from "@/modules/audit/audit-chain";
+import { authorizeRouteRequest } from "@/platform/route-authorization";
 import {
   DEMO_DEFAULT_SCORES,
   DEMO_EVALUATION_LABEL,
@@ -42,10 +43,30 @@ function recordAuditEvent(eventInput: ReturnType<typeof buildEvaluationConflictD
 
 export async function GET(request: Request) {
   try {
+    const authorization = await authorizeRouteRequest(request, [
+      "EVALUATOR",
+      "PROCUREMENT_REVIEWER",
+      "PROBLEM_OWNER",
+    ]);
+    if (!authorization.authorized) return authorization.response;
+
     const { searchParams } = new URL(request.url);
     const proposalId = searchParams.get("proposalId") ?? "PROP-ECOSCAN";
 
-    const advisories = analyzeEvaluationIntegrity(DEMO_FROZEN_RUBRIC, currentSubmissions);
+    const isEvaluator = authorization.actor.membershipRole === "EVALUATOR";
+    if (isEvaluator && authorization.actor.id !== currentAssignment.evaluatorId) {
+      return NextResponse.json(
+        { success: false, error: "This evaluation assignment belongs to another evaluator." },
+        { status: 403 },
+      );
+    }
+
+    const visibleSubmissions = isEvaluator
+      ? currentSubmissions.filter((submission) => submission.evaluatorId === authorization.actor.id)
+      : currentSubmissions;
+    const advisories = isEvaluator
+      ? []
+      : analyzeEvaluationIntegrity(DEMO_FROZEN_RUBRIC, currentSubmissions);
 
     return NextResponse.json({
       success: true,
@@ -53,9 +74,9 @@ export async function GET(request: Request) {
       label: DEMO_EVALUATION_LABEL,
       rubric: DEMO_FROZEN_RUBRIC,
       assignment: currentAssignment,
-      submissions: currentSubmissions,
+      submissions: visibleSubmissions,
       advisories,
-      decision: currentDecision,
+      decision: isEvaluator ? null : currentDecision,
       auditEventsCount: auditEventLog.length,
       latestAuditHash: getLatestAuditEvent()?.eventHash ?? null,
     });
@@ -82,9 +103,25 @@ export async function POST(request: Request) {
       );
     }
 
+    const allowedRoles = action === "MODERATE_PROPOSAL"
+      ? (["PROCUREMENT_REVIEWER", "PROBLEM_OWNER"] as const)
+      : action === "DECLARE_CONFLICT" || action === "SUBMIT_EVALUATION"
+        ? (["EVALUATOR"] as const)
+        : null;
+
+    if (!allowedRoles) {
+      return NextResponse.json(
+        { success: false, error: `Unsupported evaluation action '${action}'.` },
+        { status: 400 },
+      );
+    }
+
+    const authorization = await authorizeRouteRequest(request, allowedRoles);
+    if (!authorization.authorized) return authorization.response;
+
     if (action === "DECLARE_CONFLICT") {
-      const actor: EvaluationActor = body.actor ?? {
-        id: currentAssignment.evaluatorId,
+      const actor: EvaluationActor = {
+        id: authorization.actor.id,
         role: "EVALUATOR",
       };
       const hasConflict = Boolean(body.hasConflict);
@@ -110,8 +147,8 @@ export async function POST(request: Request) {
     }
 
     if (action === "SUBMIT_EVALUATION") {
-      const actor: EvaluationActor = body.actor ?? {
-        id: currentAssignment.evaluatorId,
+      const actor: EvaluationActor = {
+        id: authorization.actor.id,
         role: "EVALUATOR",
       };
       const scores = (body.scores as CriterionScoreInput[]) ?? DEMO_DEFAULT_SCORES;
@@ -144,9 +181,11 @@ export async function POST(request: Request) {
     }
 
     if (action === "MODERATE_PROPOSAL") {
-      const actor: EvaluationActor = body.actor ?? {
-        id: "USR-PROC-REV-1",
-        role: "PROCUREMENT_REVIEWER",
+      const actor: EvaluationActor = {
+        id: authorization.actor.id,
+        role: authorization.actor.membershipRole === "PROBLEM_OWNER"
+          ? "PROBLEM_OWNER"
+          : "PROCUREMENT_REVIEWER",
       };
       const proposalId = body.proposalId ?? "PROP-ECOSCAN";
       const decisionType = (body.decision as ModerationDecisionType) ?? "SELECTED";
@@ -156,9 +195,9 @@ export async function POST(request: Request) {
 
       const advisories = analyzeEvaluationIntegrity(DEMO_FROZEN_RUBRIC, currentSubmissions);
       const eligibleAssignmentIds = [
-        "ASSIGN-PROP-ECOSCAN-USR-EVAL-1",
-        "ASSIGN-PROP-ECOSCAN-USR-EVAL-2",
-        "ASSIGN-PROP-ECOSCAN-USR-EVAL-3",
+        "ASSIGN-PROP-ECOSCAN-USR-MEERA-JOSHI",
+        "ASSIGN-PROP-ECOSCAN-USR-VIKRAM-RAO",
+        "ASSIGN-PROP-ECOSCAN-USR-FARHAN-SHEIKH",
       ];
 
       const moderation = moderateProposal({
@@ -186,10 +225,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json(
-      { success: false, error: `Unsupported evaluation action '${action}'.` },
-      { status: 400 },
-    );
+    throw new Error(`Unreachable evaluation action '${action}'.`);
   } catch (error) {
     if (error instanceof EvaluationRuleError) {
       return NextResponse.json(

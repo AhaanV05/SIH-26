@@ -5,6 +5,7 @@ import {
   buildTransferabilityEvaluatedAuditEvent,
   type TransferabilityAssessmentInput,
 } from "@/modules/solutions";
+import { authorizeRouteRequest } from "@/platform/route-authorization";
 
 const auditEventLog: AuditEvent[] = [];
 
@@ -86,6 +87,12 @@ const DEFAULT_FACTORS = [
 
 export async function GET(request: Request) {
   try {
+    const authorization = await authorizeRouteRequest(request, [
+      "PROBLEM_OWNER",
+      "PROCUREMENT_REVIEWER",
+    ]);
+    if (!authorization.authorized) return authorization.response;
+
     const { searchParams } = new URL(request.url);
     const solutionCardId = searchParams.get("solutionCardId") ?? "SOLUTION-WASTE-001";
     const sourceContextId = searchParams.get("sourceContextId") ?? "DEPT-PUNE-SWM";
@@ -120,9 +127,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const authorization = await authorizeRouteRequest(request, [
+      "PROBLEM_OWNER",
+      "PROCUREMENT_REVIEWER",
+    ]);
+    if (!authorization.authorized) return authorization.response;
+
     const body = await request.json();
     const input = body.assessmentInput as TransferabilityAssessmentInput;
-    const actorId = (body.actorId as string) ?? "USR-SCALE-ANALYST-1";
 
     if (!input || !input.factors || input.factors.length === 0) {
       return NextResponse.json(
@@ -133,7 +145,11 @@ export async function POST(request: Request) {
 
     const assessment = assessTransferability(input);
     const auditEvent = recordAuditEvent(
-      buildTransferabilityEvaluatedAuditEvent(assessment, actorId),
+      buildTransferabilityEvaluatedAuditEvent(
+        assessment,
+        authorization.actor.id,
+        authorization.actor.membershipRole,
+      ),
     );
 
     return NextResponse.json({

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { appendAuditEvent, type AuditEvent } from "@/modules/audit/audit-chain";
 import {
   buildAdoptionTransitionAuditEvent,
+  assessTransferability,
   createAdoptionRequest,
   transitionAdoptionRequest,
   type AdoptionActorRole,
@@ -9,9 +10,40 @@ import {
   type AdoptionRequestState,
   type TransferabilityAssessment,
 } from "@/modules/solutions";
+import { authorizeRouteRequest } from "@/platform/route-authorization";
+import type { MembershipRole } from "@prisma/client";
 
 const adoptionStore = new Map<string, AdoptionRequestSnapshot>();
 const auditEventLog: AuditEvent[] = [];
+
+type AdoptionRoutePolicy = {
+  allowedRoles: readonly MembershipRole[];
+  actorRole: AdoptionActorRole;
+};
+
+function policyForAdoptionDestination(
+  destination: AdoptionRequestState,
+): AdoptionRoutePolicy | null {
+  if (destination === "ASSESSMENT_READY") {
+    return {
+      allowedRoles: ["PROBLEM_OWNER"],
+      actorRole: "TRANSFERABILITY_RULE_ENGINE",
+    };
+  }
+  if (destination === "SUBMITTED_FOR_AUTHORIZATION") {
+    return {
+      allowedRoles: ["PROBLEM_OWNER"],
+      actorRole: "PROBLEM_OWNER",
+    };
+  }
+  if (destination === "AUTHORIZED" || destination === "RETURNED") {
+    return {
+      allowedRoles: ["PROCUREMENT_REVIEWER"],
+      actorRole: "PROCUREMENT_REVIEWER",
+    };
+  }
+  return null;
+}
 
 function getOrCreateAdoptionRequest(
   requestId: string,
@@ -41,6 +73,12 @@ function recordAuditEvent(
 
 export async function GET(request: Request) {
   try {
+    const authorization = await authorizeRouteRequest(request, [
+      "PROBLEM_OWNER",
+      "PROCUREMENT_REVIEWER",
+    ]);
+    if (!authorization.authorized) return authorization.response;
+
     const { searchParams } = new URL(request.url);
     const requestId = searchParams.get("requestId") ?? "ADOPTION-SATARA-001";
 
@@ -68,23 +106,32 @@ export async function POST(request: Request) {
     const body = await request.json();
     const requestId = body.requestId as string;
     const to = body.to as AdoptionRequestState;
-    const actorRole = body.actorRole as AdoptionActorRole;
-    const actorId = (body.actorId as string) ?? "USR-PROC-REV-1";
     const reason = body.reason as string;
     const expectedVersion = Number(body.expectedVersion ?? 0);
     const assessment = body.assessment as TransferabilityAssessment | undefined;
     const solutionCardId = (body.solutionCardId as string) ?? "SOLUTION-WASTE-001";
     const targetDepartmentId = (body.targetDepartmentId as string) ?? "DEPT-SATARA-SERVICES";
 
-    if (!requestId || !to || !actorRole || !reason) {
+    if (!requestId || !to || !reason) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: requestId, to, actorRole, reason.",
+          error: "Missing required fields: requestId, to, reason.",
         },
         { status: 400 },
       );
     }
+
+    const policy = policyForAdoptionDestination(to);
+    if (!policy) {
+      return NextResponse.json(
+        { success: false, error: `Unsupported adoption destination '${to}'.` },
+        { status: 400 },
+      );
+    }
+
+    const authorization = await authorizeRouteRequest(request, policy.allowedRoles);
+    if (!authorization.authorized) return authorization.response;
 
     const currentSnapshot = getOrCreateAdoptionRequest(
       requestId,
@@ -92,12 +139,31 @@ export async function POST(request: Request) {
       targetDepartmentId,
     );
 
+    const verifiedAssessment = to === "ASSESSMENT_READY" && assessment
+      ? assessTransferability({
+          assessmentId: assessment.id,
+          solutionCardId: assessment.solutionCardId,
+          sourceContextId: assessment.sourceContextId,
+          targetContextId: assessment.targetContextId,
+          synthetic: assessment.synthetic,
+          displayLabel: assessment.displayLabel,
+          factors: assessment.factors.map((factor) => ({
+            key: factor.key,
+            score: factor.score,
+            rationale: factor.rationale,
+            evidenceIds: factor.evidenceIds,
+            gaps: factor.gaps,
+            constraint: factor.constraint,
+          })),
+        })
+      : undefined;
+
     const nextSnapshot = transitionAdoptionRequest(currentSnapshot, {
       expectedVersion,
       to,
-      actorRole,
+      actorRole: policy.actorRole,
       reason,
-      assessment,
+      assessment: verifiedAssessment,
     });
 
     adoptionStore.set(requestId, nextSnapshot);
@@ -108,7 +174,12 @@ export async function POST(request: Request) {
     }
 
     const auditEvent = recordAuditEvent(
-      buildAdoptionTransitionAuditEvent(nextSnapshot, latestHistory, actorId),
+      buildAdoptionTransitionAuditEvent(
+        nextSnapshot,
+        latestHistory,
+        authorization.actor.id,
+        authorization.actor.membershipRole,
+      ),
     );
 
     return NextResponse.json({

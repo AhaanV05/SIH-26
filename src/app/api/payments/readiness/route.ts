@@ -5,6 +5,7 @@ import {
   evaluatePaymentReadiness,
   type PaymentPacketInput,
 } from "@/modules/payments";
+import { authorizeRouteRequest } from "@/platform/route-authorization";
 
 const auditEventLog: AuditEvent[] = [];
 
@@ -19,9 +20,11 @@ function recordAuditEvent(
 
 export async function POST(request: Request) {
   try {
+    const authorization = await authorizeRouteRequest(request, ["FINANCE_OFFICER"]);
+    if (!authorization.authorized) return authorization.response;
+
     const body = await request.json();
     const packet = body.packet as PaymentPacketInput;
-    const actorId = (body.actorId as string) ?? "USR-FINANCE-1";
 
     if (!packet) {
       return NextResponse.json(
@@ -35,7 +38,11 @@ export async function POST(request: Request) {
     let auditEvent: AuditEvent | null = null;
     if (packet.milestoneId) {
       auditEvent = recordAuditEvent(
-        buildPaymentReadinessEvaluatedAuditEvent(packet.milestoneId, readiness, actorId),
+        buildPaymentReadinessEvaluatedAuditEvent(
+          packet.milestoneId,
+          readiness,
+          authorization.actor.id,
+        ),
       );
     }
 

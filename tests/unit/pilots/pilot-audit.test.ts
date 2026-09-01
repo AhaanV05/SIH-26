@@ -30,6 +30,7 @@ describe("Pilot Milestone Audit Trail Integration", () => {
         snapshot,
         snapshot.events[snapshot.events.length - 1]!,
         "USR-OFFICER-1",
+        "PROBLEM_OWNER",
       ),
     );
     chain.push(startEvent);
@@ -51,6 +52,7 @@ describe("Pilot Milestone Audit Trail Integration", () => {
         snapshot,
         snapshot.events[snapshot.events.length - 1]!,
         "USR-FOUNDER-1",
+        "STARTUP_CONTRIBUTOR",
       ),
     );
     chain.push(submitEvent);
