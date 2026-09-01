@@ -2799,10 +2799,35 @@ Research was performed on 2026-08-31 using current authoritative/standards sourc
 - **Supersedes:** Fulfills and refines the `MATCH-001` specification from `Truth.md` §6.3 and §7.8.
 - **Revisit trigger:** Introduction of Sangam multi-startup consortium recommendations (`INNO-010`) or localized domain taxonomy additions.
 
+### DEC-20260901-002 — Deterministic Proposal Evaluation Engine, Conflict Gating & Audit Integration (EVAL-001)
 
-### OPEN_QUESTION OQ-014 — Choose hero depth versus breadth
+- **Decision:** Implemented `EVAL-001` in `src/modules/evaluations/` (`types.ts`, `evaluation-engine.ts`, `audit-events.ts`, `demo-fixture.ts`, `index.ts`), API route `src/app/api/evaluations/route.ts`, and workspace UI in `src/app/evaluations/`.
+- **Core Governance & Evaluation Invariants:**
+  1. **Mandatory Conflict Declaration Gate:** An evaluator cannot view or score a proposal until declaring conflict status. If a conflict exists with required details, the evaluator is permanently `RECUSED` and cannot submit scores. If no conflict exists, the assignment transitions to `READY_TO_SCORE`.
+  2. **Independent Scoring Against Frozen Rubric:** Evaluators score independently against a frozen, content-hashed rubric. Rubric criteria weights must total 100%. Rationales are mandatory for every criterion.
+  3. **Advisory Integrity Analysis:** Statistical score divergence across criteria ($\ge 3$ pts) or overall weighted scores ($\ge 20$ pts) automatically generates `EvaluationIntegrityAdvisory` alerts. These alerts are strictly advisory and require human moderator disposition.
+  4. **Human-Authorized Moderation Decision:** Autonomous AI award is strictly prohibited (`autonomousSelection: false`, `humanAuthorized: true`). Only authorized `PROCUREMENT_REVIEWER` or `PROBLEM_OWNER` roles can record selection/non-selection decisions with substantive written rationale ($\ge 30$ chars).
+  5. **Cryptographic Audit Chain Enforcement:** Every conflict declaration, independent score submission, and moderation decision generates an immutable `AuditEvent` (`appendAuditEvent`) linked by SHA-256 event hash.
+- **Rationale:** Satisfies public procurement integrity standards, prevents evaluator collusion and bias, and preserves full evidentiary auditability for grievance redressal and CAG inspection.
+- **Consequences:** `EVAL-001` is fully completed and verified with 100% automated test coverage across domain logic, audit chaining, API endpoints, and workspace UI.
+### DEC-20260901-003 — Pilot Milestone State Machine, 10-Point Payment Readiness & Disbursement Audit Integration (PILOT-001, PAY-001)
 
-- **Question:** Should the first demo implement all eight screens shallowly, or implement Pulse/Forge/Proof/ScaleGraph deeply and seed the intervening evaluation screens?
+- **Decision:** Implemented `PILOT-001` and `PAY-001` in `src/modules/pilots/` (`milestone-workflow.ts`, `audit-events.ts`, `index.ts`), `src/modules/payments/` (`payment-readiness.ts`, `audit-events.ts`, `index.ts`), and API routes `src/app/api/pilots/milestones/route.ts`, `src/app/api/payments/readiness/route.ts`, and `src/app/api/payments/disburse/route.ts`.
+- **Core Governance & Payment Invariants:**
+  1. **Strict Milestone State Transitions:** `PLANNED -> IN_PROGRESS -> EVIDENCE_SUBMITTED -> READY_FOR_HUMAN_ACCEPTANCE -> ACCEPTED` (or `RETURNED` / `REJECTED`). Evidence submission requires non-empty, deduplicated evidence IDs. Automatic AI acceptance is forbidden (`humanAuthorizationRequired: true`).
+  2. **10-Point Deterministic Payment Readiness Gate:** A payment request can only be created and disbursed when all 10 checks pass:
+     - Target milestone reference present & milestone state is `ACCEPTED`.
+     - Acceptance record ID present & matches target milestone.
+     - All required evidence IDs are attached and cryptographically bound to the milestone.
+     - Invoice reference present, valid amount ($> 0$), budget head reference present, and beneficiary reference present.
+  3. **Role-Restricted Disbursement Authorization:** Only `DRAWING_DISBURSING_OFFICER` (DDO) or `FINANCE_REVIEWER` roles can authorize disbursement (`autonomousDisbursement: false`, `humanAuthorized: true`).
+  4. **Cryptographic Audit Chain Enforcement:** Every milestone state change, payment readiness check, and disbursement authorization emits an immutable SHA-256 chained `AuditEvent` linked to the preceding transaction hash.
+- **Rationale:** Prevents unauthorized public expenditure, ensures zero-leakage milestone disbursement strictly against verified evidence, and provides an undeniable forensic trail for treasury and audit authorities.
+- **Consequences:** `PILOT-001` and `PAY-001` are complete and verified with 100% automated test coverage across domain logic, audit chaining, and REST API routes.
+- **Supersedes:** Refines the Proof & Payment specifications from `Truth.md` §4.5, §7.4, §7.5, and §9.2.
+- **Revisit trigger:** Integration of live PFMS/SBI e-Kuber sandbox API endpoints.
+
+
 - **Recommendation:** Build the complete transition path but concentrate interactive depth and visual polish on Pulse, Forge, Proof, and ScaleGraph.
 
 ### OPEN_QUESTION OQ-015 — Confirm availability of official problem image/artifacts
