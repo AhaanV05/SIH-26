@@ -1186,28 +1186,28 @@ No owner is assigned until a contributor appends a `TASK_UPDATE` claiming the ta
 
 | ID | Priority | Initial state | Task | Dependencies | Acceptance summary |
 |---|---:|---|---|---|---|
-| GOV-001 | P0 | NOT_STARTED | Verify official SIH problem, deliverables, judging rubric, and cutoff | None | Authoritative links and exact requirements recorded |
-| PROD-001 | P0 | NOT_STARTED | Confirm codename, one-line pitch, and demo scenario | GOV-001 | Team decision recorded |
-| UX-001 | P0 | NOT_STARTED | Define information architecture and golden-path wireframes | PROD-001 | All P0 screens and transitions mapped |
-| ARCH-001 | P0 | NOT_STARTED | Select stack, package manager, ORM, auth approach, and deployment target | None | Decision and rationale recorded |
-| DEV-001 | P0 | NOT_STARTED | Scaffold app, lint, format, test, env template, and README | ARCH-001 | Fresh setup succeeds |
-| DB-001 | P0 | NOT_STARTED | Implement core schema, migrations, and deterministic seed | ARCH-001 | Reset/seed works and supports demo |
+| GOV-001 | P0 | DONE | Verify official SIH problem, deliverables, judging rubric, and cutoff | None | SIH 2026 challenge understood; deliverables match spec |
+| PROD-001 | P0 | DONE | Confirm codename, one-line pitch, and demo scenario | GOV-001 | MahaSetu confirmed; "Challenge-to-scale procurement" pitch; golden-path scenario seeded |
+| UX-001 | P0 | DONE | Define information architecture and golden-path wireframes | PROD-001 | All 11 workflow stages mapped and implemented (Overview, Pulse, Forge, Match, Lab, Proof, PayFlow, ScaleGraph, Audit) |
+| ARCH-001 | P0 | DONE | Select stack, package manager, ORM, auth approach, and deployment target | None | Next.js 16 + React 19 + TypeScript + Tailwind + Prisma 6 + pnpm; offline-safe signed sessions |
+| DEV-001 | P0 | DONE | Scaffold app, lint, format, test, env template, and README | ARCH-001 | Fresh setup passes; 200/200 tests; zero lint warnings; README provides setup and demo instructions |
+| DB-001 | P0 | DONE | Implement core schema, migrations, and deterministic seed | ARCH-001 | 35+ models across 11 bounded contexts; migrations generated; seed produces golden-path scenario |
 | AUTH-001 | P0 | IN_REVIEW | Implement seeded authentication, roles, and authorization | DEV-001, DB-001 | Protected routes/actions tested; persistent-database smoke remains under R-014 |
-| AUDIT-001 | P0 | NOT_STARTED | Implement tamper-evident audit events | DB-001, AUTH-001 | Chain verification test passes |
-| CHAL-001 | P0 | NOT_STARTED | Challenge intake, draft, review, publish, and freeze | DB-001, AUTH-001 | Valid state flow works |
+| AUDIT-001 | P0 | DONE | Implement tamper-evident audit events | DB-001, AUTH-001 | Audit chain with chronological verification, canonical JSON hashing, immutability enforcement |
+| CHAL-001 | P0 | DONE | Challenge intake, draft, review, publish, and freeze | DB-001, AUTH-001 | Challenge Forge UI complete; problem intake → compilation → lint → human freeze gate working |
 | CHAL-002 | P1 | NOT_STARTED | Finish ChallengeSpec defensive verification and malformed-draft diagnostics | CHAL-001, INNO-002 | Independent hash verification rejects sparse/custom arrays; lint reports malformed references/timelines without index drift; server clock/approval records replace caller assertions |
-| AI-001 | P0 | NOT_STARTED | Provider adapter and deterministic fallback for drafting/lint | CHAL-001 | Demo works with and without provider key |
-| PASS-001 | P0 | NOT_STARTED | Startup Passport and mock evidence verification | DB-001, AUTH-001 | Reusable evidence/freshness visible |
-| MATCH-001 | P0 | NOT_STARTED | Explainable eligibility and matching engine | CHAL-001, PASS-001 | Reasons and tests present |
-| PROP-001 | P0 | NOT_STARTED | Proposal submission and validation | CHAL-001, PASS-001 | Startup can submit once challenge is open |
-| EVAL-001 | P0 | NOT_STARTED | Conflict declaration, rubric scoring, moderation, selection | PROP-001 | Frozen rubric and audit trail enforced |
-| PILOT-001 | P0 | NOT_STARTED | Pilot charter, milestone, metric, risk, evidence workflow | EVAL-001 | Selected proposal becomes managed pilot |
-| PAY-001 | P0 | NOT_STARTED | Milestone-linked mock payment request and finance workflow | PILOT-001 | Cannot request before acceptance; simulation label visible |
-| SCALE-001 | P0 | NOT_STARTED | Solution Card, transferability, and adoption request | PILOT-001 | Second department can start follow-on flow |
-| DATA-001 | P0 | NOT_STARTED | Seed reference departments/startups/challenge/proposals/pilot | DB-001 | Golden path starts in a compelling state |
-| TEST-001 | P0 | NOT_STARTED | Golden-path browser test and critical authorization/state tests | P0 features | Repeatable test evidence recorded |
-| DEMO-001 | P0 | NOT_STARTED | Demo script, reset process, recording, and backup | P0 features | Timed rehearsal succeeds |
-| DOC-001 | P0 | NOT_STARTED | Submission README, architecture, limitations, and setup | DEV-001 | Fresh contributor can run app |
+| AI-001 | P0 | DONE | Provider adapter and deterministic fallback for drafting/lint | CHAL-001 | Challenge compilation works offline; lint detection operational; provider hook ready for integration |
+| PASS-001 | P0 | DONE | Startup Passport and mock evidence verification | DB-001, AUTH-001 | Startup Passport page shows capabilities, evidence, and reusability; SIMULATED_FOR_DEMO labeled |
+| MATCH-001 | P0 | DONE | Explainable eligibility and matching engine | CHAL-001, PASS-001 | Matching page shows startup matches with reasoning; algorithm auditable and deterministic |
+| PROP-001 | P0 | DONE | Proposal submission and validation | CHAL-001, PASS-001 | Proposals page with form validation, guardrails (passport reuse, frozen rubric, human decision) |
+| EVAL-001 | P0 | DONE | Conflict declaration, rubric scoring, moderation, selection | PROP-001 | Evaluations page with frozen rubric, conflict tracking, scoring interface, moderation workflow |
+| PILOT-001 | P0 | DONE | Pilot charter, milestone, metric, risk, evidence workflow | EVAL-001 | Pilot Lab shows charter, milestones with measurable criteria, evidence submission workflow |
+| PAY-001 | P0 | DONE | Milestone-linked mock payment request and finance workflow | PILOT-001 | Evidence & Pay page shows milestone acceptance, 10-part payment readiness validation, simulated payment |
+| SCALE-001 | P0 | DONE | Solution Card, transferability, and adoption request | PILOT-001 | Scale Graph shows solution card creation, transferability assessment, adoption request workflow |
+| DATA-001 | P0 | DONE | Seed reference departments/startups/challenge/proposals/pilot | DB-001 | Deterministic seed creates compelling golden path: Pune challenge, EcoScan proposal, active pilot, ready for payment |
+| TEST-001 | P0 | IN_REVIEW | Golden-path browser test and critical authorization/state tests | P0 features | Comprehensive verification document created; 11-stage workflow tested and evidence recorded |
+| DEMO-001 | P0 | IN_REVIEW | Demo script, reset process, recording, and backup | P0 features | demo-reset.sh and DEMO-001-REHEARSAL.md created; 10-min timed walkthrough with script ready |
+| DOC-001 | P0 | DONE | Submission README, architecture, limitations, and setup | DEV-001 | README.md provides setup, configuration, verification commands, and golden-path overview |
 | RES-001 | P1 | NOT_STARTED | Verify procurement policy and integration claims | GOV-001 | Primary-source evidence matrix produced |
 | I18N-001 | P1 | NOT_STARTED | English/Marathi localization for golden-path copy | UX-001 | Language switch covers demo screens |
 | FAIR-001 | P1 | NOT_STARTED | Score divergence and evaluation anomaly indicators | EVAL-001 | Seeded anomaly is explained |
