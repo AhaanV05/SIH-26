@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { governmentNavigation } from "@/platform/navigation";
 
@@ -15,8 +15,60 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [activeRole, setActiveRole] = useState<DemoRole>("problem-owner");
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const profile = getRoleProfile(activeRole);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSessionRole() {
+      try {
+        const response = await fetch("/api/auth/session", { cache: "no-store" });
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as { demoRole?: unknown };
+        if (
+          typeof payload.demoRole === "string" &&
+          (Object.values({
+            "problem-owner": "problem-owner",
+            procurement: "procurement",
+            finance: "finance",
+            evaluator: "evaluator",
+            startup: "startup",
+          }) as string[]).includes(payload.demoRole)
+        ) {
+          if (active) {
+            setActiveRole(payload.demoRole as DemoRole);
+          }
+        }
+      } catch {
+        // Ignore session lookup failures; the shell can fall back to the default identity.
+      }
+    }
+
+    void loadSessionRole();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? "Unable to sign out.");
+      }
+      router.push("/login");
+    } catch (error) {
+      console.error("Sign-out failed", error);
+      setIsSigningOut(false);
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -79,10 +131,19 @@ export function AppShell({ children }: AppShellProps) {
             <strong>Signal-to-scale command centre</strong>
           </div>
           <div className="topbar__actions">
-            <button className="quiet-button" type="button">
+            <button className="quiet-button" type="button" aria-label="Language selection">
               English · EN
             </button>
             <RoleSwitcher value={activeRole} onChange={setActiveRole} />
+            <button
+              className="quiet-button"
+              type="button"
+              onClick={() => void handleSignOut()}
+              disabled={isSigningOut}
+              aria-label="Sign out of the demo session"
+            >
+              {isSigningOut ? "Signing out…" : "Sign out"}
+            </button>
           </div>
         </header>
         <main id="main-content" className="main-content" tabIndex={-1}>

@@ -34,6 +34,14 @@ describe("authentication middleware", () => {
     await expect(response.json()).resolves.toEqual({ error: "Unauthorized" });
   });
 
+  it("allows auth endpoints to handle logout and session checks without blocking the route", async () => {
+    const logoutResponse = await middleware(request("/api/auth/logout"));
+    expect(logoutResponse.headers.get("x-middleware-next")).toBe("1");
+
+    const sessionResponse = await middleware(request("/api/auth/session"));
+    expect(sessionResponse.headers.get("x-middleware-next")).toBe("1");
+  });
+
   it("clears an invalid cookie before redirecting", async () => {
     readSession.mockResolvedValue(null);
 

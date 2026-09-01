@@ -4,15 +4,16 @@
  * This middleware:
  * 1. Checks for a session cookie
  * 2. Validates the session is still valid
- * 3. Attaches the user to the request context
- * 4. Redirects unauthenticated requests to /login (except for login itself)
+ * 3. Allows auth endpoints to manage their own session state without a redirect loop
+ * 4. Redirects unauthenticated requests to /login (except for public routes)
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { readSession } from "./src/platform/session";
 
-// Routes that don't require authentication
-const PUBLIC_ROUTES = ["/login", "/api/auth/login"];
+// Routes that don't require authentication. Auth endpoints may need to read or clear cookies
+// themselves rather than being blocked by the edge middleware.
+const PUBLIC_ROUTES = ["/login", "/api/auth/login", "/api/auth/logout", "/api/auth/session"];
 
 function unauthenticatedResponse(request: NextRequest, clearSession = false): NextResponse {
   const response = request.nextUrl.pathname.startsWith("/api/")

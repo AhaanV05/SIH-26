@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compileChallengeDraft } from "@/modules/compiler";
+import { compileChallengeDraft, resolveDraftProviderMode, draftChallengeWithProviderFallback } from "@/modules/compiler";
 
 const poorBrief = {
   problemStatement:
@@ -46,5 +46,26 @@ describe("deterministic offline Challenge Forge compiler", () => {
         geography: "",
       }),
     ).toThrow("Problem statement must contain at least 20 characters");
+  });
+
+  it("falls back to the deterministic compiler when no AI provider key is configured", () => {
+    const provider = resolveDraftProviderMode({ apiKey: undefined, model: undefined });
+
+    expect(provider.mode).toBe("OFFLINE_FIXTURE");
+    expect(provider.fallbackUsed).toBe(true);
+    expect(provider.providerName).toMatch(/deterministic|offline/i);
+    expect(provider.label).toContain("SIMULATED_FOR_DEMO");
+  });
+
+  it("keeps the provider path simulated and safe when a demo provider key exists", async () => {
+    const result = await draftChallengeWithProviderFallback(poorBrief, {
+      apiKey: "demo-key",
+      model: "gpt-4o-mini",
+    });
+
+    expect(result.mode).toBe("SIMULATED");
+    expect(result.providerName).toContain("MahaSetu demo provider");
+    expect(result.fallbackUsed).toBe(false);
+    expect(result.specification.problem.title).toContain("Reduce community-bin overflow events");
   });
 });

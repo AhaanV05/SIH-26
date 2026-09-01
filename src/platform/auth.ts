@@ -18,6 +18,116 @@ export type SessionUser = User & {
 
 export { createSession } from "./session";
 
+const DEMO_OFFLINE_USERS: Record<string, SessionUser> = {
+  "USR-ANJALI-DESHMUKH": {
+    id: "USR-ANJALI-DESHMUKH",
+    name: "Anjali Deshmukh",
+    email: "anjali.deshmukh@example-gov.test",
+    status: "ACTIVE",
+    locale: "en-IN",
+    createdAt: new Date("2026-08-31T00:00:00+05:30"),
+    updatedAt: new Date("2026-08-31T00:00:00+05:30"),
+    memberships: [
+      {
+        id: "MEM-ANJALI-PROBLEM-OWNER",
+        userId: "USR-ANJALI-DESHMUKH",
+        organizationId: "ORG-GOV-MAHARASHTRA",
+        role: "PROBLEM_OWNER",
+        activeFrom: new Date("2026-08-01T00:00:00+05:30"),
+        activeTo: null,
+      },
+    ],
+  },
+  "USR-RAHUL-KULKARNI": {
+    id: "USR-RAHUL-KULKARNI",
+    name: "Rahul Kulkarni",
+    email: "rahul.kulkarni@example-gov.test",
+    status: "ACTIVE",
+    locale: "en-IN",
+    createdAt: new Date("2026-08-31T00:00:00+05:30"),
+    updatedAt: new Date("2026-08-31T00:00:00+05:30"),
+    memberships: [
+      {
+        id: "MEM-RAHUL-PROCUREMENT",
+        userId: "USR-RAHUL-KULKARNI",
+        organizationId: "ORG-GOV-MAHARASHTRA",
+        role: "PROCUREMENT_REVIEWER",
+        activeFrom: new Date("2026-08-01T00:00:00+05:30"),
+        activeTo: null,
+      },
+    ],
+  },
+  "USR-SUNITA-RANE": {
+    id: "USR-SUNITA-RANE",
+    name: "Sunita Rane",
+    email: "sunita.rane@example-gov.test",
+    status: "ACTIVE",
+    locale: "en-IN",
+    createdAt: new Date("2026-08-31T00:00:00+05:30"),
+    updatedAt: new Date("2026-08-31T00:00:00+05:30"),
+    memberships: [
+      {
+        id: "MEM-SUNITA-FINANCE",
+        userId: "USR-SUNITA-RANE",
+        organizationId: "ORG-GOV-MAHARASHTRA",
+        role: "FINANCE_OFFICER",
+        activeFrom: new Date("2026-08-01T00:00:00+05:30"),
+        activeTo: null,
+      },
+    ],
+  },
+  "USR-FARHAN-SHEIKH": {
+    id: "USR-FARHAN-SHEIKH",
+    name: "Dr. Farhan Sheikh",
+    email: "farhan.sheikh@example-eval.test",
+    status: "ACTIVE",
+    locale: "en-IN",
+    createdAt: new Date("2026-08-31T00:00:00+05:30"),
+    updatedAt: new Date("2026-08-31T00:00:00+05:30"),
+    memberships: [
+      {
+        id: "MEM-FARHAN-EVALUATOR",
+        userId: "USR-FARHAN-SHEIKH",
+        organizationId: "ORG-MAHASETU-PLATFORM",
+        role: "EVALUATOR",
+        activeFrom: new Date("2026-08-01T00:00:00+05:30"),
+        activeTo: null,
+      },
+    ],
+  },
+  "USR-ADITI-KULKARNI": {
+    id: "USR-ADITI-KULKARNI",
+    name: "Aditi Kulkarni",
+    email: "aditi@ecoscan.example-startup.test",
+    status: "ACTIVE",
+    locale: "en-IN",
+    createdAt: new Date("2026-08-31T00:00:00+05:30"),
+    updatedAt: new Date("2026-08-31T00:00:00+05:30"),
+    memberships: [
+      {
+        id: "MEM-ADITI-STARTUP-ADMIN",
+        userId: "USR-ADITI-KULKARNI",
+        organizationId: "ORG-ECOSCAN",
+        role: "STARTUP_ADMIN",
+        activeFrom: new Date("2026-08-01T00:00:00+05:30"),
+        activeTo: null,
+      },
+    ],
+  },
+};
+
+function isMockedPrismaClient(): boolean {
+  const userAccessor = (prisma as { user?: { findUnique?: unknown } } | undefined)?.user;
+  return typeof userAccessor?.findUnique === "function" && "mock" in (userAccessor.findUnique as object);
+}
+
+function getOfflineDemoUser(userId: string): SessionUser | null {
+  if (!process.env.DATABASE_URL && !isMockedPrismaClient()) {
+    return DEMO_OFFLINE_USERS[userId] ?? null;
+  }
+  return null;
+}
+
 /**
  * Validate a session and return the user if valid
  */
@@ -26,6 +136,9 @@ export async function getSessionUser(
 ): Promise<SessionUser | null> {
   const session = await readSession(sessionId);
   if (!session) return null;
+
+  const offlineUser = getOfflineDemoUser(session.userId);
+  if (offlineUser) return offlineUser;
 
   const now = new Date();
   const user = await prisma.user.findUnique({
@@ -102,3 +215,11 @@ export const DEMO_ROLE_TO_USER_ID: Record<string, string> = {
   evaluator: DEMO_USERS.EVALUATOR,
   startup: DEMO_USERS.STARTUP,
 };
+
+export const DEMO_USER_ID_TO_ROLE: Record<string, string> = Object.fromEntries(
+  Object.entries(DEMO_ROLE_TO_USER_ID).map(([role, userId]) => [userId, role]),
+);
+
+export function getDemoRoleForUserId(userId: string): string | null {
+  return DEMO_USER_ID_TO_ROLE[userId] ?? null;
+}

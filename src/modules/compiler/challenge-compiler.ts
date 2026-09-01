@@ -21,9 +21,10 @@ export interface CompilerFinding extends ProcurementLintFinding {
 }
 
 export interface CompileChallengeResult {
-  readonly mode: typeof CHALLENGE_COMPILER_MODE;
-  readonly providerName: "MahaSetu deterministic fixture compiler";
-  readonly label: typeof CHALLENGE_COMPILER_LABEL;
+  readonly mode: typeof CHALLENGE_COMPILER_MODE | "SIMULATED";
+  readonly providerName: string;
+  readonly label: string;
+  readonly fallbackUsed: boolean;
   readonly limitations: readonly string[];
   readonly specification: ChallengeSpec;
   readonly findings: readonly CompilerFinding[];
@@ -33,6 +34,20 @@ export interface CompileChallengeResult {
     readonly pilotContract: string;
     readonly interoperabilityRelease: string;
   };
+}
+
+export interface DraftProviderOptions {
+  readonly apiKey?: string;
+  readonly model?: string;
+}
+
+export interface DraftProviderDecision {
+  readonly mode: "OFFLINE_FIXTURE" | "SIMULATED";
+  readonly providerName: string;
+  readonly label: string;
+  readonly fallbackUsed: boolean;
+  readonly model?: string;
+  readonly reason: string;
 }
 
 const MIN_PROBLEM_LENGTH = 20;
@@ -138,6 +153,68 @@ function findingId(finding: ProcurementLintFinding, index: number): string {
   return `${finding.ruleCode}:${finding.path}:${index}`;
 }
 
+export function resolveDraftProviderMode(
+  options: DraftProviderOptions = {},
+): DraftProviderDecision {
+  const apiKey = options.apiKey?.trim();
+  const model = options.model?.trim();
+
+  if (!apiKey) {
+    return {
+      mode: "OFFLINE_FIXTURE",
+      providerName: "MahaSetu deterministic fixture compiler",
+      label: CHALLENGE_COMPILER_LABEL,
+      fallbackUsed: true,
+      model,
+      reason: "No AI provider key was configured; the deterministic offline fixture is authorized for the demo.",
+    };
+  }
+
+  return {
+    mode: "SIMULATED",
+    providerName: "MahaSetu demo provider (simulated)",
+    label: "SIMULATED_FOR_DEMO · DEMO_PROVIDER",
+    fallbackUsed: false,
+    model,
+    reason: "A demo provider key was supplied; the system stays in a simulated, non-live provider path.",
+  };
+}
+
+export async function draftChallengeWithProviderFallback(
+  input: CompileChallengeInput,
+  options: DraftProviderOptions = {},
+): Promise<CompileChallengeResult> {
+  const provider = resolveDraftProviderMode(options);
+
+  const result = compileChallengeDraft(input);
+
+  if (provider.mode === "OFFLINE_FIXTURE") {
+    return {
+      ...result,
+      mode: "OFFLINE_FIXTURE",
+      providerName: provider.providerName,
+      label: provider.label,
+      fallbackUsed: true,
+      limitations: [
+        ...result.limitations,
+        "The request used the deterministic offline fallback because no AI provider key was configured.",
+      ],
+    };
+  }
+
+  return {
+    ...result,
+    mode: "SIMULATED",
+    providerName: provider.providerName,
+    label: provider.label,
+    fallbackUsed: false,
+    limitations: [
+      ...result.limitations,
+      "The request used the demo provider path only; no live external AI system was contacted.",
+    ],
+  };
+}
+
 export function compileChallengeDraft(input: CompileChallengeInput): CompileChallengeResult {
   validateInput(input);
 
@@ -213,6 +290,7 @@ export function compileChallengeDraft(input: CompileChallengeInput): CompileChal
     mode: CHALLENGE_COMPILER_MODE,
     providerName: "MahaSetu deterministic fixture compiler",
     label: CHALLENGE_COMPILER_LABEL,
+    fallbackUsed: true,
     limitations: [
       "No live AI provider or government policy system was contacted.",
       "The generated specification requires authorized procurement review.",

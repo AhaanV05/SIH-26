@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { compileChallengeDraft } from "@/modules/compiler";
+import { draftChallengeWithProviderFallback } from "@/modules/compiler";
 import { authorizeRouteRequest } from "@/platform/route-authorization";
 
 export async function POST(request: NextRequest) {
@@ -14,13 +14,16 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = input as Record<string, unknown>;
-    const result = compileChallengeDraft({
+    const result = await draftChallengeWithProviderFallback({
       problemStatement: typeof payload.problemStatement === "string" ? payload.problemStatement : "",
       department: typeof payload.department === "string" ? payload.department : "",
       geography: typeof payload.geography === "string" ? payload.geography : "",
       acceptedRemediationCodes: Array.isArray(payload.acceptedRemediationCodes)
         ? payload.acceptedRemediationCodes.filter((value): value is string => typeof value === "string")
         : [],
+    }, {
+      apiKey: process.env.AI_PROVIDER_API_KEY,
+      model: process.env.AI_PROVIDER_MODEL,
     });
 
     return NextResponse.json(result, { status: 200 });

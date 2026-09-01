@@ -17,6 +17,9 @@ import EvaluationsPage from "../../../src/app/evaluations/page";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/pulse",
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
 }));
 
 describe("core lifecycle route pages", () => {
@@ -28,7 +31,7 @@ describe("core lifecycle route pages", () => {
     expect(html).toContain("Reduce community-bin overflow events");
   });
 
-  it("marks the current route as active in the app shell navigation", () => {
+  it("marks the current route as active in the app shell navigation and exposes sign out", () => {
     const html = renderToStaticMarkup(
       <AppShell>
         <div>Child content</div>
@@ -37,6 +40,7 @@ describe("core lifecycle route pages", () => {
 
     expect(html).toContain('nav-link nav-link--active');
     expect(html).toContain('href="/pulse"');
+    expect(html).toContain('Sign out');
   });
 
   it("exposes the correct account identity for the selected demo role", () => {

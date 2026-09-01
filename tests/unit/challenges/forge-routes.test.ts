@@ -51,6 +51,34 @@ describe("Challenge Forge command routes", () => {
     });
   });
 
+  it("uses the offline fixture mode when no provider configuration is set", async () => {
+    const previousApiKey = process.env.AI_PROVIDER_API_KEY;
+    const previousModel = process.env.AI_PROVIDER_MODEL;
+
+    delete process.env.AI_PROVIDER_API_KEY;
+    delete process.env.AI_PROVIDER_MODEL;
+
+    try {
+      const response = await compileRoute(
+        post("/api/challenges/compile", {
+          ...intake,
+          acceptedRemediationCodes: ["MS-PROC-005"],
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.mode).toBe("OFFLINE_FIXTURE");
+      expect(body.fallbackUsed).toBe(true);
+    } finally {
+      if (previousApiKey === undefined) delete process.env.AI_PROVIDER_API_KEY;
+      else process.env.AI_PROVIDER_API_KEY = previousApiKey;
+
+      if (previousModel === undefined) delete process.env.AI_PROVIDER_MODEL;
+      else process.env.AI_PROVIDER_MODEL = previousModel;
+    }
+  });
+
   it("rejects an unauthenticated freeze before trusting body assertions", async () => {
     const specification = await compiledSpecification(["MS-PROC-005"]);
     authorizeRouteRequest.mockResolvedValueOnce({

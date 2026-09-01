@@ -258,6 +258,23 @@ The entries below preserve the original activity history and identifiers. Entrie
 |---:|---|---|---|---|
 | 1 | **Ahaan** | 09:30–11:30 IST | Hands off to Drishika at 11:30 | CONFIRMED |
 | 2 | **Drishika** | 11:30–13:30 IST | Hands off to Taanish at 13:30 | CONFIRMED |
+
+### [2026-09-01T16:45:00+05:30] CHECKPOINT — Runtime auth fallback for demo-safe offline mode
+
+- **Entry ID:** LOG-20260901-001
+- **Author:** Dhanya, using GitHub Copilot (MAI-Code-1.1-Flash)
+- **Session window:** 2026-09-01T16:45:00+05:30 → ACTIVE
+- **Related tasks:** AUTH-001, DEV-001, DEMO-001
+- **Status changes:** `AUTH-001: IN_REVIEW → IN_PROGRESS` while verifying the offline demo runtime contract.
+- **Summary:** Reproduced a live runtime bug: the app still attempts to query Prisma during demo session validation even when the project is explicitly designed for synthetic, offline-only operation with no live database configured. The failure occurs before the UI can compile or the protected route flow can run, even though the unit tests remain green.
+- **Changes:** No implementation change yet; this checkpoint records the exact failure and the planned fallback.
+- **Decisions/assumptions:** The project contract is intentionally demo-safe, so the runtime must degrade gracefully to a synthetic user/membership model when `DATABASE_URL` is absent or the DB is unavailable. This should preserve the existing UI and route authorization behavior without requiring a Postgres instance.
+- **Verification:** Reproduced in browser and server logs: `GET /api/auth/session` and challenge compilation triggered a Prisma `findUnique` call and failed with `Environment variable not found: DATABASE_URL.` in the local app runtime.
+- **Known issues/risks:** Existing app shell and auth flow remain partially dependent on Prisma-backed user lookup; the fallback must be implemented in the central auth layer and not just in one route.
+- **Git state:** branch `main`; modified files are tracked in the working tree and include the auth/session changes from the prior fix. No commit created.
+- **Next action:** Add a graceful offline demo-user fallback in the central auth/session path, then rerun the focused auth tests and a browser-level smoke check for /login and /challenges.
+- **Handoff note:** The root cause is not a missing feature; it is a drift between the demo-safe architecture and the runtime database assumptions in the auth layer.
+
 | 3 | **Taanish** | 13:30–15:30 IST | Hands off into the unassigned middle rotation | CONFIRMED |
 | 4 | **Contributor TBD-1** | Somewhere within 15:30–23:00 IST | Name and exact boundary pending | UNCONFIRMED |
 | 5 | **Contributor TBD-2** | Somewhere within 15:30–23:00 IST | Name and exact boundary pending | UNCONFIRMED |
@@ -1055,6 +1072,27 @@ No staged changes; no commits this session
   - `npx pnpm typecheck` (`tsc --noEmit`): **PASS with 0 errors**.
 - **Working tree & Git state:** Safe and isolated.
 - **Recommended next action:** Claim `EVAL-001` (Proposal evaluation engine) or wire the `/matches` UI page to consume data dynamically from `/api/challenges/[id]/matches`.
+
+### [2026-09-01T21:15:59+05:30] SESSION_END — Dhanya: sign-out action fixed and app-shell regression verified
+
+- **Entry ID:** LOG-20260901-009
+- **Author:** Dhanya, assisted by GitHub Copilot (MAI-Code-1.1-Flash)
+- **Session window:** 2026-09-01T21:15:59+05:30 → 2026-09-01T21:15:59+05:30
+- **Related tasks:** `AUTH-001` (user-session sign-out behavior), `TEST-001` (regression validation)
+- **State change:** `AUTH-001: IN_REVIEW → IN_REVIEW` (no task status change; fix completed and verified within the existing auth flow), `TEST-001: IN_PROGRESS → DONE` for the targeted app-shell regression.
+- **Objective:** Fix the real missing sign-out path in the app shell and verify it against the repo’s actual unit and type checks without touching the established matching/API work.
+- **What changed:**
+  - Added a real sign-out button to [src/components/app-shell.tsx](src/components/app-shell.tsx) that posts to `/api/auth/logout`, disables while signing out, and redirects the user to `/login` on success.
+  - Kept the rest of the shell behavior intact and left the role-switcher and navigation logic unchanged.
+  - Updated the app-shell route test in [tests/unit/app/navigation-pages.test.tsx](tests/unit/app/navigation-pages.test.tsx) to assert the sign-out affordance and extended the mocked router hook so the test matches the production contract.
+- **Verification:**
+  - `npx vitest run tests/unit/app/navigation-pages.test.tsx` → PASS (4/4 tests passed)
+  - `npx eslint src/components/app-shell.tsx tests/unit/app/navigation-pages.test.tsx --max-warnings=0` → PASS
+  - `npx tsc --noEmit` → PASS
+  - The repo still emits the known non-failing Vite native-config-loader warning, but the actual test and type gates are green.
+- **Git state:** branch `main`; no commit or push was made in this session. Modified files are limited to the app-shell and its test.
+- **Known remaining work:** This fixes the missing user-facing sign-out action in the shell; it does not add a full auth back-end or protected-route enforcement beyond what the repo already had in place.
+- **Next action:** If the next task is a broader auth or lifecycle integration pass, continue from the verified shell fix and keep the existing auth/session implementation as the source of truth.
 
 ### [2026-09-01T02:59:50+05:30] SESSION_START — Update /matches frontend UI with live explainable matching
 
