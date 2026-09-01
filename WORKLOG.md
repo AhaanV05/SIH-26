@@ -1176,6 +1176,42 @@ No staged changes; no commits this session
 
 ### [2026-09-01T09:51:24+05:30] SESSION_START — EVAL-001 deterministic evaluation workflow lane
 
+What is already working
+- Next.js, React, TypeScript and Tailwind foundation.
+- Prisma schema, migration and deterministic seed dataset.
+- Demo authentication with signed cookies and protected routes.
+- Pages for Pulse, Challenges, Matches, Pilots, Evidence, Solutions and Audit.
+- Tested domain logic for:
+  - ChallengeSpec validation and procurement linting.
+  - Audit hashing.
+  - Evidence metrics and milestone acceptance.
+  - Payment readiness/state transitions.
+  - Transferability scoring.
+  - Explainable startup matching.
+- Matching is currently the most complete feature: engine, API, UI and tests.
+- Latest recorded verification reports 105/105 tests passing, lint passing and typecheck passing.
+What is still missing
+
+| Area | Current state | Main remaining work |
+|---|---|---|
+| Challenge Forge | Read-only summary + underlying logic | Intake form, compiler workflow, finding resolution, freeze/publish actions and persistence |
+| Startup Passport | Database models and seed data | Actual UI, evidence verification workflow and APIs |
+| Proposals | Database models only | Submission UI, validation, attachments and state transitions |
+| Evaluation | Seed data only | Conflict declaration, scoring UI, moderation and selection commands |
+| Pilot workflow | Read-only page + metric logic | Pilot charter, milestone actions, evidence submission and reviewer decisions |
+| Payments | Tested pure logic | Finance UI, authenticated API, persistence and simulated adapter timeline |
+| ScaleGraph | Read-only page + scoring logic | Adoption request action, localized-pilot workflow and persistence |
+| Audit | Hashing + read-only page | Connect every real mutation to persistent audit events |
+| Authorization | Demo authentication exists | Per-role page/action authorization and negative tests |
+| AI/compiler | Not implemented | Provider-neutral adapter plus deterministic offline fallback |
+| Testing | Strong unit coverage | End-to-end browser test and visual/manual verification |
+| Delivery | Not started | Shared database, deployment, demo script, recording and submission assets |
+
+
+The application currently tells the story visually, but judges cannot yet perform the complete:
+Problem → Challenge → Proposal → Evaluation → Pilot → Evidence → Payment → Reuse
+workflow.
+
 - **Entry ID:** LOG-20260901-014
 - **Author:** Ahaan, assisted by OpenAI Codex delegated agent `/root/evaluation_flow`
 - **Session window:** 2026-09-01T09:51:24+05:30 → ACTIVE
