@@ -1,0 +1,63 @@
+services:
+  # ---------------------------------------------------------------------------
+  # Next.js Application Service (MahaSetu Platform)
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mahasetu-platform:latest
+    container_name: mahasetu-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgresql://mahasetu:mahasetu_dev_password@postgres:5432/mahasetu_db?schema=public
+      - AUTH_SECRET=development_session_secret_replace_in_production_environment
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mahasetu-net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database Service
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: mahasetu-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mahasetu
+      POSTGRES_PASSWORD: mahasetu_dev_password
+      POSTGRES_DB: mahasetu_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - mahasetu-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mahasetu -d mahasetu_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  mahasetu-net:
+    driver: bridge

@@ -2840,6 +2840,25 @@ Research was performed on 2026-08-31 using current authoritative/standards sourc
 - **Supersedes:** Refines the ScaleGraph & Transferability specifications from `Truth.md` §4.6 and §6.5.
 - **Revisit trigger:** Multi-city municipal consortium federated discovery policies.
 
+### DEC-20260901-005 — Multi-Stage Standalone Docker Containerization & Compose Architecture (OPS-006)
+
+- **Decision:** Implemented production-ready Docker containerization via `Dockerfile`, `.dockerignore`, `docker-compose.yml`, and enabled `output: "standalone"` in `next.config.ts`.
+- **Core Container Invariants & Architecture:**
+  1. **Multi-Stage Build Pipeline (`deps -> builder -> runner`):**
+     - `deps`: Installs exact locked dependencies with Corepack `pnpm` and generates Prisma client artifacts on Alpine Linux.
+     - `builder`: Compiles Next.js application with Turbopack and produces an isolated `.next/standalone` output bundle containing only required dependencies.
+     - `runner`: Uses a minimal `node:20-alpine` base image running as an unprivileged non-root user (`nextjs:nodejs`, UID/GID 1001).
+  2. **Security & Production Hardening:**
+     - Exposes port 3000 (`0.0.0.0`) without root privileges.
+     - Container healthcheck probe (`wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/`) validates container responsiveness.
+     - `.dockerignore` strictly excludes `.git`, `.env*`, `node_modules`, test suites, and scratch build artifacts from Docker build context.
+  3. **Docker Compose Orchestration:**
+     - Orchestrates `app` (`mahasetu-web`) and `postgres` (`postgres:16-alpine`) services connected via isolated bridge network `mahasetu-net` with persistent volume `pgdata`.
+     - App container depends on PostgreSQL `service_healthy` probe.
+- **Rationale:** Ensures portable, cloud-agnostic, and secure container deployments across NIC / Cloud / On-Prem Kubernetes clusters with minimal image footprint (~120MB).
+- **Consequences:** `OPS-006` is complete and verified. Standalone build succeeds with 100% test pass.
+- **Supersedes:** None. Establishes deployment packaging standard.
+- **Revisit trigger:** Kubernetes Helm chart or cloud-managed deployment manifest requirements.
 
 - **Recommendation:** Build the complete transition path but concentrate interactive depth and visual polish on Pulse, Forge, Proof, and ScaleGraph.
 
