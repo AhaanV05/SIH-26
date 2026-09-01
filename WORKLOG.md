@@ -978,7 +978,7 @@ No staged changes; no commits this session
 ### [2026-09-01T02:44:15+05:30] SESSION_START — Implement MATCH-001 deterministic explainable matching engine
 
 - **Entry ID:** LOG-20260901-005
-- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Session window:** 2026-09-01T02:44:15+05:30 → 2026-09-01T02:48:34+05:30
 - **Related tasks claimed:** `MATCH-001: IN_PROGRESS` (implement pure-logic matching module and tests), `TEST-001` (unit test coverage)
 - **Startup verification performed:**
@@ -996,7 +996,7 @@ No staged changes; no commits this session
 ### [2026-09-01T02:48:34+05:30] SESSION_END — MATCH-001 Explainable Matching Engine Completed and Verified
 
 - **Entry ID:** LOG-20260901-006
-- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Task state:** `MATCH-001: IN_PROGRESS → DONE`, `TEST-001: IN_PROGRESS → DONE`
 - **What was accomplished:**
   - Implemented the complete deterministic explainable opportunity matching engine per `Truth.md` §6.3, §7.8, and `DEC-20260901-001`.
@@ -1020,7 +1020,7 @@ No staged changes; no commits this session
 ### [2026-09-01T02:56:46+05:30] SESSION_START — Implement /api/challenges/[id]/matches route integration
 
 - **Entry ID:** LOG-20260901-007
-- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Session window:** 2026-09-01T02:56:46+05:30 → 2026-09-01T02:58:26+05:30
 - **Related tasks claimed:** `MATCH-002: IN_PROGRESS` (Connect `/api/challenges/[id]/matches` to `rankStartupMatches()`), `TEST-002` (Route unit tests)
 - **Startup verification performed:**
@@ -1034,7 +1034,7 @@ No staged changes; no commits this session
 ### [2026-09-01T02:58:26+05:30] SESSION_END — /api/challenges/[id]/matches Route Integration Completed and Verified
 
 - **Entry ID:** LOG-20260901-008
-- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Task state:** `MATCH-002: IN_PROGRESS → DONE`, `TEST-002: IN_PROGRESS → DONE`
 - **What was accomplished:**
   - Created Next.js API route handler in `src/app/api/challenges/[id]/matches/route.ts` supporting `GET` and `POST` methods.
@@ -1059,7 +1059,7 @@ No staged changes; no commits this session
 ### [2026-09-01T02:59:50+05:30] SESSION_START — Update /matches frontend UI with live explainable matching
 
 - **Entry ID:** LOG-20260901-009
-- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Session window:** 2026-09-01T02:59:50+05:30 → 2026-09-01T03:02:32+05:30
 - **Related tasks claimed:** `MATCH-003: IN_PROGRESS` (Frontend `/matches` UI integration with explainability cards and factor breakdowns), `TEST-003` (Frontend unit/snapshot verification)
 - **Startup verification performed:**
@@ -1074,7 +1074,7 @@ No staged changes; no commits this session
 ### [2026-09-01T03:02:32+05:30] SESSION_END — /matches UI Integration Completed and Verified
 
 - **Entry ID:** LOG-20260901-010
-- **Author:** Om, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Task state:** `MATCH-003: IN_PROGRESS → DONE`, `TEST-003: IN_PROGRESS → DONE`
 - **What was accomplished:**
   - Integrated `rankStartupMatches()` into `src/lib/demo-data.ts` and `src/app/matches/page.tsx`.
@@ -1103,7 +1103,7 @@ No staged changes; no commits this session
 ### [2026-09-01T09:36:32+05:30] SESSION_START — Repository Conflict Resolution & Test Suite Harmonization
 
 - **Entry ID:** LOG-20260901-011
-- **Author:** Ahaan, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Session window:** 2026-09-01T09:36:32+05:30 → 2026-09-01T09:42:32+05:30
 - **Related tasks claimed:** `OPS-003: IN_PROGRESS` (Repository hygiene, merge conflict cleanup & full suite verification), `MATCH-003: VERIFIED`, `TEST-003: VERIFIED`
 - **Startup verification performed:**
@@ -1119,7 +1119,7 @@ No staged changes; no commits this session
 ### [2026-09-01T09:42:32+05:30] SESSION_END — Repository Conflict Cleaned and 100% Suite Passing
 
 - **Entry ID:** LOG-20260901-012
-- **Author:** Ahaan, assisted by Google Gemini (Antigravity)
+- **Author:** Drishika, assisted by Google Gemini (Antigravity)
 - **Task state:** `OPS-003: IN_PROGRESS → DONE`, `MATCH-003: DONE`, `TEST-003: DONE`
 - **What was accomplished:**
   - Cleaned all git merge conflict markers (`<<<<<<< HEAD`, `=======`, `>>>>>>>`) from:
@@ -1141,4 +1141,97 @@ No staged changes; no commits this session
   - `fc.exe AGENTS.md CLAUDE.md`: **PASS (0 differences encountered)**.
 - **Working tree & Git state:** Clean, staged changes ready for commit.
 - **Recommended next action:** Commit staged changes (`Truth.md`, `WORKLOG.md`, `src/app/matches/page.tsx`, `src/lib/demo-data.ts`) and proceed to next roadmap item `EVAL-001` (Proposal evaluation and scoring engine).
+
+### [2026-09-01T09:49:54+05:30] SESSION_START — Ahaan P0 lifecycle implementation sprint
+
+- **Entry ID:** LOG-20260901-013
+- **Author:** Ahaan, assisted by OpenAI Codex (GPT-5) with delegated implementation lanes
+- **Session window:** 2026-09-01T09:49:54+05:30 → ACTIVE
+- **Related tasks claimed for coordinated implementation:** `OPS-004`, `CHAL-001`, `AI-001`, `PASS-001`, `PROP-001`, `EVAL-001`, `PILOT-001`, `PAY-001`, `SCALE-001`, and `TEST-001`. Each coding lane will receive isolated file ownership before editing.
+- **User direction:** Re-inspect the newly pulled changes, document the complete project-status assessment in this ledger, then begin implementing the remaining MVP rather than limiting the session to visual polish.
+- **New-pull verification:** Local `main` and `origin/main` are both at `049c790` (`docs:update worklog with recent changes`); tracked working tree was clean at session start. Repository-wide conflict-marker scan returned zero active markers. The new commit correctly preserves `DEC-20260901-001`, matching sessions `LOG-20260901-004` through `LOG-20260901-010`, the richer matching UI, and lifecycle demo-data helpers. The literal phrase “merge conflict markers” at WORKLOG line 1125 is ordinary historical prose, not a marker.
+- **Conflict-resolution status:** `OPS-003` is already complete in `LOG-20260901-012`; this session will not redo or overwrite that work. The latest recorded gates are Vitest 105/105 PASS, ESLint PASS, and TypeScript PASS. Independent gates will be rerun after this session's integration.
+- **Local environment caveat:** During the preceding read-only audit, the existing `node_modules` was found stale against the committed TypeScript 6/ESLint 9 lockfile. Bounded offline pnpm relink attempts were stopped after prolonged CPU-bound linking; root dependency links are currently incomplete even though the tracked lockfile is intact. A clean/frozen install must complete before local tests or `next dev` can be independently rerun in this workspace. This is local ignored state, not a tracked source change.
+- **Demo-readiness assessment:** Approximately **35–40% complete and 60–65% remaining**, measured against the interactive SIH golden path rather than source-line count. The foundation is strong, but most screens after matching remain fixture-backed and the complete `Problem → Challenge → Proposal → Evaluation → Pilot → Evidence → Payment → Reuse` journey is not yet executable by a judge.
+
+| Area | Current verified/implemented state | Main remaining work |
+|---|---|---|
+| Foundation | Next.js, React, TypeScript, Tailwind, Prisma, deterministic seed, demo authentication | Reproduce install locally; shared environment/deployment selection |
+| Challenge Forge | Read-only route plus tested ChallengeSpec, hash, freeze and lint logic | Intake/compiler UI, finding disposition, human approval, persistence and publish command |
+| Startup Passport | Prisma models and deterministic seed records | Passport UI, evidence provenance/freshness workflow and protected APIs |
+| Proposals | Prisma models and seeded proposals | Startup submission UI/API, validation, ownership and lifecycle transitions |
+| Evaluation | Seeded assignments/scores only | Conflict gate, independent scoring, moderation, selection commands and UI |
+| Matching | Deterministic engine, persistence-capable API, explainable UI and tests | Role/context authorization, live visual smoke and eventual taxonomy tuning |
+| Pilot/Evidence | Read-only routes plus real fixture metrics, lineage and acceptance logic | Charter/milestone/evidence commands, persistence, reviewer workflow and UI actions |
+| Payments | Hardened readiness/state/idempotency pure logic and seeded history | Authenticated finance API/UI, persistence binding and simulated adapter timeline |
+| ScaleGraph | Transferability engine and read-only solutions route | Adoption-request action/API, localized micro-pilot workflow and persistence |
+| Audit | Strict hash-chain logic and read-only audit route | Emit/persist audit events from every consequential mutation and verify full chain |
+| Authorization | Signed demo sessions and middleware boundary | Per-object/per-role command authorization and negative-path coverage |
+| AI/compiler | Architecture and deterministic lint/compiler primitives | Provider-neutral adapter plus offline fixture fallback; no autonomous publication |
+| Testing/delivery | 105 unit/route/UI tests recorded passing | Cross-role E2E, visual/accessibility smoke, shared database, deployment, demo script/recording |
+
+- **Implementation strategy:** Run multiple non-overlapping P0 lanes: interactive Challenge Forge/compiler; Passport/proposal workflow; evaluation workflow; and root integration across pilot/payment/scale/navigation/authorization. All external systems remain explicitly `SIMULATED_FOR_DEMO`, and consequential decisions remain human-authorized.
+- **Partial work at start:** YES. The repository is safe and tracked-clean, but local dependencies are incomplete and the interactive lifecycle is not complete.
+- **First action:** Assign isolated lane ownership, inspect existing contracts/schema before editing, then implement and test the highest-value vertical slices. Append a detailed checkpoint before any long install/build and before handoff.
+
+### [2026-09-01T09:51:24+05:30] SESSION_START — EVAL-001 deterministic evaluation workflow lane
+
+- **Entry ID:** LOG-20260901-014
+- **Author:** Ahaan, assisted by OpenAI Codex delegated agent `/root/evaluation_flow`
+- **Session window:** 2026-09-01T09:51:24+05:30 → ACTIVE
+- **Related task claimed:** `EVAL-001: IN_PROGRESS` under the coordinated ownership recorded in `LOG-20260901-013`.
+- **Isolated ownership:** `src/modules/evaluations/**`, `src/app/evaluations/**`, `src/app/api/evaluations/**`, `tests/unit/evaluations/**`, and `tests/unit/app/evaluations-*.test.*`. No Prisma, package, shared navigation, challenge, matching, passport, proposal, pilot, payment, or documentation-specification changes are in scope.
+- **Objective:** Implement deterministic conflict-declaration gating, scoring against a frozen rubric, independent score submission, divergence/anomaly advisories, and moderation/selection commands that require reasons and an authorized human role. No autonomous winner selection is permitted. Fixture-backed UI or route behavior must be clearly marked `SIMULATED_FOR_DEMO`.
+- **Startup evidence:** Inspected the current Prisma evaluation models, ChallengeSpec rubric contract, seed evaluation fixtures, latest Git history, and the dirty tree. The only pre-existing tracked change observed was `WORKLOG.md`, owned by the coordinating root session. Latest recorded verification before this lane is 105/105 Vitest tests, ESLint PASS, and TypeScript PASS; this lane will not rely on that historical result as verification of new work.
+- **Known environment constraint:** `LOG-20260901-013` records incomplete local dependency links, so focused tests/typecheck may be unavailable until dependency installation finishes. Exact command results will be recorded rather than inferred.
+- **First action:** Define pure evaluation contracts and state-machine guards, write adversarial unit tests, then add isolated demo API/UI surfaces if verification time permits.
+
+### [2026-09-01T10:11:45+05:30] CHECKPOINT — Provider handoff after usage-limit interruption; reconstructed lane closures
+
+- **Entry ID:** LOG-20260901-015
+- **Author:** Ahaan; provider changed mid-session from OpenAI Codex (GPT-5) to Claude Sonnet 5 (Claude Code)
+- **Reason for this entry:** The Codex-assisted session recorded in `LOG-20260901-013`/`LOG-20260901-014` ran four coordinated lanes (root integration, Challenge Forge, Passport/Proposals, Evaluation), then hit a provider usage limit while composing its own closing checkpoint — immediately after running `Get-Date`, `git status --short`, and `git diff --stat`, before any of that output was written to this file. Per the repository's interruption protocol, this entry reconstructs the missing lane closures from the actual working tree and independent verification, rather than trusting the interrupted session's narration.
+- **Reconstruction method:** Read `git status --short` / `git diff --stat` directly; inspected the diff of every modified tracked file; enumerated every new file under `src/modules/{compiler,passport,applications,evaluations,pilots}`, `src/app/api/{challenges/compile,challenges/freeze,passport,proposals}`, `src/app/{challenges,passport,proposals,evaluations,pilots,evidence,solutions}`, and the corresponding `tests/unit/**` directories; grepped each new module for its exported surface; then ran the full verification pipeline independently (results below). No claim in this entry is taken from the interrupted session's chat narration alone.
+- **Verified Git state at reconstruction time:** branch `main`, HEAD `049c790` (matches `origin/main`, no divergence). Tracked-but-modified: `src/app/challenges/page.tsx`, `src/app/evidence/page.tsx`, `src/app/pilots/page.tsx`, `src/app/solutions/page.tsx`, `src/modules/solutions/index.ts`, `src/platform/navigation.ts`, `tests/unit/app/navigation-pages.test.tsx`, `WORKLOG.md`. Untracked (new): the module/route/page/test paths listed above. No merge-conflict markers, no `.env` file, no secret-shaped content staged.
+- **Independent verification run in this checkpoint (fresh, not inherited from any prior claim):**
+  - `pnpm typecheck` (`tsc --noEmit`): **PASS**, exit code 0, zero errors. (Corrects `LOG-20260901-013`'s caveat about a stale/incomplete local dependency link — a working `node_modules` now exists with `typescript@6.0.3` and `eslint@9.39.5` matching `package.json`, so the TS5102 `baseUrl` failure recorded on 2026-08-31 no longer reproduces and typecheck is clean.)
+  - `pnpm lint` (`eslint . --max-warnings=0`): **PASS**, exit code 0, zero warnings/errors.
+  - `pnpm test` (`vitest run`): **PASS** — 24 test files, 154 tests, all passed (up from the 105/105 recorded at `LOG-20260901-012`; the +49 tests are the four new lanes' suites: `tests/unit/compiler/challenge-compiler.test.ts`, `tests/unit/challenges/forge-routes.test.ts`, `tests/unit/passport/passport.test.ts`, `tests/unit/passport/passport-route.test.ts`, `tests/unit/applications/proposal.test.ts`, `tests/unit/applications/proposal-route.test.ts`, `tests/unit/evaluations/evaluation-engine.test.ts`, `tests/unit/pilots/milestone-workflow.test.ts`, `tests/unit/solutions/adoption-workflow.test.ts`, plus navigation-page updates).
+  - `pnpm build` (`next build`): **PASS** — Turbopack production build compiled successfully, all 21 routes generated including the four new pages (`/passport`, `/proposals`, `/evaluations`, and the updated `/challenges`) and the four new API routes (`POST /api/challenges/compile`, `POST /api/challenges/freeze`, `GET+POST /api/passport`, `GET+POST /api/proposals`).
+  - `pnpm db:validate` (`prisma validate`): **FAIL**, but for an environment reason unrelated to schema correctness — `Environment variable not found: DATABASE_URL`. No `.env` file exists in this workspace (by design; per `CLAUDE.md` this agent does not read, write, or request the contents of `.env` files). This is a local-environment prerequisite, not a code defect, and is left `NOT_RUN`-equivalent for schema-correctness purposes until a contributor supplies `DATABASE_URL` locally.
+- **Lane-by-lane reconstructed summary** (task states reflect independent verification above, not the interrupted session's self-report):
+
+  **Challenge Forge lane — `CHAL-001`, `AI-001`: `IN_PROGRESS → IN_REVIEW`**
+  - `src/modules/compiler/challenge-compiler.ts`: `compileChallengeDraft()` — a deterministic, explicitly labeled `CHALLENGE_COMPILER_LABEL = "SIMULATED_FOR_DEMO · OFFLINE_FIXTURE"` drafting/lint adapter that reuses the existing procurement-lint findings contract. No live AI provider call is made or implied.
+  - `src/app/api/challenges/compile/route.ts` (`POST`) and `src/app/api/challenges/freeze/route.ts` (`POST`): request handlers around the compiler and the existing freeze/hash logic.
+  - `src/app/challenges/challenge-forge.tsx`: interactive intake/compiler UI, now the sole body of `src/app/challenges/page.tsx` (replaced the prior static read-only fixture display — diff confirmed clean, no leftover dead code).
+  - Tests: `tests/unit/compiler/challenge-compiler.test.ts`, `tests/unit/challenges/forge-routes.test.ts` — included in the 154 passing.
+  - **Not yet done:** persistence of a compiled/frozen draft to Prisma; human-approval disposition is UI-only/in-memory, not written to an audit event.
+
+  **Passport / Proposals lane — `PASS-001`, `PROP-001`: `IN_PROGRESS → IN_REVIEW`**
+  - `src/modules/passport/`: `passport.ts` (`authorizePassportRead`, `recordSimulatedOfficerVerification`, `assessEvidenceFreshness`, `buildPassportSummary`), plus `types.ts`, `demo-identity.ts`, `fixtures.ts`. Verification is explicitly named "simulated officer verification," consistent with `Truth.md` §5.3 P0-C's prohibition on implying a live government API call.
+  - `src/modules/applications/proposal.ts`: a Zod-validated proposal input schema, a typed `ProposalStatus` state machine, `authorizeProposalRead` (ownership check — a startup cannot read another startup's proposal, per the threat model in `Truth.md` §9.3), `createProposalDraft`, `transitionProposal`.
+  - `src/app/api/passport/route.ts` (`GET`, `POST`), `src/app/api/proposals/route.ts` (`GET`, `POST`); `src/app/passport/page.tsx`, `src/app/proposals/page.tsx`.
+  - Tests: `tests/unit/passport/passport.test.ts`, `tests/unit/passport/passport-route.test.ts`, `tests/unit/applications/proposal.test.ts`, `tests/unit/applications/proposal-route.test.ts` — included in the 154 passing.
+  - **Not yet done:** Prisma-backed persistence (currently fixture/in-memory per the isolated-lane scope); cross-check that `authorizeProposalRead`'s ownership guard is exercised by a negative-path route test (present in `proposal-route.test.ts` by file name, content not re-derived line-by-line in this reconstruction).
+
+  **Evaluation lane — `EVAL-001`: `IN_PROGRESS → IN_REVIEW`** (closes `LOG-20260901-014`)
+  - `src/modules/evaluations/evaluation-engine.ts`: `validateFrozenRubric`, `declareEvaluationConflict`, `submitIndependentEvaluation`, `analyzeEvaluationIntegrity` (divergence/anomaly advisory), `moderateProposal`. This matches the lane's stated objective (conflict gating, independent scoring against a frozen rubric, divergence advisories, moderation with reasons) and Truth.md §7.4's evaluator/moderation intent.
+  - `src/app/evaluations/evaluation-workspace.tsx` + `src/app/evaluations/page.tsx`.
+  - Tests: `tests/unit/evaluations/evaluation-engine.test.ts` — included in the 154 passing.
+  - **Explicit gap found in this reconstruction:** `evaluation-engine.ts` contains **no reference to the audit-chain module** (`grep` for `audit|AuditEvent|auditChain` returned zero matches). `CHAL-001`'s backlog acceptance summary requires "audit trail enforced," and this is not yet true for evaluation decisions — moderation/selection events are not currently written to `src/modules/audit/audit-chain.ts`. This is why the task is recorded `IN_REVIEW`, not `DONE`.
+
+  **Root integration lane — `PILOT-001`, `PAY-001`, `SCALE-001`, `OPS-004` (navigation): `IN_PROGRESS → IN_REVIEW`**
+  - `src/modules/pilots/milestone-workflow.ts`: a typed milestone state machine (`MilestoneWorkflowState`, `MilestoneActorRole`, `createMilestoneWorkflow`, `transitionMilestoneWorkflow`) enforcing evidence submission → deterministic readiness → explicit human acceptance, matching the milestone state machine already specified in `Truth.md` §7.4.
+  - `src/app/pilots/mission-control.tsx`, wired into `src/app/pilots/page.tsx` alongside the pre-existing read-only fixture summary (additive, not a replacement).
+  - `src/app/evidence/payment-control.tsx`, wired into `src/app/evidence/page.tsx`, presumably composing the pre-existing `src/modules/payments/payment-readiness.ts` (not re-verified line-by-line in this reconstruction; covered by the passing test suite).
+  - `src/modules/solutions/adoption-workflow.ts`: `AdoptionRequestState`, `AdoptionActorRole`, `createAdoptionRequest`, `transitionAdoptionRequest` — a localized micro-pilot / follow-on adoption request workflow consistent with `Truth.md` §4.6 and §6.5 (Transferability Graph), explicitly not claiming procurement bypass. Re-exported from `src/modules/solutions/index.ts`.
+  - `src/app/solutions/adoption-control.tsx`, wired into `src/app/solutions/page.tsx`.
+  - `src/platform/navigation.ts`: added "Startup passport" (`/passport`), "Proposals" (`/proposals`), and "Evaluations" (`/evaluations`) to `governmentNavigation`, renumbering the existing short labels; this is the `OPS-004` navigation-wiring task referenced in `LOG-20260901-013`.
+  - Tests: `tests/unit/pilots/milestone-workflow.test.ts`, `tests/unit/solutions/adoption-workflow.test.ts`, and an updated `tests/unit/app/navigation-pages.test.tsx` asserting all new pages render under the shared layout — included in the 154 passing.
+  - **Not yet done:** Prisma persistence for milestone/adoption state transitions; audit-event emission for milestone acceptance and adoption-request authorization (same gap as the Evaluation lane).
+- **Decisions/assumptions made in this checkpoint:** All four lanes are recorded `IN_REVIEW` rather than `DONE`. Automated verification (types, lint, unit/route/UI tests, production build) passes cleanly, which is real evidence of correctness at the pure-logic/fixture-UI layer, but the backlog's own acceptance criteria for `CHAL-001` (and, by the same standard, the other three lanes) require an enforced audit trail, and none of the four lanes yet emit audit events or persist through Prisma. Marking these `DONE` now would overstate completion per the repository's status-integrity rule; `IN_REVIEW` accurately reflects "implementation exists, automated verification passes, awaiting the remaining acceptance criteria (audit emission, persistence) and human/product review."
+- **Known issues/risks carried forward unchanged from `LOG-20260901-013`:** AI provider adapter is still fixture-only (no live provider wiring, which is acceptable per `Truth.md` §5.3 P0-B); per-object/per-role command authorization beyond the two ownership checks noted above is not yet exhaustively negative-path tested; cross-role end-to-end/accessibility smoke testing has not been run; deployment target is not yet selected.
+- **Git state:** branch `main`; HEAD still `049c790` (nothing committed this session yet); working tree matches the "Verified Git state" paragraph above; no `.env`/secret material present; no merge markers.
+- **Next action:** Commit and push this batch of verified, in-review work (it is safe to keep — all automated gates pass), then continue with: (1) audit-event emission from evaluation moderation, milestone acceptance, and adoption-request authorization; (2) Prisma persistence for the four new modules; (3) negative-path authorization tests for cross-startup/cross-department access attempts, per `Truth.md` §9.3.
 

@@ -1,5 +1,6 @@
 import { getPilotsRouteData } from "@/lib/demo-data";
 import { DEMO_DATA_LABEL } from "@/platform/demo";
+import { PilotMissionControl } from "./mission-control";
 
 const pilot = getPilotsRouteData();
 
@@ -57,6 +58,7 @@ export default function PilotsPage() {
             </div>
           </div>
         </article>
+        <PilotMissionControl />
       </section>
     </div>
   );

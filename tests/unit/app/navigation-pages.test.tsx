@@ -8,9 +8,12 @@ import AuditPage from "../../../src/app/audit/page";
 import ChallengesPage from "../../../src/app/challenges/page";
 import EvidencePage from "../../../src/app/evidence/page";
 import MatchesPage from "../../../src/app/matches/page";
+import PassportPage from "../../../src/app/passport/page";
 import PilotsPage from "../../../src/app/pilots/page";
+import ProposalsPage from "../../../src/app/proposals/page";
 import PulsePage from "../../../src/app/pulse/page";
 import SolutionsPage from "../../../src/app/solutions/page";
+import EvaluationsPage from "../../../src/app/evaluations/page";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/pulse",
@@ -52,7 +55,10 @@ describe("core lifecycle route pages", () => {
     const pages = [
       [PulsePage, "Problem radar"],
       [ChallengesPage, "Challenge forge"],
+      [PassportPage, "Reusable trust"],
       [MatchesPage, "Startup matches"],
+      [ProposalsPage, "Outcome-first proposal"],
+      [EvaluationsPage, "Frozen-rubric evaluation room"],
       [PilotsPage, "Pilot lab"],
       [EvidencePage, "Evidence &amp; pay"],
       [SolutionsPage, "Scale graph"],

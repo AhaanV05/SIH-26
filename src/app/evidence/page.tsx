@@ -1,5 +1,6 @@
 import { getEvidenceRouteData } from "@/lib/demo-data";
 import { DEMO_DATA_LABEL } from "@/platform/demo";
+import { PaymentControl } from "./payment-control";
 
 const evidence = getEvidenceRouteData();
 
@@ -59,6 +60,7 @@ export default function EvidencePage() {
             </div>
           </div>
         </article>
+        <PaymentControl />
       </section>
     </div>
   );

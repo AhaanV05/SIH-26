@@ -1,5 +1,6 @@
 import { getSolutionsRouteData } from "@/lib/demo-data";
 import { DEMO_DATA_LABEL } from "@/platform/demo";
+import { AdoptionControl } from "./adoption-control";
 
 const solutions = getSolutionsRouteData();
 
@@ -47,6 +48,7 @@ export default function SolutionsPage() {
             ))}
           </div>
         </article>
+        <AdoptionControl />
       </section>
     </div>
   );
