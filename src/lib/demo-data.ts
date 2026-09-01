@@ -5,15 +5,12 @@ import {
   calculateWasteMetrics,
   parseSyntheticWasteEventDataset,
 } from "@/modules/evidence";
-<<<<<<< HEAD
-=======
 import {
   rankStartupMatches,
   type ChallengeMatchInput,
   type StartupProfileMatchInput,
   type StartupMatchResult,
 } from "@/modules/matching";
->>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
 import { governmentNavigation } from "@/platform/navigation";
 
 export type DashboardMetricSummary = {
@@ -75,13 +72,6 @@ export type ChallengesRouteData = {
 export type MatchesRouteData = {
   readonly topFit: string;
   readonly topFitScore: number;
-<<<<<<< HEAD
-  readonly topFitReferences: number;
-  readonly matches: Array<{
-    readonly name: string;
-    readonly score: number;
-    readonly note: string;
-=======
   readonly topFitConfidence: number;
   readonly topFitReferences: number;
   readonly totalEvaluated: number;
@@ -94,7 +84,6 @@ export type MatchesRouteData = {
     readonly score: number;
     readonly note: string;
     readonly eligible: boolean;
->>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
   }>;
 };
 
@@ -241,35 +230,6 @@ export function getChallengesRouteData(): ChallengesRouteData {
   };
 }
 
-<<<<<<< HEAD
-export function getMatchesRouteData(): MatchesRouteData {
-  return {
-    topFit: "UrbanLoop Labs",
-    topFitScore: 0.92,
-    topFitReferences: 3,
-    matches: [
-      {
-        name: "UrbanLoop Labs",
-        score: 0.92,
-        note: "Strong fit for data sensing and route optimization.",
-      },
-      {
-        name: "BinTrace AI",
-        score: 0.88,
-        note: "Good field integration and pilot operating model.",
-      },
-      {
-        name: "RoutePilot",
-        score: 0.84,
-        note: "Strong logistics capability with moderate data access needs.",
-      },
-      {
-        name: "GeoFleet",
-        score: 0.79,
-        note: "Needs more sandbox access to meet unique constraints.",
-      },
-    ],
-=======
 const demoChallengeMatchInput: ChallengeMatchInput = {
   challengeId: "CHAL-WASTE-PUNE-001",
   departmentId: "DEPT-PUNE-SWM",
@@ -545,7 +505,6 @@ export function getMatchesRouteData(): MatchesRouteData {
     ineligibleCount: batch.ineligibleCount,
     rankedMatches: batch.rankedMatches,
     matches,
->>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
   };
 }
 
@@ -639,7 +598,3 @@ export function getAuditRouteData(): AuditRouteData {
     ],
   };
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)

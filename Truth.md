@@ -2784,8 +2784,6 @@ Research was performed on 2026-08-31 using current authoritative/standards sourc
 - **Supersedes:** None.
 - **Revisit trigger:** A shared development/staging Postgres becomes available, or the schema changes again before that first real deployment happens (in which case regenerate the migration rather than hand-editing the SQL).
 
-<<<<<<< HEAD
-=======
 ### DEC-20260901-001 — Adopt deterministic explainable opportunity matching engine (MATCH-001)
 
 - **Decision:** Implemented `MATCH-001` as a pure-logic, deterministic, explainable matching module in `src/modules/matching/` (`types.ts`, `matching-engine.ts`, `index.ts`), accompanied by unit tests in `tests/unit/matching/matching-engine.test.ts`.
@@ -2801,7 +2799,7 @@ Research was performed on 2026-08-31 using current authoritative/standards sourc
 - **Supersedes:** Fulfills and refines the `MATCH-001` specification from `Truth.md` §6.3 and §7.8.
 - **Revisit trigger:** Introduction of Sangam multi-startup consortium recommendations (`INNO-010`) or localized domain taxonomy additions.
 
->>>>>>> 1339371 (feat(matching):complete matching engine UI Integration, tests and route updates)
+
 ### OPEN_QUESTION OQ-014 — Choose hero depth versus breadth
 
 - **Question:** Should the first demo implement all eight screens shallowly, or implement Pulse/Forge/Proof/ScaleGraph deeply and seed the intervening evaluation screens?
