@@ -1410,6 +1410,49 @@ Project-specific maintenance rules:
 - **Revisit trigger:** Only if the team explicitly chooses another documented information architecture.
 
 
+---
+
+## 22. Presentation layer
+
+### DEC-UI-001 — Government service portal visual language for the frontend
+
+- **Decision:** The frontend presents MahaSetu in the visual language of an Indian government service portal (reference: `https://www.startupindia.gov.in`): a dark national utility strip, a white masthead carrying the brand lockup, programme seal, language control and search, a horizontal primary navigation bar with a saffron active rule, saffron/deep-navy institutional accents, restrained corner radii, and a dark institutional footer. The previous dark-forest left-sidebar dashboard shell is replaced.
+- **Scope of the change:** Presentation only. No route, API, module, schema, permission, label, option value, metric, or copy string was added, removed, or altered by this decision. Navigation entries, demo roles, metric labels, lifecycle stage names, and all seeded values remain exactly as specified elsewhere in this document.
+- **Alternatives considered:**
+  - *Keep the sidebar dashboard shell and only retint it.* Rejected: the sidebar reads as a SaaS console, not a public service portal, and was the main reason the prototype did not read as authentic to a government audience.
+  - *Rebuild pages individually in the new style.* Rejected: it would have meant editing every page file, which risks silently changing labels, options, or values — exactly what the change was required not to do.
+- **Implementation approach:** Every pre-existing CSS class name and custom property name is retained as a public contract, because page components consume them from inline `style` attributes and Tailwind arbitrary values (`var(--line)`, `bg-[var(--color-accent)]`, and similar). Only their values were retuned. The Tailwind `emerald-*` scale, used inline throughout the page files, is remapped in `@theme` to an institutional navy scale so those utilities adopt the government palette without any page file being edited.
+- **Consequences:**
+  - `--color-emerald-*` no longer renders green anywhere in the application. Any future work that wants literal green must use `--color-mint-bright` (India green) rather than an `emerald-*` utility.
+  - Class names such as `.sidebar__footer` and `.workspace-label` survive from the sidebar era and now describe masthead furniture. They are kept to avoid touching consuming markup; renaming them is optional future cleanup.
+  - Four custom properties that page files referenced but that were never defined (`--color-accent`, `--color-border`, `--color-surface-muted`, `--color-text-secondary`) are now defined, so the affected controls in `payment-control.tsx`, `adoption-control.tsx`, and `mission-control.tsx` render with real colours for the first time.
+- **Honesty constraints preserved:** The portal chrome must never imply live government connectivity. The utility strip carries a permanent `Prototype` chip and a "Simulated environment · No live government systems" notice; the existing `SIMULATED_FOR_DEMO` banner is retained above the workspace; the footer repeats the integration mode and the synthetic-data label. Social icons in the strip are non-interactive and labelled as inactive. No real ministry, emblem, helpline number, or official identity is asserted.
+- **Motion policy:** Scroll-driven motion (section reveals, reading-progress rule, compacting masthead, announcement ticker, back-to-top control) is progressive enhancement. Content is fully visible without JavaScript, and all motion is disabled under `prefers-reduced-motion: reduce`.
+- **Revisit trigger:** A change of reference portal, an accessibility finding against the contrast or motion behaviour, or a decision to adopt a published government design system (for example India's GovDS) instead of a hand-built one.
+
+### DEC-UI-002 — Masthead utility column: language at the far right, identity below the search
+
+- **Decision:** The masthead's right-hand side is a two-row utility column instead of a single row of loose controls. Row one carries the section search with the language selector at the far right of the masthead; row two, directly beneath the search field and right-aligned, carries the demo role switcher and the signed-in identity. `Sign out` is no longer a standalone masthead button — it lives inside the identity dropdown.
+- **Scope of the change:** Presentation and control placement only. The sign-out behaviour itself (`POST /api/auth/logout`, then `router.push("/login")`) is unchanged, as are the five demo roles, their names, labels, and initials, and every route, API, schema, and permission.
+- **Languages offered:** English, मराठी (Marathi), हिंदी (Hindi) — the three languages the programme is scoped to serve.
+- **`SIMULATED_FOR_DEMO` boundary on the language selector:** The selection is real and persists per browser (`localStorage` key `mahasetu.language`) and is applied to `<html lang>` so assistive technology announces the chosen language. **The interface copy is not translated.** No translation catalogue exists in this repository. The open dropdown states this in place ("Interface copy is not translated yet — SIMULATED_FOR_DEMO"), and the control must not be presented as working localisation in a demo or write-up.
+- **Alternatives considered:**
+  - *Keep `Sign out` visible in the masthead.* Rejected: the requested layout puts identity below the search on the right, and a second free-standing button beside it crowds a column that already carries the role switcher. A dropdown is also the convention users expect from an account block.
+  - *Introduce an i18n framework (for example `next-intl`) so the selector really translates.* Deferred, not rejected. It is a dependency and a full copy-extraction pass across every page — out of scope for a layout change, and it would have breached the "presentation only" boundary. Recorded as backlog item `UI-003`.
+  - *Store the language preference in the session cookie.* Rejected for now: it would mean touching the auth/session boundary for a preference that has no server-side effect while no translations exist.
+- **Consequences:**
+  - `.sidebar__footer` is gone from the markup and its CSS is removed; the identity block is now `.gov-profile*`. This retires part of the naming debt recorded under `DEC-UI-001`. `.workspace-label` still survives from the sidebar era.
+  - `.gov-lang` changed from a static pill to a dropdown container; the pill styling moved to `.gov-lang__trigger`.
+  - Sign out is not present in server-rendered markup until the menu is opened. `tests/unit/app/navigation-pages.test.tsx` was updated accordingly: it now asserts the account-menu trigger renders, because the repository has no DOM-interaction test harness (vitest + `react-dom/server` only, no Testing Library).
+- **Revisit trigger:** Adoption of a real i18n catalogue (`UI-003`), or a decision to move the preference server-side.
+
+### Backlog item UI-003 — Real interface translation for Marathi and Hindi
+
+- **Status:** `FUTURE` (not started, unowned).
+- **Need:** `DEC-UI-002` ships a language selector whose selection persists but changes no copy. Until a catalogue exists, the control is labelled `SIMULATED_FOR_DEMO` in the UI.
+- **Acceptance criteria:** navigation labels, lifecycle stage names, masthead and footer chrome, and the login page render in the selected language; the selector no longer carries the simulated-for-demo note; the language preference survives a reload and a route change.
+
+
 ## Innovation Expansion A — The new product thesis
 
 ### A.1 The platform should optimize learning, not merely purchasing

@@ -38,110 +38,107 @@ export default function LoginPage() {
     <div className="page-stack">
       <section className="hero-panel">
         <div className="hero-panel__content">
+          <span className="eyebrow">Secure demo access</span>
           <h1>MahaSetu Demo</h1>
           <p>Select your demo role to continue</p>
+        </div>
+        <div className="hero-panel__signal" aria-label="Access notice">
+          <span>Access notice</span>
+          <strong>SIMULATED_FOR_DEMO</strong>
+          <p>
+            No real authentication is performed. Seeded demo accounts are used to
+            demonstrate server-derived route authorization.
+          </p>
+          <small>Synthetic demonstration data</small>
         </div>
       </section>
 
       <section className="content-grid">
         <article className="panel">
           <div className="panel__heading">
-            <h2>Select a role</h2>
-            <p>Choose which persona you&apos;d like to demonstrate:</p>
+            <div>
+              <span className="eyebrow">Step 1 of 1</span>
+              <h2>Select a role</h2>
+            </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-              marginBottom: "2rem",
-            }}
-          >
-            {roles.map((role) => (
-              <label
-                key={role.value}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1rem",
-                  padding: "1rem",
-                  border:
-                    selectedRole === role.value
-                      ? "2px solid var(--color-accent, #0066cc)"
-                      : "2px solid transparent",
-                  borderRadius: "0.5rem",
-                  cursor: "pointer",
-                  backgroundColor:
-                    selectedRole === role.value
-                      ? "var(--color-accent-bg, rgba(0, 102, 204, 0.05))"
-                      : "transparent",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  value={role.value}
-                  checked={selectedRole === role.value}
-                  onChange={(e) => setSelectedRole(e.target.value as DemoRole)}
-                  style={{ cursor: "pointer" }}
-                />
-                <div>
-                  <div style={{ fontWeight: "bold" }}>{role.label}</div>
-                  <div style={{ fontSize: "0.875rem", color: "var(--color-text-secondary, #666)" }}>
-                    {role.personName}
-                  </div>
-                </div>
-              </label>
-            ))}
+          <p className="mt-4 text-sm text-ink-muted">
+            Choose which persona you&apos;d like to demonstrate:
+          </p>
+
+          <div className="mt-4 grid gap-3" role="radiogroup" aria-label="Demo role">
+            {roles.map((role) => {
+              const isSelected = selectedRole === role.value;
+
+              return (
+                <label
+                  key={role.value}
+                  className="flex min-h-11 cursor-pointer items-center gap-4 p-4"
+                  style={{
+                    border: `1px solid ${isSelected ? "var(--saffron)" : "var(--line)"}`,
+                    borderLeft: `4px solid ${isSelected ? "var(--saffron)" : "var(--line)"}`,
+                    borderRadius: "var(--radius-md)",
+                    backgroundColor: isSelected
+                      ? "var(--color-accent-bg)"
+                      : "var(--paper)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value={role.value}
+                    checked={isSelected}
+                    onChange={(e) => setSelectedRole(e.target.value as DemoRole)}
+                    className="size-4 cursor-pointer accent-emerald-800"
+                  />
+                  <span>
+                    <span className="block text-sm font-bold text-emerald-950">
+                      {role.label}
+                    </span>
+                    <span className="block text-xs text-ink-muted">
+                      {role.personName}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
           </div>
 
           {error && (
             <div
+              className="mt-4 p-4 text-sm"
+              role="alert"
               style={{
-                padding: "1rem",
-                marginBottom: "1rem",
-                backgroundColor: "var(--color-error-bg, #ffe5e5)",
-                color: "var(--color-error, #d32f2f)",
-                borderRadius: "0.5rem",
-                fontSize: "0.875rem",
+                backgroundColor: "var(--color-error-bg)",
+                borderLeft: "4px solid var(--color-error)",
+                borderRadius: "var(--radius-sm)",
+                color: "var(--color-error)",
               }}
             >
               {error}
             </div>
           )}
 
-          <button
-            onClick={handleLogin}
-            disabled={isLoading}
-            style={{
-              padding: "0.75rem 1.5rem",
-              backgroundColor: isLoading ? "#ccc" : "var(--color-accent, #0066cc)",
-              color: "white",
-              border: "none",
-              borderRadius: "0.5rem",
-              cursor: isLoading ? "not-allowed" : "pointer",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              transition: "background-color 0.2s ease",
-            }}
-          >
-            {isLoading ? "Signing in..." : "Sign in"}
-          </button>
-
-          <div
-            style={{
-              marginTop: "2rem",
-              padding: "1rem",
-              backgroundColor: "var(--color-info-bg, #e3f2fd)",
-              borderRadius: "0.5rem",
-              fontSize: "0.875rem",
-              color: "var(--color-text-secondary, #666)",
-            }}
-          >
-            <strong>Demo credentials:</strong> This is a hackathon demonstration using seeded demo accounts. No real authentication is performed.
+          <div className="button-row mt-6">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign in"}
+            </button>
           </div>
+        </article>
+
+        <article className="panel action-panel">
+          <span className="eyebrow">Demo credentials</span>
+          <h2>Seeded accounts only</h2>
+          <p>
+            This is a hackathon demonstration using seeded demo accounts. No real
+            authentication is performed.
+          </p>
         </article>
       </section>
     </div>

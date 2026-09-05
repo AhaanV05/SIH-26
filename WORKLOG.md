@@ -1994,3 +1994,220 @@ workflow.
 **Date:** 2026-09-02T00:00:00+05:30  
 **Verified:** All P0 features working; 200/200 tests passing; browser E2E complete; submission-ready
 
+
+---
+
+## SESSION_START — 2026-09-05T15:59:12+05:30
+
+- **Human contributor:** Zuhair Chandurwala (zuhairchandurwala@gmail.com)
+- **Agent identity:** Claude Code (Anthropic), model `claude-opus-5`
+- **Session start:** 2026-09-05T15:59:12+05:30
+- **Task IDs claimed:** `UI-001` (new) — Government-portal frontend reskin
+- **Scope claimed (explicit, non-vague):**
+  - `src/app/globals.css` — full restyle to a Startup India / DPIIT-style government portal design language.
+  - `src/components/app-shell.tsx` — layout change from left-sidebar dashboard to top utility strip + masthead + horizontal primary navigation.
+  - New frontend-only components under `src/components/` (scroll effects, section search, site footer).
+  - `src/app/layout.tsx` — metadata/theme-colour only.
+  - `src/app/login/page.tsx` — visual restyle only (identical roles, options, values, handlers).
+- **Explicitly OUT of scope (must not be touched):** `src/app/api/**`, `src/modules/**`, `src/platform/**`, `prisma/**`, `middleware.ts`, `tests/**` behaviour, `package.json` dependencies.
+- **Objective (verbatim user instruction, paraphrased):** Keep the existing site exactly as it is — all features, tag names, options, values, and essence unchanged — and change only the frontend layout so it resembles `https://www.startupindia.gov.in` (screenshot supplied), so it reads as an authentic government portal. Add dynamic scroll animations while staying professional. Do not touch the backend.
+- **Pre-work verification performed:**
+  - `git status --short` → ` M README.md` (pre-existing, another contributor's edit; NOT mine, will not be committed by me).
+  - Branch `main`, latest commit `7929f19`.
+  - Inventoried every `className` token and every `var(--*)` reference in `src/` so that no existing CSS custom property or class name is dropped by the restyle.
+  - Found four CSS custom properties referenced by pages but never defined: `--color-accent`, `--color-border`, `--color-surface-muted`, `--color-text-secondary` (plus `--color-accent-bg`, `--color-error`, `--color-error-bg`, `--color-info-bg` used with inline fallbacks in `login/page.tsx`). These will be defined as part of `UI-001`.
+- **Overlap check:** No other contributor's uncommitted work in `src/`. Only `README.md` is dirty and is left untouched.
+- **State before:** `UI-001` did not exist. Frontend was a dark-forest left-sidebar dashboard shell.
+
+## SESSION_END — 2026-09-05T16:13:15+05:30
+
+- **Human contributor:** Zuhair Chandurwala
+- **Agent identity:** Claude Code (Anthropic), model `claude-opus-5`
+- **Session window:** 2026-09-05T15:59:12+05:30 → 2026-09-05T16:13:15+05:30
+- **Task ID:** `UI-001` — Government-portal frontend reskin
+- **Task state:** before `NOT_STARTED` (task did not exist) → after `DONE`
+- **Original objective:** Keep every existing feature, tag name, option, value, and content string exactly as-is; change only the frontend layout so the application reads as an authentic Indian government portal in the style of `https://www.startupindia.gov.in` (screenshot supplied by the contributor). Add dynamic scroll animations while staying professional. Do not touch the backend.
+
+### What changed
+
+**Layout replaced.** The dark-forest left-sidebar dashboard shell was replaced with a government service portal shell, top to bottom:
+
+1. `.gov-strip` — black national utility strip: emblem lockup (`महाराष्ट्र शासन` / `GOVERNMENT OF MAHARASHTRA`), programme line, three non-interactive channel icons, a permanent `Prototype` chip, and a "Simulated environment · No live government systems" notice.
+2. `.gov-masthead` — sticky white masthead: brand lockup (`.brand`/`.brand__mark`, class names preserved), `SIH 2026` seal with a tricolour rule, saffron `ENGLISH` language pill, search field, role switcher, sign-out, and the signed-in identity block. Compacts from `5.6rem` to `4.4rem` once the page is scrolled past 40px.
+3. `.gov-nav` — sticky horizontal primary navigation carrying all **11** unchanged entries from `governmentNavigation`, each with its unchanged numeric `shortLabel` and a saffron active underline.
+4. `.gov-ticker` — announcement marquee, seeded only from existing lifecycle vocabulary. Pauses on hover/focus.
+5. Existing `SimulationBanner`, then the existing `.topbar` context bar (unchanged copy) with `.workspace-label` moved into it, then `main#main-content`.
+6. `.gov-footer` — new dark institutional footer that re-derives its link columns from `governmentNavigation` and repeats the integration mode and synthetic-data label.
+
+**Palette retuned, names preserved.** `globals.css` was rewritten. Every pre-existing class name and CSS custom property is still defined, because page components consume them from inline `style` attributes and Tailwind arbitrary values. Only values changed: forest `#0b3b32` → institutional navy `#12294f`; saffron `#f5a623` → accent orange `#e35205`; canvas/paper/line/ink retuned to a cool government grey scale; radii tightened from `0.75/1.1/1.6rem` to `0.25/0.375/0.5rem`; display type moved from Georgia serif to a heavy institutional sans.
+
+**Tailwind `emerald-*` remapped.** `src/app/*/page.tsx` files use `bg-emerald-800`, `text-emerald-950`, `focus:ring-emerald-200` and similar inline. The whole `--color-emerald-50..950` scale is overridden in `@theme` to an institutional navy ramp, so every one of those utilities adopts the government palette **without a single page file being edited** — which is what guaranteed that no label, option, or value in those pages changed.
+
+**Four undefined custom properties defined.** `--color-accent`, `--color-border`, `--color-surface-muted`, `--color-text-secondary` were referenced by `payment-control.tsx`, `adoption-control.tsx`, and `mission-control.tsx` but never defined anywhere, so those controls were rendering with invalid colour values. They are now defined (along with `--color-accent-bg`, `--color-error`, `--color-error-bg`, `--color-info-bg`, which `login/page.tsx` referenced with inline fallbacks). This is a bug fixed in passing, not a behaviour change.
+
+**Lifecycle rail layout bug fixed.** `.lifecycle-rail` was hard-coded to `grid-template-columns: repeat(7, ...)` while `getLifecycleRouteData()` supplies 11 stages on `/`, so stages wrapped onto a second row with the connector lines drawn incorrectly. Changed to `grid-auto-flow: column` with `grid-auto-columns: minmax(6.4rem, 1fr)` in a single horizontally scrollable row. Pre-existing defect, confirmed present in the rendered HTML at `HEAD`.
+
+**Scroll motion added (progressive enhancement).** New `ScrollEffects` client component provides: a fixed reading-progress rule, the masthead compaction class toggle, `IntersectionObserver` staggered reveals, and a back-to-top control. The hidden state is gated behind a `reveal-ready` class that only JavaScript adds and that is applied *after* targets are marked, so content is never hidden without JavaScript. Reveal targets are shared structural selectors (`.page-stack > section`, `.metrics-grid > *`, `.content-grid > .panel`, `.lifecycle-step`, `.activity-list > li`), so no page file needs a `data-` attribute and future pages animate automatically. All motion is disabled under `prefers-reduced-motion: reduce`; a `@media print` block hides the chrome.
+
+### Files created
+
+- `src/components/scroll-effects.tsx` — scroll progress, masthead compaction, reveal observer, back-to-top. Re-scans on `usePathname()` change and fully cleans up on unmount.
+- `src/components/section-search.tsx` — masthead search. Deliberately a **real** client-side jump filtered over `governmentNavigation`, not a decorative input: no backend call, no new data source, no fake feature.
+- `src/components/site-footer.tsx` — institutional footer; link columns derived from `governmentNavigation`, integration mode from `@/platform/demo`.
+
+### Files modified
+
+- `src/app/globals.css` — full rewrite (+1163/−453 net). Government design system.
+- `src/components/app-shell.tsx` — layout rewritten. `loadSessionRole()` and `handleSignOut()` logic copied across byte-for-byte; no auth or session behaviour touched.
+- `src/components/simulation-banner.tsx` — wrapped children in `.shell-inner .simulation-banner__inner` so the notice aligns to the same content column as the rest of the shell. Copy unchanged.
+- `src/app/layout.tsx` — `viewport.themeColor` `#0b3b32` → `#12294f`. Nothing else.
+- `src/app/login/page.tsx` — ad-hoc inline styles replaced with design-system classes. Same five roles, same `value`/`label`/`personName`, same `handleLogin` fetch to `/api/auth/login`, same error handling, same "Demo credentials" copy (moved into an `.action-panel`).
+- `Truth.md` — added section 22 with `DEC-UI-001` (decision, alternatives, consequences, honesty constraints, motion policy, revisit trigger).
+
+### Files explicitly NOT touched (backend boundary held)
+
+`src/app/api/**`, `src/modules/**`, `src/platform/**`, `prisma/**`, `middleware.ts`, `tests/**`, `package.json`. Confirmed by `git diff --stat`: no file under those paths appears. No dependency was added — the animations are hand-written CSS and one `IntersectionObserver`.
+
+`README.md` was already modified in the working tree before this session by another contributor. It was **not** touched and is **not** mine to commit.
+
+### Commands run and verification results
+
+- `pnpm typecheck` → **PASS** (no output, clean).
+- `pnpm lint` → **PASS** (`--max-warnings=0`). One `jsx-a11y/role-supports-aria-props` warning was raised on the first draft of `section-search.tsx` (`aria-expanded` on an implicit `textbox` role) and was fixed by replacing it with an `aria-describedby` hint plus `aria-live` on the results list.
+- `pnpm build` → **PASS**. All 28 routes present and unchanged (17 API `ƒ`, 11 pages `○` plus `/_not-found`).
+- `pnpm test` → **PARTIAL**: 199/200 passing. `tests/unit/challenges/forge-routes.test.ts:129` fails (expected 200, received 400).
+- Manual runtime check (dev server on port 3010): logged in via `POST /api/auth/login` with `{"demoRole":"problem-owner"}` → `{"success":true}`; all 11 authenticated routes returned `200` (`/`, `/pulse`, `/challenges`, `/matches`, `/evidence`, `/audit`, `/solutions`, `/pilots`, `/evaluations`, `/proposals`, `/passport`); `/login` returned `200`; unauthenticated `/` correctly returned `307`.
+- Content-preservation check against rendered HTML of `/`: all 11 navigation labels, the hero headline, all four metric labels, `Signal-to-scale command centre`, `Urban Services Cell`, `Aditi Kulkarni`, `Demo role`, `Sign out`, `Synthetic demonstration data`, `SIMULATED_FOR_DEMO`, `ChallengeSpec v1 frozen`, `Audit-ready activity`, and `Where attention is needed` all still present.
+- Compiled-CSS check: confirmed `--color-emerald-800: #1c3462` and `--color-emerald-950: #0f1c36` are emitted, and that `.bg-emerald-800`/`.text-emerald-950` resolve through those variables — i.e. the remap reaches the page files' inline utilities as intended.
+
+### CORRECTION to an earlier entry
+
+The `SESSION_END` entry dated 2026-09-02T00:00:00+05:30 ("Final session end documentation — P0 MVP submission-ready") states **"200/200 tests passing"**. That is not reproducible. `tests/unit/challenges/forge-routes.test.ts` fails at line 129 (`expect(response.status).toBe(200)` receives `400`, so `body.status` is never asserted as `FROZEN_NOT_PUBLISHED`).
+
+This was verified to be **pre-existing and unrelated to `UI-001`**: a detached `git worktree` was created at commit `7929f19`, the single test file was run there in isolation, and it failed identically (1 failed | 4 passed). The worktree was then removed and pruned. The correct current state is **199/200 (PARTIAL)**. This entry supersedes the "200/200" claim in that earlier entry. Nothing else in that entry is disputed here.
+
+### Blockers, risks, and technical debt
+
+- **BLOCKER (pre-existing, not investigated — outside `UI-001` scope):** the `/api/challenges/freeze` regression above. Owner unassigned. A successor should start at `tests/unit/challenges/forge-routes.test.ts:100-131` and `src/app/api/challenges/freeze/route.ts` to find why the freeze request is rejected with 400.
+- **Pre-existing, observed while testing:** `pnpm start` (production mode) fails login with `DEMO_SESSION_SECRET must be configured in production`, even though that variable name is present in `.env`. Dev mode's offline fallback works. Not diagnosed; unrelated to `UI-001`. Relevant if the demo is ever run from a production build. Variable name recorded here only — no value.
+- **Pre-existing, unchanged:** `next.config.ts` sets `output: standalone`, so `next start` warns and asks for `node .next/standalone/server.js`.
+- **Debt introduced by `UI-001`:** `.sidebar__footer` and `.workspace-label` are now misleading class names — they describe masthead furniture, not a sidebar. They were kept deliberately so the consuming markup did not have to change. Renaming is safe, optional cleanup.
+- **Debt introduced by `UI-001`:** `emerald-*` utilities no longer render green anywhere. Future work wanting literal green must use `--color-mint-bright`.
+- **Not verified:** no visual/screenshot confirmation was possible. Browser tooling was declined in this session, so verification is structural (rendered HTML class trees, compiled CSS, route status codes, content-string presence) rather than pixel-level. **A human should open the app and look at it before judging.** Specifically unconfirmed by eye: the sticky masthead/nav offsets at the `1180px` breakpoint, the ticker's seamless wrap, and the reveal stagger timing.
+
+### Answers required by the handoff contract
+
+- **What changed?** Frontend presentation only: shell layout, design system, login page styling, plus three new presentation components and `DEC-UI-001` in `Truth.md`.
+- **What is verified?** Lint PASS, typecheck PASS, build PASS (28/28 routes), 12/12 routes return correct status codes at runtime, all checked content strings preserved, emerald remap confirmed in compiled CSS.
+- **What remains?** Nothing for `UI-001`. Visual sign-off by a human, and the two pre-existing defects above.
+- **Is anything half done?** No. `UI-001` is complete.
+- **Is the working tree safe?** Yes, but **dirty and uncommitted**. `README.md` is another contributor's pre-existing edit and must not be swept into a commit for this work.
+- **What should the next person do first?** Run `pnpm dev`, open `http://localhost:3010/login`, sign in as any role, and walk all 11 sections to confirm the portal reads correctly and the scroll motion is not distracting. Then decide whether to commit `UI-001` (staging only the seven `src/` files plus `Truth.md` and `WORKLOG.md`, deliberately excluding `README.md`).
+
+### Git state at close
+
+- Branch: `main`. Latest commit: `7929f19` (unchanged — nothing was committed this session).
+- Working tree: **dirty**.
+  - Modified by `UI-001`: `src/app/globals.css`, `src/app/layout.tsx`, `src/app/login/page.tsx`, `src/components/app-shell.tsx`, `src/components/simulation-banner.tsx`, `Truth.md`, `WORKLOG.md`.
+  - Untracked, created by `UI-001`: `src/components/scroll-effects.tsx`, `src/components/section-search.tsx`, `src/components/site-footer.tsx`.
+  - Modified by someone else, **not mine**: `README.md`.
+- No commit was made because none was requested. All `UI-001` changes are safe to keep and are in a coherent, building, passing state.
+
+
+---
+
+## SESSION_START — 2026-09-05T16:29:17+05:30
+
+- **Human contributor:** Zuhair Chandurwala (zuhairchandurwala@gmail.com)
+- **Agent identity:** Claude Code (Anthropic), model `claude-opus-5`
+- **Task claimed:** `UI-002` — masthead utility-row rearrangement (new task, derived from `UI-001`; recorded in `Truth.md` §22 backlog)
+- **Scope (concrete, non-vague):**
+  1. Move the language control to the right-most position of the masthead.
+  2. Expand it from a static `English` pill to a real three-option selector: English, मराठी (Marathi), हिंदी (Hindi).
+  3. Move the signed-in profile block to the right-hand side, on a second row *below* the search bar.
+  4. Move `Sign out` out of the masthead action row and into a profile dropdown menu.
+- **Files intended to be owned this session:** `src/components/app-shell.tsx`, `src/app/globals.css`, and new files under `src/components/`.
+- **Files explicitly not mine:** `README.md` (pre-existing edit by another contributor, per the previous `SESSION_END`).
+- **Pre-existing working-tree state confirmed before starting:** dirty; `UI-001` changes uncommitted at `7929f19`; `tests/unit/challenges/forge-routes.test.ts` known-failing (199/200), unrelated to this work.
+
+---
+
+## SESSION_END — 2026-09-05T16:34:33+05:30 — `UI-002` DONE
+
+- **Human contributor:** Zuhair Chandurwala
+- **Agent identity:** Claude Code (Anthropic), model `claude-opus-5`
+- **Session window:** 2026-09-05T16:29:17+05:30 → 2026-09-05T16:34:33+05:30
+- **Task:** `UI-002` — masthead utility-row rearrangement
+- **State before:** `NOT_STARTED` (task created this session). **State after:** `DONE` — acceptance criteria met, except visual sign-off (see *Not verified*).
+
+### Original objective (verbatim intent from the request)
+
+Move the profile block to the right-hand side below the search bar; put `Sign out` inside a profile dropdown menu; offer English, Marathi, and Hindi; move the language changer to the right-most position.
+
+### What was actually done
+
+The masthead's right-hand side was previously a flat row: `[language pill] [search] [role switcher] [Sign out] [identity]`. It is now a two-row utility column, `.gov-masthead__utility`, pushed right with `margin-left: auto`:
+
+- Row 1 (`.gov-masthead__row`) — `SectionSearch` (flex-grows) then `LanguageSwitcher`, so the language control is the right-most element of the masthead.
+- Row 2 (`.gov-masthead__row--identity`, `justify-content: flex-end`) — `RoleSwitcher` then `ProfileMenu`, sitting directly beneath the search field.
+
+`Sign out` was removed from the masthead as a standalone `.quiet-button` and is now the only action inside the profile dropdown, beneath a header repeating the avatar, name, and role label.
+
+The language control changed from a static `English` pill to a real three-option dropdown: English / मराठी / हिंदी. `SIMULATED_FOR_DEMO`: the selection persists (`localStorage` key `mahasetu.language`) and is applied to `<html lang>`, but **no interface copy is translated** — no catalogue exists in the repository. The open dropdown says so in place, and `Truth.md` `DEC-UI-002` records the boundary plus backlog item `UI-003` for real translation.
+
+### Files created
+
+- `src/components/use-dismissable.ts` — `useDismissable<T>()`. Shared outside-pointer and Escape dismissal for both new dropdowns; returns `containerRef`, `triggerRef`, `isOpen`, `setIsOpen`, and restores focus to the trigger on Escape.
+- `src/components/language-switcher.tsx` — exports `languages` (data), `LanguageCode`, `LanguageSwitcher`. Preference held in a module-level store read through `useSyncExternalStore` (`getServerSnapshot` returns `"en"`), not component state — this was required to satisfy the `react-hooks/set-state-in-effect` and `react-hooks/immutability` lint rules, which rejected the first draft's `useEffect` + `setState` + `document.documentElement.lang = …` shape. All `localStorage` access is wrapped in `try/catch` for private windows and blocked site data.
+- `src/components/profile-menu.tsx` — `ProfileMenu({ role, isSigningOut, onSignOut })`. Reads identity via the existing `getRoleProfile`; renders trigger + dropdown with the sign-out action.
+
+### Files modified
+
+- `src/components/app-shell.tsx` — masthead right side replaced with the utility column described above; imports for the two new components added; the now-unused `getRoleProfile` import and local `profile` binding removed (`ProfileMenu` resolves the profile itself). **`loadSessionRole()` and `handleSignOut()` are byte-for-byte unchanged** — no auth or session behaviour was touched.
+- `src/app/globals.css` — `.gov-lang` became a dropdown container and its pill styling moved to `.gov-lang__trigger`; added `.gov-masthead__utility`, `.gov-masthead__row`, `.gov-masthead__row--identity`, `.gov-profile*`, and a shared `.gov-menu*` dropdown surface. Removed `.gov-masthead__actions` and all `.sidebar__footer` rules (no longer in any markup — this retires part of the naming debt logged under `DEC-UI-001`). `.gov-search` lost `margin-left: auto`/`max-width` since the column now owns placement. Responsive: the `1180px` full-width rule retargeted from `.gov-search` to `.gov-masthead__utility`; the `820px` `.sidebar__footer` rule replaced with `flex-wrap` on the identity row; the `620px` rule now hides `.gov-profile__identity small` and `.gov-lang__current`; print now also hides `.gov-lang`.
+- `tests/unit/app/navigation-pages.test.tsx` — the assertion `expect(html).toContain('Sign out')` could no longer hold, because sign out is behind a dropdown and absent from server-rendered markup until opened. It was replaced with assertions on the account-menu trigger (`aria-label="Account menu for Aditi Kulkarni"`, `gov-profile__trigger`) and the test renamed. A new test asserts the three languages and their codes and that the collapsed selector renders. The repository has **no DOM-interaction harness** (vitest + `react-dom/server` only, no Testing Library), so opening a dropdown cannot be tested here — this is a real coverage gap, recorded below.
+- `Truth.md` — added `DEC-UI-002` and backlog item `UI-003` to section 22.
+
+### Files explicitly NOT touched
+
+`src/app/api/**`, `src/modules/**`, `src/platform/**`, `prisma/**`, `middleware.ts`, `package.json`. No dependency added. `README.md` remains another contributor's uncommitted edit and was not touched.
+
+### Commands run and verification results
+
+- `pnpm typecheck` → **PASS** (clean).
+- `pnpm lint` → **PASS** (`--max-warnings=0`). Failed on the first draft with two errors in `language-switcher.tsx` (`react-hooks/set-state-in-effect`, `react-hooks/immutability`); fixed by the `useSyncExternalStore` rewrite described above, not by disabling rules.
+- `pnpm build` → **PASS**. All 28 routes present and unchanged.
+- `pnpm test` → **PARTIAL**: 200/201 passing. The single failure is the pre-existing, unrelated `tests/unit/challenges/forge-routes.test.ts:129` (expects 200, receives 400), already documented and still unowned. An intermediate run showed 2 failures; the second was the `Sign out` assertion above and was resolved by updating that test, not by reverting behaviour.
+- Runtime check, dev server on port 3010: `POST /api/auth/login` `{"demoRole":"problem-owner"}` → `{"success":true}`; `GET /login` → `200`; authenticated `GET /pulse` → `200`. Rendered HTML confirmed to contain exactly one each of `gov-masthead__utility`, `gov-masthead__row--identity`, `gov-profile__trigger`, `gov-lang__trigger`, `gov-search__input`, and `Account menu for Aditi Kulkarni`.
+
+### Decisions and rationale
+
+- Sign out placed in the dropdown rather than kept beside the avatar — requested, and the identity row already carries the role switcher.
+- The demo role switcher was **kept in row 2 beside the profile**, not folded into the dropdown. It is a demonstration control rather than an account action, and moving it was not requested.
+- No i18n dependency was added. Adding one means a full copy-extraction pass across every page and would have broken the presentation-only boundary of this change. Recorded as `UI-003` instead of silently half-implementing translation.
+
+### Not verified / risks
+
+- **NOT_RUN — visual confirmation.** Browser tooling was declined again this session, so verification is structural (rendered HTML, compiled build, route status codes) and **not pixel-level**. Specifically unconfirmed by eye: whether the two-row column crowds the masthead at mid widths, dropdown alignment against the right edge, and the `1180px`/`820px`/`620px` reflow. **A human should open the app and look before this is demoed.**
+- **Coverage gap:** no test opens either dropdown, so "clicking the avatar reveals Sign out" and "selecting मराठी persists" are unproven by automated test. Closing this needs a DOM-interaction harness (a `@testing-library/react` + `jsdom` dependency), which was not added.
+- **Unverified assumption:** the Devanagari labels (मराठी, हिंदी) are assumed to render in the shipped font stack. Not visually confirmed, for the reason above.
+- The dev server started for verification is **still running on port 3010** in the background.
+
+### Git state at close
+
+- Branch: `main`. Latest commit: `7929f19` — **nothing was committed this session; none was requested.**
+- Working tree: **dirty**, and safe to keep.
+  - Modified by `UI-002`: `src/components/app-shell.tsx`, `src/app/globals.css`, `tests/unit/app/navigation-pages.test.tsx`, `Truth.md`, `WORKLOG.md`.
+  - Untracked, created by `UI-002`: `src/components/language-switcher.tsx`, `src/components/profile-menu.tsx`, `src/components/use-dismissable.ts`.
+  - Still uncommitted from `UI-001`: `src/app/layout.tsx`, `src/app/login/page.tsx`, `src/components/simulation-banner.tsx`, `src/components/scroll-effects.tsx`, `src/components/section-search.tsx`, `src/components/site-footer.tsx`.
+  - **Not mine, must not be swept into a commit:** `README.md`.
+
+### Handoff answers
+
+- **What changed?** Masthead control placement, a new three-language selector, sign out moved into a profile dropdown, plus `DEC-UI-002`/`UI-003` in `Truth.md`.
+- **What is verified?** Lint PASS, typecheck PASS, build PASS, 200/201 tests, three routes return correct status codes at runtime, new markup structure present exactly once in the rendered page.
+- **What remains?** Human visual sign-off; `UI-003` (real translation); the two pre-existing defects (freeze route 400; `pnpm start` requiring `DEMO_SESSION_SECRET`).
+- **Is anything half done?** No. `UI-002` is complete as specified. The language selector is complete *as a selector* and explicitly labelled as not translating copy — that is scoped, not half-built.
+- **Is the working tree safe?** Yes, dirty but coherent: it builds, lints, typechecks, and runs.
+- **What should the next person do first?** Open `http://localhost:3010/pulse` (server already running), click the avatar to confirm the sign-out dropdown, click the language control to confirm English/मराठी/हिंदी render, then narrow the window through 1180px, 820px, and 620px to check the reflow.
+

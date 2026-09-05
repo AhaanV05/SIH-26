@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppShell } from "../../../src/components/app-shell";
 import { getRoleProfile } from "../../../src/components/role-switcher";
+import { languages } from "../../../src/components/language-switcher";
 import OverviewPage from "../../../src/app/page";
 import AuditPage from "../../../src/app/audit/page";
 import ChallengesPage from "../../../src/app/challenges/page";
@@ -31,7 +32,7 @@ describe("core lifecycle route pages", () => {
     expect(html).toContain("Reduce community-bin overflow events");
   });
 
-  it("marks the current route as active in the app shell navigation and exposes sign out", () => {
+  it("marks the current route as active in the app shell navigation and exposes the account menu", () => {
     const html = renderToStaticMarkup(
       <AppShell>
         <div>Child content</div>
@@ -40,7 +41,28 @@ describe("core lifecycle route pages", () => {
 
     expect(html).toContain('nav-link nav-link--active');
     expect(html).toContain('href="/pulse"');
-    expect(html).toContain('Sign out');
+    // Sign out now lives inside the account dropdown, so the shell exposes the
+    // trigger rather than the action itself until the menu is opened.
+    expect(html).toContain('aria-label="Account menu for Aditi Kulkarni"');
+    expect(html).toContain('gov-profile__trigger');
+  });
+
+  it("offers English, Marathi, and Hindi in the masthead language selector", () => {
+    expect(languages.map((language) => language.label)).toEqual([
+      "English",
+      "Marathi",
+      "Hindi",
+    ]);
+    expect(languages.map((language) => language.value)).toEqual(["en", "mr", "hi"]);
+
+    const html = renderToStaticMarkup(
+      <AppShell>
+        <div>Child content</div>
+      </AppShell>,
+    );
+
+    // The selector renders collapsed, showing the default language.
+    expect(html).toContain('aria-label="Language: English. Change language"');
   });
 
   it("exposes the correct account identity for the selected demo role", () => {

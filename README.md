@@ -28,7 +28,7 @@ pnpm.cmd dev
 
 `db:deploy` applies the committed migration in `prisma/migrations/` (requires a reachable PostgreSQL server; it does not create or drop the database itself). `db:seed` truncates every application table and reloads the deterministic golden-path demo dataset described in `Truth.md` section 5.1 — safe to rerun any number of times for repeatable judging. Use `pnpm.cmd db:reset` during development to apply migrations from scratch and reseed in one step (destructive: drops and recreates the database).
 
-Open [http://localhost:3000](http://localhost:3000). The initial overview shell runs without contacting external government or AI services.
+Open [http://localhost:3010](http://localhost:3000). The initial overview shell runs without contacting external government or AI services.
 
 To validate the foundation:
 

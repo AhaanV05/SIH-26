@@ -1,26 +1,63 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   MahaSetu — Government portal design system
+   --------------------------------------------------------------------------
+   Visual language modelled on Indian government service portals (national
+   emblem strip, white masthead with search, horizontal primary navigation,
+   saffron accent rules, deep-navy institutional type).
+
+   IMPORTANT FOR CONTRIBUTORS: every custom property and class name that
+   existed before the UI-001 reskin is still defined here. Page components
+   reference them from inline `style` attributes and Tailwind arbitrary values
+   (e.g. `bg-[var(--color-accent)]`, `border: 1px solid var(--line)`), so the
+   NAMES are a public contract. Only their VALUES were retuned to the
+   government palette.
+   ========================================================================== */
+
 @theme {
-  --color-canvas: #f4f7f3;
-  --color-danger: #a64236;
-  --color-forest: #0b3b32;
-  --color-forest-soft: #155d4d;
-  --color-ink: #10241f;
-  --color-ink-muted: #5c6e68;
-  --color-line: #d9e2dd;
-  --color-mint: #dff5e9;
-  --color-mint-bright: #92e3bb;
-  --color-paper: #fffef9;
-  --color-saffron: #f5a623;
-  --color-saffron-soft: #fff4d8;
-  --font-display: Georgia, "Times New Roman", serif;
+  /* --- Institutional palette ------------------------------------------ */
+  --color-canvas: #f1f4f9;
+  --color-danger: #b3261e;
+  --color-forest: #12294f; /* primary institutional navy */
+  --color-forest-soft: #1f4587;
+  --color-ink: #131f36;
+  --color-ink-muted: #5b6b85;
+  --color-line: #d9e0ea;
+  --color-mint: #e6f2ea; /* success tint */
+  --color-mint-bright: #1a8a41; /* India green */
+  --color-paper: #ffffff;
+  --color-saffron: #e35205; /* accent orange */
+  --color-saffron-soft: #fff2e8;
+
+  --font-display:
+    "Segoe UI", Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, sans-serif;
   --font-sans:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  --shadow-panel: 0 18px 50px rgba(22, 54, 45, 0.08);
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --shadow-panel: 0 1px 2px rgba(19, 31, 54, 0.06), 0 10px 30px rgba(19, 31, 54, 0.07);
+
+  /* --- Emerald scale remapped to institutional navy --------------------
+     Page files use `bg-emerald-800`, `text-emerald-950`, `focus:ring-emerald-200`
+     and similar utilities inline. Remapping the scale reskins every one of
+     them to the government palette without editing a single page file, so no
+     tag name, option, or value in those pages changes. */
+  --color-emerald-50: #eef3fb;
+  --color-emerald-100: #dce7f7;
+  --color-emerald-200: #bcd0ee;
+  --color-emerald-300: #8fb0e0;
+  --color-emerald-400: #5b87cd;
+  --color-emerald-500: #3765b3;
+  --color-emerald-600: #2a4f95;
+  --color-emerald-700: #223f78;
+  --color-emerald-800: #1c3462;
+  --color-emerald-900: #172a51;
+  --color-emerald-950: #0f1c36;
 }
 
 :root {
+  /* Legacy/consumed tokens — names preserved, values retuned. */
   --ink: var(--color-ink);
   --ink-muted: var(--color-ink-muted);
   --forest: var(--color-forest);
@@ -34,9 +71,33 @@
   --line: var(--color-line);
   --danger: var(--color-danger);
   --shadow: var(--shadow-panel);
-  --radius-sm: 0.75rem;
-  --radius-md: 1.1rem;
-  --radius-lg: 1.6rem;
+
+  /* Previously referenced by pages but never defined — now real. */
+  --color-accent: #12294f;
+  --color-accent-bg: rgba(227, 82, 5, 0.07);
+  --color-border: var(--color-line);
+  --color-surface-muted: #f5f8fc;
+  --color-text-secondary: var(--color-ink-muted);
+  --color-error: var(--color-danger);
+  --color-error-bg: #fdecea;
+  --color-info-bg: #eaf1fb;
+
+  /* Government-portal specific tokens. */
+  --gov-strip: #1c1c1c;
+  --gov-strip-text: #f2f2f2;
+  --gov-saffron-light: #ff8a3d;
+  --gov-navy-deep: #0d1d3a;
+  --gov-band-a: #fbe4cd;
+  --gov-band-b: #f7cfa6;
+  --gov-rule: #e6ebf2;
+
+  /* Government portals use restrained corner radii. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  --shell-max: 84rem;
+  --shell-pad: clamp(1rem, 3.2vw, 2.75rem);
 }
 
 * {
@@ -47,9 +108,11 @@ html {
   background: var(--canvas);
   color: var(--ink);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
   scroll-behavior: smooth;
+  scroll-padding-top: 9rem;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -75,196 +138,849 @@ button {
 
 :focus-visible {
   outline: 3px solid var(--saffron);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
 .skip-link {
   background: var(--paper);
+  border: 1px solid var(--forest);
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  color: var(--forest);
+  font-weight: 700;
   left: 1rem;
   padding: 0.8rem 1rem;
   position: fixed;
   top: -5rem;
-  z-index: 100;
+  z-index: 200;
 }
 
 .skip-link:focus {
   top: 0;
 }
 
-.app-shell {
-  display: grid;
-  grid-template-columns: 17rem minmax(0, 1fr);
-  min-height: 100vh;
-}
+/* ==========================================================================
+   1. Shell
+   ========================================================================== */
 
-.sidebar {
-  background:
-    radial-gradient(circle at 20% 90%, rgba(146, 227, 187, 0.15), transparent 32%),
-    var(--forest);
-  color: #f8fffb;
+.app-shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 1.6rem 1.15rem;
-  position: sticky;
+}
+
+.shell-inner {
+  margin: 0 auto;
+  max-width: var(--shell-max);
+  padding-inline: var(--shell-pad);
+  width: 100%;
+}
+
+/* --- Scroll progress rule (top of viewport) --------------------------- */
+.scroll-progress {
+  background: linear-gradient(90deg, #ff9933 0%, var(--saffron) 45%, var(--mint-bright) 100%);
+  height: 3px;
+  left: 0;
+  position: fixed;
   top: 0;
+  transform-origin: 0 50%;
+  transition: opacity 0.25s ease;
+  width: 100%;
+  z-index: 120;
 }
 
-.brand {
-  @apply flex min-h-11 items-center;
+/* ==========================================================================
+   2. Government utility strip (black bar)
+   ========================================================================== */
 
-  gap: 0.8rem;
-  margin: 0 0.55rem 2.25rem;
+.gov-strip {
+  background: var(--gov-strip);
+  color: var(--gov-strip-text);
+  font-size: 0.74rem;
 }
 
-.brand__mark {
+.gov-strip__inner {
   align-items: center;
-  background: var(--mint-bright);
-  border-radius: 0.8rem;
-  color: var(--forest);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  min-height: 3.1rem;
+  padding-block: 0.45rem;
+}
+
+.gov-emblem {
+  align-items: center;
+  color: #fff;
   display: inline-flex;
-  font-family: Georgia, serif;
-  font-size: 1.35rem;
-  font-weight: 800;
-  height: 2.75rem;
+  flex-shrink: 0;
+  gap: 0.55rem;
+}
+
+.gov-emblem__mark {
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  display: inline-flex;
+  flex-direction: column;
+  height: 2.05rem;
   justify-content: center;
-  width: 2.75rem;
+  line-height: 1;
+  width: 1.6rem;
 }
 
-.brand strong,
-.brand small,
-.workspace-label span,
-.workspace-label strong,
-.sidebar__footer strong,
-.sidebar__footer small {
+.gov-emblem__mark span:first-child {
+  font-size: 0.9rem;
+}
+
+.gov-emblem__mark span:last-child {
+  font-size: 0.32rem;
+  letter-spacing: 0.02em;
+  margin-top: 0.12rem;
+  opacity: 0.85;
+}
+
+.gov-emblem__text {
   display: block;
+  line-height: 1.2;
 }
 
-.brand strong {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.18rem;
+.gov-emblem__text b {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  opacity: 0.86;
 }
 
-.brand small,
-.sidebar__footer small {
-  color: #b7cec5;
-  font-size: 0.67rem;
-  margin-top: 0.18rem;
+.gov-emblem__text strong {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
-.workspace-label {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-sm);
-  margin-bottom: 1.6rem;
-  padding: 0.8rem 0.9rem;
+.gov-strip__rule {
+  background: rgba(255, 255, 255, 0.28);
+  height: 1.8rem;
+  width: 1px;
 }
 
-.workspace-label span {
-  color: #a9c3ba;
-  font-size: 0.64rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.gov-strip__ministry {
+  color: #e2e2e2;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
-.workspace-label strong {
-  font-size: 0.79rem;
-  margin-top: 0.28rem;
+.gov-strip__ministry small {
+  color: #a9a9a9;
+  display: block;
+  font-size: 0.63rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
-.nav-list {
-  display: grid;
-  gap: 0.32rem;
+.gov-social {
+  display: flex;
+  gap: 0.4rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.nav-link {
-  @apply flex min-h-11 items-center;
-
-  border-radius: 0.7rem;
-  color: #c7d9d2;
-  font-size: 0.86rem;
-  font-weight: 620;
-  gap: 0.8rem;
-  padding: 0.62rem 0.78rem;
+.gov-social li {
+  align-items: center;
+  background: #3a3a3a;
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  height: 1.55rem;
+  justify-content: center;
+  width: 1.55rem;
 }
 
-.nav-link span {
-  color: #8bb3a4;
+.gov-social svg {
+  height: 0.82rem;
+  width: 0.82rem;
+}
+
+.gov-strip__right {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
+.gov-strip__notice {
+  color: #ffd9c2;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.gov-strip__notice b {
+  color: #fff;
+  font-weight: 800;
+}
+
+.gov-chip {
+  background: var(--saffron);
+  border-radius: 2px;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  padding: 0.24rem 0.45rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   3. Masthead (white brand + search row)
+   ========================================================================== */
+
+.gov-masthead {
+  background: var(--paper);
+  border-bottom: 1px solid var(--gov-rule);
+  position: sticky;
+  top: 0;
+  transition: box-shadow 0.25s ease, padding 0.25s ease;
+  z-index: 90;
+}
+
+.app-shell.is-scrolled .gov-masthead {
+  box-shadow: 0 6px 20px rgba(19, 31, 54, 0.1);
+}
+
+.gov-masthead__inner {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  min-height: 5.6rem;
+  padding-block: 0.85rem;
+  transition: min-height 0.25s ease;
+}
+
+.app-shell.is-scrolled .gov-masthead__inner {
+  min-height: 4.4rem;
+}
+
+/* Brand (class names preserved from the previous sidebar shell). */
+.brand {
+  @apply flex min-h-11 items-center;
+
+  flex-shrink: 0;
+  gap: 0.7rem;
+}
+
+.brand__mark {
+  align-items: center;
+  background: linear-gradient(160deg, #ff9933 0%, #ffffff 50%, var(--mint-bright) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--forest);
+  display: inline-flex;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  height: 2.9rem;
+  justify-content: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.3s ease;
+  width: 2.9rem;
+}
+
+.brand:hover .brand__mark {
+  transform: translateY(-2px);
+}
+
+.brand strong,
+.brand small,
+.workspace-label span,
+.workspace-label strong {
+  display: block;
+}
+
+.brand strong {
+  color: var(--forest);
+  font-family: var(--font-display);
+  font-size: 1.42rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+
+.brand small {
+  color: var(--saffron);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  margin-top: 0.15rem;
+  text-transform: uppercase;
+}
+
+.gov-masthead__rule {
+  background: var(--line);
+  height: 2.6rem;
+  width: 1px;
+}
+
+/* Programme seal — mirrors the "Azadi Ka Amrit Mahotsav" lockup slot. */
+.gov-seal {
+  line-height: 1.2;
+  text-align: center;
+}
+
+.gov-seal strong {
+  color: var(--forest);
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.gov-seal span {
+  color: var(--ink-muted);
+  display: block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gov-seal__flag {
+  border-radius: 1px;
+  display: block;
+  height: 0.28rem;
+  margin: 0.3rem auto 0.25rem;
+  width: 2.4rem;
+  background: linear-gradient(
+    to bottom,
+    #ff9933 0 33.3%,
+    #ffffff 33.3% 66.6%,
+    #138808 66.6% 100%
+  );
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+/* Language selector — sits at the far right of the masthead utility row. */
+.gov-lang {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.gov-lang__trigger {
+  @apply inline-flex min-h-11 items-center justify-center;
+
+  background: var(--saffron);
+  border: 1px solid var(--saffron);
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 800;
+  gap: 0.42rem;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 0.85rem;
+  transition: background 0.2s ease;
+}
+
+.gov-lang__trigger:hover {
+  background: #c9450f;
+  border-color: #c9450f;
+}
+
+.gov-lang__current {
+  white-space: nowrap;
+}
+
+/* Search — a real, client-side jump to any workspace section. */
+.gov-search {
+  flex: 1 1 16rem;
+  min-width: 11rem;
+  position: relative;
+}
+
+.gov-search__field {
+  align-items: center;
+  border: 1px solid var(--saffron);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(19, 31, 54, 0.06);
+  display: flex;
+  overflow: hidden;
+}
+
+.gov-search__field:focus-within {
+  box-shadow: 0 0 0 3px rgba(227, 82, 5, 0.18);
+}
+
+.gov-search__input {
+  background: var(--paper);
+  border: 0;
+  color: var(--ink);
+  flex: 1;
+  font-size: 0.88rem;
+  min-height: 2.9rem;
+  min-width: 0;
+  outline: none;
+  padding: 0.6rem 0.85rem;
+}
+
+.gov-search__input::placeholder {
+  color: #9aa6b8;
+  font-style: italic;
+}
+
+.gov-search__button {
+  align-items: center;
+  align-self: stretch;
+  background: var(--saffron);
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  min-width: 3.4rem;
+  transition: background 0.2s ease;
+}
+
+.gov-search__button:hover {
+  background: #c9450f;
+}
+
+.gov-search__results {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 0 0 3px 3px;
+  box-shadow: var(--shadow);
+  left: 0;
+  list-style: none;
+  margin: 0.3rem 0 0;
+  max-height: 19rem;
+  overflow-y: auto;
+  padding: 0.3rem;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 95;
+}
+
+.gov-search__results li a,
+.gov-search__empty {
+  border-radius: 2px;
+  color: var(--ink);
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 600;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+}
+
+.gov-search__results li a:hover,
+.gov-search__results li a:focus-visible {
+  background: var(--saffron-soft);
+  color: var(--forest);
+}
+
+.gov-search__results li a span {
+  color: var(--saffron);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.gov-search__empty {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+/* Masthead right-hand utility column: search + language above, identity below. */
+.gov-masthead__utility {
+  display: flex;
+  flex: 1 1 30rem;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-left: auto;
+  max-width: 34rem;
+  min-width: 15rem;
+}
+
+.gov-masthead__row {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.gov-masthead__row--identity {
+  justify-content: flex-end;
+}
+
+/* Signed-in identity block (previously `.sidebar__footer`). */
+.gov-profile {
+  position: relative;
+}
+
+.gov-profile__trigger {
+  align-items: center;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  gap: 0.55rem;
+  min-height: 2.9rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.4rem;
+  text-align: left;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.gov-profile__trigger:hover,
+.gov-profile__trigger[aria-expanded="true"] {
+  background: #f7f9fc;
+  border-color: var(--saffron);
+}
+
+.gov-profile__identity strong,
+.gov-menu__header strong {
+  color: var(--forest);
+  display: block;
+  font-size: 0.79rem;
+  font-weight: 700;
+}
+
+.gov-profile__identity small,
+.gov-menu__header small {
+  color: var(--ink-muted);
+  display: block;
   font-size: 0.64rem;
 }
 
-.nav-link:hover,
-.nav-link--active {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.nav-link--active {
-  box-shadow: inset 3px 0 var(--mint-bright);
-}
-
-.sidebar__footer {
-  align-items: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+/* Shared masthead dropdown surface (language + profile). */
+.gov-menu {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  box-shadow: var(--shadow);
   display: flex;
-  gap: 0.72rem;
-  margin-top: auto;
-  padding: 1.25rem 0.55rem 0;
+  flex-direction: column;
+  margin-top: 0.3rem;
+  min-width: 13rem;
+  padding: 0.3rem;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 95;
 }
 
-.sidebar__footer strong {
-  font-size: 0.77rem;
+.gov-menu__header {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+  padding: 0.45rem 0.55rem 0.6rem;
+}
+
+.gov-menu__item {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 650;
+  gap: 0.6rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+  width: 100%;
+}
+
+.gov-menu__item:hover,
+.gov-menu__item:focus-visible {
+  background: var(--saffron-soft);
+  color: var(--forest);
+}
+
+.gov-menu__item--active {
+  background: var(--saffron-soft);
+  color: var(--forest);
+}
+
+.gov-menu__item--danger {
+  color: #b3261e;
+}
+
+.gov-menu__item--danger:hover,
+.gov-menu__item--danger:focus-visible {
+  background: rgba(179, 38, 30, 0.09);
+  color: #8c1d18;
+}
+
+.gov-menu__item:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.gov-menu__native {
+  font-weight: 750;
+}
+
+.gov-menu__item small {
+  color: var(--ink-muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.gov-menu__note {
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 0.62rem;
+  line-height: 1.4;
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.6rem 0.35rem;
 }
 
 .avatar {
   align-items: center;
-  background: #215b4e;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: var(--forest);
+  border: 1px solid var(--forest);
   border-radius: 50%;
+  color: #fff;
   display: flex;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  height: 2.2rem;
+  height: 2.3rem;
   justify-content: center;
-  width: 2.2rem;
+  width: 2.3rem;
 }
 
-.workspace {
-  min-width: 0;
+/* ==========================================================================
+   4. Primary horizontal navigation
+   ========================================================================== */
+
+.gov-nav {
+  background: var(--paper);
+  border-bottom: 3px solid var(--forest);
+  position: sticky;
+  top: 5.6rem;
+  transition: top 0.25s ease;
+  z-index: 80;
 }
+
+.app-shell.is-scrolled .gov-nav {
+  top: 4.4rem;
+}
+
+.gov-nav__inner {
+  position: relative;
+}
+
+.nav-list {
+  display: flex;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  overflow-x: auto;
+  padding: 0;
+  scrollbar-width: thin;
+}
+
+.nav-list::-webkit-scrollbar {
+  height: 4px;
+}
+
+.nav-list::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 2px;
+}
+
+.nav-link {
+  @apply flex min-h-11 items-center;
+
+  border-bottom: 3px solid transparent;
+  color: var(--ink);
+  flex-direction: column;
+  font-size: 0.82rem;
+  font-weight: 650;
+  gap: 0.12rem;
+  justify-content: center;
+  margin-bottom: -3px;
+  padding: 0.85rem 0.95rem;
+  position: relative;
+  text-align: center;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link span {
+  color: var(--ink-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #f7f9fc;
+  color: var(--saffron);
+}
+
+.nav-link:hover span {
+  color: var(--saffron);
+}
+
+.nav-link--active {
+  border-bottom-color: var(--saffron);
+  color: var(--forest);
+  font-weight: 800;
+}
+
+.nav-link--active span {
+  color: var(--saffron);
+}
+
+/* ==========================================================================
+   5. Notices, page context bar, announcement ticker
+   ========================================================================== */
 
 .simulation-banner {
-  align-items: center;
-  background: var(--saffron-soft);
-  border-bottom: 1px solid #ecd699;
-  color: #60440b;
-  display: flex;
+  background: repeating-linear-gradient(
+      135deg,
+      rgba(227, 82, 5, 0.05) 0 10px,
+      transparent 10px 20px
+    ),
+    var(--saffron-soft);
+  border-bottom: 1px solid #f5d3b8;
+  color: #7a3a10;
   font-size: 0.74rem;
-  gap: 0.6rem;
-  min-height: 2.35rem;
-  padding: 0.55rem 2rem;
+}
+
+.simulation-banner__inner {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  min-height: 2.5rem;
+  padding-block: 0.55rem;
+}
+
+.simulation-banner strong {
+  font-weight: 800;
+  letter-spacing: 0.03em;
 }
 
 .simulation-banner__pulse {
+  animation: gov-pulse 2s ease-in-out infinite;
   background: var(--saffron);
   border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(245, 166, 35, 0.18);
+  box-shadow: 0 0 0 4px rgba(227, 82, 5, 0.15);
+  flex-shrink: 0;
   height: 0.5rem;
   width: 0.5rem;
 }
 
-.topbar {
+@keyframes gov-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(227, 82, 5, 0.16);
+  }
+
+  50% {
+    box-shadow: 0 0 0 7px rgba(227, 82, 5, 0.04);
+  }
+}
+
+/* Announcement ticker — carries the existing lifecycle vocabulary. */
+.gov-ticker {
   align-items: center;
-  background: rgba(255, 254, 249, 0.9);
-  border-bottom: 1px solid var(--line);
+  background: var(--forest);
+  color: #eaf0fa;
   display: flex;
+  font-size: 0.75rem;
+  gap: 0;
+  overflow: hidden;
+}
+
+.gov-ticker__label {
+  align-items: center;
+  align-self: stretch;
+  background: var(--saffron);
+  color: #fff;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 0.5rem 0.9rem;
+  text-transform: uppercase;
+}
+
+.gov-ticker__viewport {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.gov-ticker__track {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2.5rem;
+  min-width: 100%;
+  padding-inline: 1.25rem;
+  white-space: nowrap;
+  will-change: transform;
+  animation: gov-marquee 38s linear infinite;
+}
+
+.gov-ticker:hover .gov-ticker__track,
+.gov-ticker:focus-within .gov-ticker__track {
+  animation-play-state: paused;
+}
+
+.gov-ticker__track b {
+  color: #ffb787;
+  font-weight: 800;
+  margin-right: 0.4rem;
+}
+
+@keyframes gov-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Page context bar (previously `.topbar`). */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+  border-bottom: 1px solid var(--gov-rule);
+}
+
+.topbar__inner {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
   justify-content: space-between;
-  min-height: 5rem;
-  padding: 0.9rem 2.25rem;
+  min-height: 4rem;
+  padding-block: 0.85rem;
 }
 
 .topbar strong,
@@ -273,45 +989,129 @@ button {
 }
 
 .topbar strong {
-  font-size: 0.95rem;
-  margin-top: 0.17rem;
+  color: var(--forest);
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 0.12rem;
 }
 
 .topbar__actions,
 .button-row {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem;
 }
 
+/* Workspace label (kept from the sidebar shell, now a context chip). */
+.workspace-label {
+  border-left: 3px solid var(--saffron);
+  padding: 0.15rem 0 0.15rem 0.75rem;
+}
+
+.workspace-label span {
+  color: var(--ink-muted);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.workspace-label strong {
+  color: var(--forest);
+  font-size: 0.84rem;
+  font-weight: 700;
+  margin-top: 0.15rem;
+}
+
+/* ==========================================================================
+   6. Buttons and controls
+   ========================================================================== */
+
 .quiet-button,
 .role-button,
 .primary-button,
 .secondary-button {
-  @apply inline-flex min-h-11 items-center justify-center rounded-full;
+  @apply inline-flex min-h-11 items-center justify-center;
 
+  border-radius: 3px;
   cursor: pointer;
   font-size: 0.78rem;
-  font-weight: 760;
-  padding: 0.68rem 1rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  padding: 0.68rem 1.15rem;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+    transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quiet-button {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink-muted);
+}
+
+.role-button,
+.primary-button {
+  background: var(--saffron);
+  border: 1px solid var(--saffron);
+  box-shadow: 0 2px 8px rgba(227, 82, 5, 0.22);
+  color: #fff;
+}
+
+.secondary-button {
+  background: var(--paper);
+  border: 1px solid var(--forest);
+  color: var(--forest);
+}
+
+.quiet-button:hover {
+  background: #f7f9fc;
+  border-color: var(--forest);
+  color: var(--forest);
+}
+
+.secondary-button:hover {
+  background: var(--forest);
+  color: #fff;
+}
+
+.role-button:hover,
+.primary-button:hover {
+  background: #c9450f;
+  border-color: #c9450f;
+  box-shadow: 0 5px 16px rgba(227, 82, 5, 0.3);
+  transform: translateY(-1px);
+}
+
+.primary-button:active,
+.secondary-button:active,
+.quiet-button:active {
+  transform: translateY(0);
 }
 
 .role-switcher {
   align-items: center;
-  background: rgba(11, 59, 50, 0.05);
+  background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 3px;
   display: inline-flex;
   gap: 0.5rem;
-  min-height: 2.8rem;
-  padding: 0.25rem 0.75rem 0.25rem 0.9rem;
+  min-height: 2.9rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.8rem;
+  transition: border-color 0.2s ease;
+}
+
+.role-switcher:focus-within {
+  border-color: var(--saffron);
 }
 
 .role-switcher__label {
   color: var(--ink-muted);
-  font-size: 0.64rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -320,184 +1120,246 @@ button {
   border: none;
   color: var(--forest);
   font: inherit;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 700;
   padding: 0.35rem 0.2rem;
 }
 
-.quiet-button {
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--ink-muted);
-}
-
-.role-button,
-.primary-button {
-  background: var(--forest);
-  border: 1px solid var(--forest);
-  color: white;
-}
-
-.secondary-button {
-  background: var(--paper);
-  border: 1px solid #b9c9c1;
-  color: var(--forest);
-}
-
-.quiet-button:hover,
-.secondary-button:hover {
-  border-color: var(--forest-soft);
-}
-
-.role-button:hover,
-.primary-button:hover {
-  background: var(--forest-soft);
-}
+/* ==========================================================================
+   7. Content area
+   ========================================================================== */
 
 .main-content {
+  flex: 1;
   margin: 0 auto;
-  max-width: 92rem;
-  padding: 2.35rem;
+  max-width: var(--shell-max);
+  padding: clamp(1.25rem, 3vw, 2.4rem) var(--shell-pad) 3.5rem;
+  width: 100%;
 }
 
 .page-stack {
   display: grid;
-  gap: 2.2rem;
+  gap: 1.85rem;
 }
 
+/* --- Hero band ------------------------------------------------------- */
 .hero-panel {
   background:
-    radial-gradient(circle at 78% 12%, rgba(146, 227, 187, 0.24), transparent 28%),
-    linear-gradient(135deg, #113f35 0%, #0b3b32 65%, #082b25 100%);
+    radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.55), transparent 45%),
+    linear-gradient(118deg, var(--gov-band-a) 0%, var(--gov-band-b) 55%, #f2b982 100%);
+  border: 1px solid #eeceac;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  color: white;
+  color: var(--ink);
   display: grid;
-  gap: 2rem;
-  grid-template-columns: minmax(0, 1.3fr) minmax(15rem, 0.7fr);
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.65fr);
   overflow: hidden;
-  padding: 2.8rem;
+  padding: clamp(1.35rem, 2.6vw, 2rem);
+  position: relative;
+}
+
+/* Faint Ashoka-chakra style watermark. */
+.hero-panel::after {
+  border: 1.5rem solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  content: "";
+  height: 26rem;
+  pointer-events: none;
+  position: absolute;
+  right: -9rem;
+  top: -9rem;
+  width: 26rem;
+}
+
+.hero-panel__content {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: var(--radius-md);
+  padding: clamp(1.25rem, 2.4vw, 2.1rem);
+  position: relative;
+  z-index: 1;
 }
 
 .hero-panel h1,
 .empty-state h1 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 4.3vw, 4.25rem);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1.02;
-  margin: 0.55rem 0 1rem;
-  max-width: 14ch;
+  color: var(--forest);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.3vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  margin: 0.5rem 0 0.85rem;
+  max-width: 20ch;
+}
+
+.hero-panel h1::after {
+  background: var(--saffron);
+  border-radius: 2px;
+  content: "";
+  display: block;
+  height: 4px;
+  margin-top: 0.85rem;
+  width: 3.75rem;
 }
 
 .hero-panel__content > p {
-  color: #cce0d8;
-  font-size: 0.98rem;
-  line-height: 1.65;
-  margin: 0 0 1.55rem;
-  max-width: 60ch;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin: 0 0 1.4rem;
+  max-width: 62ch;
 }
 
 .hero-panel .primary-button {
-  background: var(--mint-bright);
-  border-color: var(--mint-bright);
-  color: var(--forest);
+  background: var(--saffron);
+  border-color: var(--saffron);
+  color: #fff;
 }
 
 .hero-panel .secondary-button {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.28);
-  color: white;
+  background: var(--paper);
+  border-color: var(--forest);
+  color: var(--forest);
 }
 
 .hero-panel__signal {
   align-self: stretch;
-  backdrop-filter: blur(6px);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--forest);
+  border: 1px solid var(--gov-navy-deep);
   border-radius: var(--radius-md);
+  color: #fff;
   display: flex;
   flex-direction: column;
-  min-height: 15rem;
-  padding: 1.35rem;
+  min-height: 14rem;
+  padding: 1.3rem;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-panel__signal > span,
 .hero-panel__signal small {
-  color: #b8d1c7;
-  font-size: 0.67rem;
-  letter-spacing: 0.08em;
+  color: #ffb787;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
 .hero-panel__signal strong {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.5rem;
-  font-weight: 500;
-  margin-top: 0.45rem;
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin-top: 0.5rem;
 }
 
 .hero-panel__signal p {
-  color: #d5e7e0;
-  font-size: 0.75rem;
+  color: #c6d4ea;
+  font-size: 0.76rem;
+  line-height: 1.55;
 }
 
 .signal-chart {
   align-items: end;
   display: flex;
   flex: 1;
-  gap: 0.34rem;
+  gap: 0.32rem;
   margin: 1rem 0;
   min-height: 5.5rem;
 }
 
 .signal-chart span {
-  background: linear-gradient(to top, #4f9f82, var(--mint-bright));
-  border-radius: 0.25rem 0.25rem 0 0;
+  animation: signal-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  background: linear-gradient(to top, #ff9933, #ffc48a);
+  border-radius: 2px 2px 0 0;
   flex: 1;
   min-height: 0.4rem;
+  transform-origin: bottom;
 }
 
+.signal-chart span:nth-child(1) { animation-delay: 0.05s; }
+.signal-chart span:nth-child(2) { animation-delay: 0.1s; }
+.signal-chart span:nth-child(3) { animation-delay: 0.15s; }
+.signal-chart span:nth-child(4) { animation-delay: 0.2s; }
+.signal-chart span:nth-child(5) { animation-delay: 0.25s; }
+.signal-chart span:nth-child(6) { animation-delay: 0.3s; }
+.signal-chart span:nth-child(7) { animation-delay: 0.35s; }
+.signal-chart span:nth-child(8) { animation-delay: 0.4s; }
+.signal-chart span:nth-child(9) { animation-delay: 0.45s; }
+.signal-chart span:nth-child(10) { animation-delay: 0.5s; }
+
+@keyframes signal-grow {
+  from {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+}
+
+/* --- Section furniture ----------------------------------------------- */
 .eyebrow {
-  color: var(--forest-soft);
-  font-size: 0.65rem;
+  color: var(--saffron);
+  font-size: 0.63rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
 .hero-panel .eyebrow {
-  color: var(--mint-bright);
+  color: #b4470a;
+}
+
+.hero-panel__signal .eyebrow {
+  color: #ffb787;
 }
 
 .section-heading,
 .panel__heading {
   align-items: flex-end;
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   justify-content: space-between;
 }
 
 .section-heading {
-  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--gov-rule);
+  margin-bottom: 1.15rem;
+  padding-bottom: 0.75rem;
+  position: relative;
+}
+
+.section-heading::after {
+  background: var(--saffron);
+  bottom: -2px;
+  content: "";
+  height: 2px;
+  left: 0;
+  position: absolute;
+  width: 4.5rem;
 }
 
 .section-heading h2,
 .panel h2 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.45rem;
-  font-weight: 500;
-  margin: 0.28rem 0 0;
+  color: var(--forest);
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0.2rem 0 0;
 }
 
 .data-label {
-  background: #e9efeb;
-  border-radius: 999px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 2px;
   color: var(--ink-muted);
   font-size: 0.65rem;
-  padding: 0.45rem 0.65rem;
+  font-weight: 600;
+  padding: 0.4rem 0.6rem;
 }
 
+/* --- Metric cards ----------------------------------------------------- */
 .metrics-grid {
   display: grid;
   gap: 0.85rem;
@@ -508,13 +1370,20 @@ button {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
+  border-top: 3px solid #97a6bd;
   min-height: 9rem;
   padding: 1.15rem;
   position: relative;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.metric-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-3px);
 }
 
 .metric-card::before {
-  background: #97aaa2;
+  background: #97a6bd;
   border-radius: 50%;
   content: "";
   height: 0.45rem;
@@ -524,8 +1393,16 @@ button {
   width: 0.45rem;
 }
 
+.metric-card--positive {
+  border-top-color: var(--mint-bright);
+}
+
 .metric-card--positive::before {
-  background: #3da16d;
+  background: var(--mint-bright);
+}
+
+.metric-card--warning {
+  border-top-color: var(--saffron);
 }
 
 .metric-card--warning::before {
@@ -534,24 +1411,30 @@ button {
 
 .metric-card > span {
   color: var(--ink-muted);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .metric-card strong {
+  color: var(--forest);
   display: block;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2rem;
-  font-weight: 500;
-  margin: 0.65rem 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin: 0.6rem 0 0.45rem;
 }
 
 .metric-card p {
   color: var(--ink-muted);
-  font-size: 0.68rem;
-  line-height: 1.45;
+  font-size: 0.7rem;
+  line-height: 1.5;
   margin: 0;
 }
 
+/* --- Panels ----------------------------------------------------------- */
 .content-grid {
   display: grid;
   gap: 1rem;
@@ -563,6 +1446,11 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: 1.35rem;
+  transition: box-shadow 0.25s ease;
+}
+
+.panel:hover {
+  box-shadow: 0 1px 2px rgba(19, 31, 54, 0.05), 0 8px 24px rgba(19, 31, 54, 0.06);
 }
 
 .panel--wide {
@@ -572,39 +1460,62 @@ button {
 
 .panel__heading {
   align-items: center;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--gov-rule);
+  padding-bottom: 0.9rem;
+  position: relative;
+}
+
+.panel__heading::after {
+  background: var(--saffron);
+  bottom: -2px;
+  content: "";
+  height: 2px;
+  left: 0;
+  position: absolute;
+  width: 3.25rem;
 }
 
 .panel__heading > a {
   @apply inline-flex min-h-11 items-center;
 
-  color: var(--forest-soft);
+  color: var(--saffron);
   font-size: 0.72rem;
-  font-weight: 760;
+  font-weight: 800;
+  gap: 0.3rem;
+}
+
+.panel__heading > a:hover {
+  text-decoration: underline;
 }
 
 .status-badge {
-  border-radius: 999px;
-  font-size: 0.65rem;
+  border-radius: 2px;
+  font-size: 0.63rem;
   font-weight: 800;
-  padding: 0.45rem 0.65rem;
+  letter-spacing: 0.05em;
+  padding: 0.42rem 0.62rem;
   text-transform: uppercase;
 }
 
 .status-badge--active {
   background: var(--mint);
-  color: var(--forest-soft);
+  border: 1px solid #bcdcc6;
+  color: #14622f;
 }
 
+/* --- Lifecycle rail --------------------------------------------------- */
+/* Auto-flow in a single scrollable row so the rail stays correct for any
+   number of stages (routes supply anywhere from 7 to 11). */
 .lifecycle-rail {
   display: grid;
   gap: 0;
-  grid-template-columns: repeat(7, minmax(5rem, 1fr));
+  grid-auto-columns: minmax(6.4rem, 1fr);
+  grid-auto-flow: column;
   list-style: none;
-  margin: 2rem 0 0;
+  margin: 1.75rem 0 0;
   overflow-x: auto;
   padding: 0 0 0.7rem;
+  scrollbar-width: thin;
 }
 
 .lifecycle-step {
@@ -628,35 +1539,61 @@ button {
 
 .lifecycle-step__marker {
   align-items: center;
-  background: var(--canvas);
-  border: 2px solid #aebdb6;
+  background: var(--paper);
+  border: 2px solid #a9b6c9;
   border-radius: 50%;
   color: var(--ink-muted);
   display: flex;
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  height: 1.65rem;
+  height: 1.7rem;
   justify-content: center;
   position: relative;
-  width: 1.65rem;
+  transition: transform 0.25s ease;
+  width: 1.7rem;
   z-index: 1;
 }
 
+.lifecycle-step:hover .lifecycle-step__marker {
+  transform: scale(1.12);
+}
+
 .lifecycle-step--complete .lifecycle-step__marker {
-  background: var(--forest-soft);
-  border-color: var(--forest-soft);
-  color: white;
+  background: var(--mint-bright);
+  border-color: var(--mint-bright);
+  color: #fff;
 }
 
 .lifecycle-step--complete::before {
-  background: var(--forest-soft);
+  background: var(--mint-bright);
 }
 
 .lifecycle-step--active .lifecycle-step__marker {
-  background: var(--saffron-soft);
+  background: var(--saffron);
   border-color: var(--saffron);
-  color: #654409;
-  box-shadow: 0 0 0 5px rgba(245, 166, 35, 0.14);
+  box-shadow: 0 0 0 5px rgba(227, 82, 5, 0.16);
+  color: #fff;
+}
+
+.lifecycle-step--active .lifecycle-step__marker::after {
+  animation: gov-ring 2s ease-out infinite;
+  border: 2px solid var(--saffron);
+  border-radius: 50%;
+  content: "";
+  inset: -4px;
+  position: absolute;
+}
+
+@keyframes gov-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.75);
+  }
 }
 
 .lifecycle-step > span:last-child {
@@ -670,68 +1607,89 @@ button {
 }
 
 .lifecycle-step strong {
-  font-size: 0.73rem;
+  color: var(--forest);
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .lifecycle-step small {
   color: var(--ink-muted);
-  font-size: 0.62rem;
-  line-height: 1.35;
+  font-size: 0.64rem;
+  line-height: 1.4;
   margin-top: 0.25rem;
 }
 
+/* --- Activity list ---------------------------------------------------- */
 .activity-list {
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
   list-style: none;
   margin: 1.15rem 0 0;
   padding: 0;
 }
 
 .activity-list li {
+  border-left: 2px solid var(--line);
   display: grid;
   gap: 0.8rem;
-  grid-template-columns: 2.5rem minmax(0, 1fr);
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  padding: 0.25rem 0 0.25rem 0.85rem;
+  transition: border-color 0.2s ease;
+}
+
+.activity-list li:hover {
+  border-left-color: var(--saffron);
 }
 
 .activity-list time {
-  color: var(--ink-muted);
+  color: var(--saffron);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.61rem;
-  padding-top: 0.18rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding-top: 0.15rem;
 }
 
 .activity-list strong {
-  font-size: 0.75rem;
+  color: var(--forest);
+  font-size: 0.77rem;
+  font-weight: 700;
 }
 
 .activity-list p {
   color: var(--ink-muted);
-  font-size: 0.66rem;
-  line-height: 1.45;
+  font-size: 0.69rem;
+  line-height: 1.5;
   margin: 0.2rem 0 0;
 }
 
+/* --- Action panel ----------------------------------------------------- */
 .action-panel {
   background: var(--saffron-soft);
-  border-color: #ecd699;
+  border-color: #f5d3b8;
+  border-left: 4px solid var(--saffron);
+}
+
+.action-panel h2 {
+  color: #8a3a08;
 }
 
 .action-panel p {
-  color: #6d5b32;
-  font-size: 0.76rem;
-  line-height: 1.55;
+  color: #7a4a20;
+  font-size: 0.78rem;
+  line-height: 1.6;
 }
 
 .action-panel .secondary-button {
-  margin-top: 0.35rem;
+  margin-top: 0.5rem;
 }
 
+/* --- Empty / loading states ------------------------------------------ */
 .empty-state {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: clamp(2rem, 6vw, 5rem);
+  border-top: 4px solid var(--saffron);
+  padding: clamp(2rem, 6vw, 4.5rem);
 }
 
 .empty-state p {
@@ -752,7 +1710,7 @@ button {
 
 .loading-state__mark {
   animation: loading-pulse 1s ease-in-out infinite alternate;
-  background: var(--forest-soft);
+  background: var(--saffron);
   border-radius: 50%;
   height: 0.7rem;
   width: 0.7rem;
@@ -765,45 +1723,179 @@ button {
   }
 }
 
+/* ==========================================================================
+   8. Footer
+   ========================================================================== */
+
+.gov-footer {
+  background: var(--forest);
+  border-top: 4px solid var(--saffron);
+  color: #c7d4ea;
+  font-size: 0.8rem;
+  margin-top: auto;
+}
+
+.gov-footer__grid {
+  display: grid;
+  gap: 1.75rem;
+  grid-template-columns: minmax(0, 1.3fr) repeat(2, minmax(0, 1fr));
+  padding-block: 2.4rem;
+}
+
+.gov-footer h3 {
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  margin: 0 0 0.9rem;
+  text-transform: uppercase;
+}
+
+.gov-footer p {
+  line-height: 1.65;
+  margin: 0 0 0.6rem;
+  max-width: 46ch;
+}
+
+.gov-footer ul {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gov-footer a {
+  color: #c7d4ea;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+.gov-footer a:hover {
+  color: #ffb787;
+  padding-left: 0.25rem;
+}
+
+.gov-footer__brand {
+  align-items: center;
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.gov-footer__brand strong {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.gov-footer__bar {
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding-block: 1.05rem;
+}
+
+.gov-footer__bar small {
+  color: #9fb2d0;
+  font-size: 0.72rem;
+}
+
+/* Back-to-top control. */
+.scroll-top {
+  align-items: center;
+  background: var(--saffron);
+  border: 0;
+  border-radius: 50%;
+  bottom: 1.5rem;
+  box-shadow: 0 8px 22px rgba(19, 31, 54, 0.28);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  height: 3rem;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  right: 1.5rem;
+  transform: translateY(0.75rem);
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s ease;
+  width: 3rem;
+  z-index: 110;
+}
+
+.scroll-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.scroll-top:hover {
+  background: #c9450f;
+}
+
+/* ==========================================================================
+   9. Scroll-reveal animation
+   --------------------------------------------------------------------------
+   The hidden state is only applied once the client observer has marked the
+   shell `reveal-ready`, so content stays fully visible without JavaScript.
+   ========================================================================== */
+
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-ready [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-ready [data-reveal-delay="1"] { transition-delay: 0.06s; }
+.reveal-ready [data-reveal-delay="2"] { transition-delay: 0.12s; }
+.reveal-ready [data-reveal-delay="3"] { transition-delay: 0.18s; }
+.reveal-ready [data-reveal-delay="4"] { transition-delay: 0.24s; }
+.reveal-ready [data-reveal-delay="5"] { transition-delay: 0.3s; }
+
+/* ==========================================================================
+   10. Responsive
+   ========================================================================== */
+
+@media (max-width: 1180px) {
+  .gov-masthead__utility {
+    flex-basis: 100%;
+    margin-left: 0;
+    max-width: none;
+    order: 5;
+  }
+
+  .gov-masthead {
+    position: static;
+  }
+
+  .gov-nav {
+    position: static;
+  }
+}
+
 @media (max-width: 1100px) {
-  .app-shell {
-    grid-template-columns: 5.2rem minmax(0, 1fr);
-  }
-
-  .brand {
-    justify-content: center;
-    margin-inline: 0;
-  }
-
-  .brand > span:last-child,
-  .workspace-label,
-  .nav-link:not(.nav-link--active)::after,
-  .nav-link {
-    font-size: 0;
-  }
-
-  .nav-link {
-    justify-content: center;
-  }
-
-  .nav-link span {
-    font-size: 0.67rem;
-  }
-
-  .sidebar__footer > span:last-child {
-    display: none;
-  }
-
-  .sidebar__footer {
-    justify-content: center;
-  }
-
   .hero-panel {
     grid-template-columns: 1fr;
   }
 
   .hero-panel__signal {
     min-height: 12rem;
+  }
+
+  .gov-footer__grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -820,76 +1912,53 @@ button {
     grid-column: auto;
     grid-row: auto;
   }
+
+  .gov-strip__ministry small {
+    display: none;
+  }
+
+  .gov-masthead__row--identity {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 620px) {
-  .app-shell {
-    display: block;
+  .gov-strip__inner {
+    gap: 0.55rem;
   }
 
-  .sidebar {
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
+  .gov-strip__rule,
+  .gov-masthead__rule,
+  .gov-seal {
+    display: none;
+  }
+
+  .gov-strip__right {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .gov-masthead__inner {
     min-height: auto;
-    overflow-x: auto;
-    padding: 0.7rem 1rem;
-    position: static;
-  }
-
-  .brand {
-    margin: 0;
-  }
-
-  .brand__mark {
-    height: 2.2rem;
-    width: 2.2rem;
-  }
-
-  .sidebar nav {
-    flex: 1;
-  }
-
-  .nav-list {
-    display: flex;
   }
 
   .nav-link {
-    @apply min-h-11 min-w-11;
-
-    padding: 0.4rem;
+    font-size: 0.76rem;
+    padding: 0.7rem 0.7rem;
   }
 
-  .sidebar__footer {
-    border: 0;
-    margin: 0;
-    padding: 0;
-  }
-
-  .simulation-banner {
-    align-items: flex-start;
-    flex-wrap: wrap;
-    padding-inline: 1rem;
-  }
-
-  .topbar {
+  .simulation-banner__inner {
     align-items: flex-start;
     flex-direction: column;
-    gap: 0.8rem;
-    padding: 1rem;
   }
 
-  .main-content {
-    padding: 1rem;
+  .topbar__inner {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .hero-panel {
-    padding: 1.5rem;
-  }
-
-  .hero-panel h1 {
-    font-size: 2.25rem;
+  .hero-panel::after {
+    display: none;
   }
 
   .metrics-grid {
@@ -899,6 +1968,18 @@ button {
   .section-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .gov-footer__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gov-profile__identity small {
+    display: none;
+  }
+
+  .gov-lang__current {
+    display: none;
   }
 }
 
@@ -910,5 +1991,26 @@ button {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .reveal-ready [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .gov-ticker__track {
+    animation: none;
+  }
+}
+
+@media print {
+  .gov-strip,
+  .gov-nav,
+  .gov-ticker,
+  .scroll-top,
+  .scroll-progress,
+  .gov-search,
+  .gov-lang {
+    display: none !important;
   }
 }
